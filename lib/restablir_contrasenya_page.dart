@@ -1,75 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'home_page.dart';
-import 'restablir_contrasenya_page.dart';
+import 'sign_in_page.dart';
 
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+class RestablirContrasenyaPage extends StatefulWidget {
+  const RestablirContrasenyaPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<RestablirContrasenyaPage> createState() => _RestablirContrasenyaPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
-  final _storage = const FlutterSecureStorage();
-  bool _isLoading = false;
   String _errorMessage = '';
+  bool _isLoading = false;
+  bool _isSuccess = false;
 
-  Future<void> _login() async {
+  Future<void> _enviarEmail() async {
 
-    setState(() => _errorMessage = '');
+    setState(() {
+      _errorMessage = '';
+      _isSuccess = false;
+    });
 
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() => _errorMessage = 'Siusplau, omple tots els camps');
+    if (_emailController.text.isEmpty) {
+      setState(() => _errorMessage = 'Siusplau, introdueix el teu correu');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse('https://trackdev.org/api/auth/login');
+      final url = Uri.parse('https://trackdev.org/api/auth/forgot-password');
       
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
-        }),
+        body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        
-        final String token = data['token']; 
-        final String fullName = data['userdata']['fullName'];
-
-        await _storage.write(key: 'auth_token', value: token);
-        await _storage.write(key: 'user_full_name', value: fullName);
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        }
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() => _isSuccess = true);
       } else {
-        if (mounted) {
-          setState(() => _errorMessage = 'Error: Credencials incorrectes');
-        }
+        print('Error Status: ${response.statusCode}');
+        print('Error Body: ${response.body}');
+        setState(() => _errorMessage = 'Error en processar la petició');
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = 'Error de connexió: $e');
-      }
+      setState(() => _errorMessage = 'Error de connexió: Revisa la teva xarxa');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -104,11 +86,23 @@ class _SignInPageState extends State<SignInPage> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Inicia sessió al teu compte',
+              'Restablir contrasenya',
               style: TextStyle(
                 color: Color(0xFF1A2B49), 
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Align(
+              alignment: Alignment.center,
+              child: Text(
+                'Introdueix la teva adreça de correu electrònic i tenviarem un enllaç per restablir la teva contrasenya.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF1A2B49), 
+                  fontSize: 15,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -145,55 +139,6 @@ class _SignInPageState extends State<SignInPage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Contrasenya',
-                style: TextStyle(
-                  color: Color(0xFF1A2B49),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: '••••••••',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.black26),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RestablirContrasenyaPage()),
-                  );
-                }, 
-                child: const Text(
-                  'Has oblidat la contrasenya?', 
-                  style: TextStyle(color: Color(0xFF2D5AF0))
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
             if (_errorMessage.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
@@ -230,7 +175,7 @@ class _SignInPageState extends State<SignInPage> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                onPressed: _isLoading ? null : _enviarEmail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),
                   foregroundColor: Colors.white,
@@ -244,9 +189,44 @@ class _SignInPageState extends State<SignInPage> {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                     )
                   : const Text(
-                      'Iniciar sessió',
+                      'Enviar enllaç',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            if(_isSuccess)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: const Text(
+                    'Si existeix un compte amb aquest correu, hem enviat un enllaç per restablir la contrasenya.',
+                    style: TextStyle(color: Color(0xFF2D5AF0), fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSuccess = false;
+                    _errorMessage = '';
+                    _emailController.clear();
+                  });
+                  Navigator.pop(context);
+                }, 
+                child: const Text(
+                  'Tornar a linici de sessió', 
+                  style: TextStyle(color: Color(0xFF2D5AF0))
+                ),
               ),
             ),
           ],

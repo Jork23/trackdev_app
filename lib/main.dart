@@ -7,6 +7,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const storage = FlutterSecureStorage();
+
+  await storage.deleteAll();
   
   String? token = await storage.read(key: 'auth_token');
   
