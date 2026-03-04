@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'sign_in_page.dart';
 
 
 class RestablirContrasenyaPage extends StatefulWidget {
@@ -44,12 +43,11 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() => _isSuccess = true);
       } else {
-        print('Error Status: ${response.statusCode}');
-        print('Error Body: ${response.body}');
         setState(() => _errorMessage = 'Error en processar la petició');
       }
     } catch (e) {
       setState(() => _errorMessage = 'Error de connexió: Revisa la teva xarxa');
+      debugPrint("Error: $e");
     } finally {
       setState(() => _isLoading = false);
     }

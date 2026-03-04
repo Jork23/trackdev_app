@@ -67,6 +67,7 @@ class _SignInPageState extends State<SignInPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _errorMessage = 'Error de connexió: $e');
+        debugPrint("Error: $e");
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
