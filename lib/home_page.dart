@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'index_page.dart';
+import 'perfil_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,19 +16,6 @@ class _HomePageState extends State<HomePage>{
   int _selectedIndex = 0;
   final storage = FlutterSecureStorage();
   Map<String, dynamic>? userData;
-
-  static const List<Widget> _pages = <Widget>[
-    Text('Index 0: Resum'),
-    Text('Index 1: Cursos'),
-    Text('Index 2: Projectes'),
-    Text('Index 3: Analitiques'),
-    Text('Index 4: Activitat'),
-
-    Text('Index 5: Perfil'),
-    Text('Index 6: Preferències'),
-    Text('Index 7: Seguretat'),
-    Text('Index 7: Integracions')
-  ];
 
   @override
   void initState() {
@@ -102,6 +90,20 @@ class _HomePageState extends State<HomePage>{
 
   @override
   Widget build(BuildContext context) {
+
+    List<Widget> pages = <Widget>[
+      Text('Index 0: Resum'),
+      Text('Index 1: Cursos'),
+      Text('Index 2: Projectes'),
+      Text('Index 3: Analitiques'),
+      Text('Index 4: Activitat'),
+
+      PerfilPage(userData: userData, onProfileUpdated: _loadUserData,),
+      Text('Index 6: Preferències'),
+      Text('Index 7: Seguretat'),
+      Text('Index 7: Integracions')
+    ];
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -136,7 +138,7 @@ class _HomePageState extends State<HomePage>{
           ],
         ),
       ),
-      body: Center(child: _pages[_selectedIndex]),
+      body: Center(child: pages[_selectedIndex]),
       drawer: Drawer(
         child: Column(
           children: [
@@ -173,7 +175,8 @@ class _HomePageState extends State<HomePage>{
                             radius: 22,
                             backgroundColor: hexToColor(userData!['color']),
                             child: Text(
-                              "${userData!['capitalLetters']}"
+                              "${userData!['capitalLetters']}",
+                              style: TextStyle(color: Colors.white)
                             ),
                           ),
                           const SizedBox(width: 10),
