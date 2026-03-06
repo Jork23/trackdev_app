@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'index_page.dart';
 import 'perfil_page.dart';
+import 'seguretat_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage>{
   }
 
   Color hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100; // Color per defecte
+    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
     buffer.write(hexString.replaceFirst('#', ''));
@@ -100,7 +101,7 @@ class _HomePageState extends State<HomePage>{
 
       PerfilPage(userData: userData, onProfileUpdated: _loadUserData,),
       Text('Index 6: Preferències'),
-      Text('Index 7: Seguretat'),
+      SeguretatPage(),
       Text('Index 7: Integracions')
     ];
 

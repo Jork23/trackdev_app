@@ -28,7 +28,7 @@ class _PerfilPageState extends State<PerfilPage> {
   bool _isSuccess = false;
 
   Color hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100; // Color per defecte
+    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
     buffer.write(hexString.replaceFirst('#', ''));
@@ -118,24 +118,28 @@ class _PerfilPageState extends State<PerfilPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
         elevation: 0,
+        toolbarHeight: 100,
         centerTitle: true,
         title: Column(
           children:[
+            const Divider(color: Colors.black12, thickness: 1),
             Text ('Informació del Perfil',
                   style: TextStyle(
                       color: Color(0xFF1A2B49), 
                       fontWeight: FontWeight.bold,
-                      fontSize: 30,
+                      fontSize: 25,
                     ),
                   ),
-              Text(
-                'Actualitza la teva informació de perfil i avatar',
-                style: TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
-              ),
+            Text(
+              'Actualitza la teva informació de perfil i avatar',
+              style: TextStyle(fontSize: 13),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.visible,
+            ),
+            const Divider(color: Colors.black12, thickness: 1),
           ],
         ),
       ),
@@ -144,7 +148,6 @@ class _PerfilPageState extends State<PerfilPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 30),
             widget.userData == null? Center(child: LinearProgressIndicator()): Row(
               children: [
                 CircleAvatar(
