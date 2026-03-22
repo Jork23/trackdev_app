@@ -3,7 +3,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'home_page.dart';
-import 'restablir_contrasenya_page.dart';
+import 'reset_password_page.dart';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
 
 class SignInPage extends StatefulWidget {
@@ -13,7 +15,7 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends State<SignInPage> with Theme_Page {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -26,7 +28,7 @@ class _SignInPageState extends State<SignInPage> {
     setState(() => _errorMessage = '');
 
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() => _errorMessage = 'Siusplau, omple tots els camps');
+      setState(() => _errorMessage = Translations.get('signin_page8', currentLang));
       return;
     }
 
@@ -48,10 +50,8 @@ class _SignInPageState extends State<SignInPage> {
         final Map<String, dynamic> data = jsonDecode(response.body);
         
         final String token = data['token']; 
-        final String fullName = data['userdata']['fullName'];
 
         await _storage.write(key: 'auth_token', value: token);
-        await _storage.write(key: 'user_full_name', value: fullName);
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -61,12 +61,12 @@ class _SignInPageState extends State<SignInPage> {
         }
       } else {
         if (mounted) {
-          setState(() => _errorMessage = 'Error: Credencials incorrectes');
+          setState(() => _errorMessage = Translations.get('signin_page9', currentLang));
         }
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = 'Error de connexió: $e');
+        setState(() => _errorMessage = '${Translations.get('signin_page10', currentLang)}: $e');
         debugPrint("Error: $e");
       }
     } finally {
@@ -77,7 +77,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -93,10 +93,10 @@ class _SignInPageState extends State<SignInPage> {
                   size: 28,
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'TrackDev',
                   style: TextStyle(
-                    color: Color(0xFF1A2B49), 
+                    color: textColor, 
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
@@ -104,21 +104,21 @@ class _SignInPageState extends State<SignInPage> {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Inicia sessió al teu compte',
+            Text(
+              Translations.get('signin_page1', currentLang),
               style: TextStyle(
-                color: Color(0xFF1A2B49), 
+                color: textColor, 
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),
             ),
             const SizedBox(height: 24),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Adreça de correu electrònic',
+                Translations.get('signin_page2', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -127,13 +127,16 @@ class _SignInPageState extends State<SignInPage> {
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: 'you@example.com',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.email_outlined, color: Colors.black26), 
+                hintText: Translations.get('signin_page3', currentLang),
+                hintStyle: TextStyle(color: hintColor),
+                filled: true,
+                fillColor: inputFillColor,
+                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -141,17 +144,17 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Contrasenya',
+                Translations.get('signin_page4', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -160,13 +163,16 @@ class _SignInPageState extends State<SignInPage> {
             TextField(
               controller: _passwordController,
               obscureText: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: '••••••••',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.black26),
+                hintText: Translations.get('signin_page5', currentLang),
+                hintStyle: TextStyle(color: hintColor),
+                filled: true,
+                fillColor: inputFillColor,
+                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -174,7 +180,7 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
@@ -185,12 +191,12 @@ class _SignInPageState extends State<SignInPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RestablirContrasenyaPage()),
+                    MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
                   );
                 }, 
-                child: const Text(
-                  'Has oblidat la contrasenya?', 
-                  style: TextStyle(color: Color(0xFF2D5AF0))
+                child: Text(
+                  Translations.get('signin_page6', currentLang), 
+                  style: const TextStyle(color: Color(0xFF2D5AF0))
                 ),
               ),
             ),
@@ -244,9 +250,9 @@ class _SignInPageState extends State<SignInPage> {
                       width: 20, 
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                     )
-                  : const Text(
-                      'Iniciar sessió',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  : Text(
+                      Translations.get('signin_page7', currentLang),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
               ),
             ),

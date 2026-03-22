@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
 
-class RestablirContrasenyaPage extends StatefulWidget {
-  const RestablirContrasenyaPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  State<RestablirContrasenyaPage> createState() => _RestablirContrasenyaPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
   final TextEditingController _emailController = TextEditingController();
 
   String _errorMessage = '';
   bool _isLoading = false;
   bool _isSuccess = false;
 
-  Future<void> _enviarEmail() async {
+  Future<void> _sendEmail() async {
 
     setState(() {
       _errorMessage = '';
@@ -25,7 +27,7 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
     });
 
     if (_emailController.text.isEmpty) {
-      setState(() => _errorMessage = 'Siusplau, introdueix el teu correu');
+      setState(() => _errorMessage = Translations.get('resetpassword_page6', currentLang));
       return;
     }
 
@@ -43,10 +45,10 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState(() => _isSuccess = true);
       } else {
-        setState(() => _errorMessage = 'Error en processar la petició');
+        setState(() => _errorMessage = Translations.get('resetpassword_page7', currentLang));
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Error de connexió: Revisa la teva xarxa');
+      setState(() => _errorMessage = Translations.get('resetpassword_page8', currentLang));
       debugPrint("Error: $e");
     } finally {
       setState(() => _isLoading = false);
@@ -56,7 +58,7 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -72,10 +74,10 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
                   size: 28,
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'TrackDev',
                   style: TextStyle(
-                    color: Color(0xFF1A2B49), 
+                    color: textColor, 
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
@@ -83,33 +85,33 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Restablir contrasenya',
+            Text(
+              Translations.get('resetpassword_page1', currentLang),
               style: TextStyle(
-                color: Color(0xFF1A2B49), 
+                color: textColor, 
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),
             ),
             const SizedBox(height: 24),
-            const Align(
+            Align(
               alignment: Alignment.center,
               child: Text(
-                'Introdueix la teva adreça de correu electrònic i tenviarem un enllaç per restablir la teva contrasenya.',
+                Translations.get('resetpassword_page2', currentLang),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF1A2B49), 
+                  color: textColor, 
                   fontSize: 15,
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Adreça de correu electrònic',
+                Translations.get('resetpassword_page3', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -118,13 +120,16 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: 'you@example.com',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.email_outlined, color: Colors.black26), 
+                hintText: Translations.get('resetpassword_page4', currentLang),
+                hintStyle: TextStyle(color: hintColor),
+                filled: true,
+                fillColor: inputFillColor,
+                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -132,7 +137,7 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
@@ -173,7 +178,7 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _enviarEmail,
+                onPressed: _isLoading ? null : _sendEmail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),
                   foregroundColor: Colors.white,
@@ -186,9 +191,9 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
                       width: 20, 
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                     )
-                  : const Text(
-                      'Enviar enllaç',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  : Text(
+                      Translations.get('resetpassword_page5', currentLang),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
               ),
             ),
@@ -204,9 +209,12 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.blue.shade200),
                   ),
-                  child: const Text(
-                    'Si existeix un compte amb aquest correu, hem enviat un enllaç per restablir la contrasenya.',
-                    style: TextStyle(color: Color(0xFF2D5AF0), fontWeight: FontWeight.w500),
+                  child: Text(
+                    Translations.get('resetpassword_page9', currentLang),
+                    style: const TextStyle(
+                      color: Color(0xFF2D5AF0), 
+                      fontWeight: FontWeight.w500
+                    ),
                   ),
                 ),
               ),
@@ -221,9 +229,9 @@ class _RestablirContrasenyaPageState extends State<RestablirContrasenyaPage> {
                   });
                   Navigator.pop(context);
                 }, 
-                child: const Text(
-                  'Tornar a linici de sessió', 
-                  style: TextStyle(color: Color(0xFF2D5AF0))
+                child: Text(
+                  Translations.get('resetpassword_page10', currentLang), 
+                  style: const TextStyle(color: Color(0xFF2D5AF0))
                 ),
               ),
             ),

@@ -1,16 +1,67 @@
 import 'package:flutter/material.dart';
 import 'sign_in_page.dart';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
-class IndexPage extends StatelessWidget {
+class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
+
+  @override
+  State<IndexPage> createState() => _IndexPageState();
+}
+
+class _IndexPageState extends State<IndexPage> with Theme_Page {
+
+    Widget _buildFeatureCard(IconData icon, String title, String description, Color bgColor) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: bgColor, 
+              borderRadius: BorderRadius.circular(8)
+            ),
+            child: Icon(icon, color: const Color(0xFF2D5AF0), size: 30),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title, 
+            style: TextStyle(
+              fontSize: 18, 
+              fontWeight: FontWeight.bold, 
+              color: textColor
+            )
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description, 
+            style: TextStyle(
+              fontSize: 14, 
+              color: subtitleColor, 
+              height: 1.4
+            )
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: backgroundColor,
         title: Row(
           children: [
             const Icon(
@@ -19,10 +70,10 @@ class IndexPage extends StatelessWidget {
               size: 28,
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'TrackDev',
               style: TextStyle(
-                color: Color(0xFF1A2B49), 
+                color: textColor, 
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -37,7 +88,7 @@ class IndexPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const SignInPage()),
                 );
               },
-              label: const Text('Sign In'),
+              label: Text(Translations.get('index_page1', currentLang)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2D5AF0),
                 foregroundColor: Colors.white,
@@ -54,21 +105,33 @@ class IndexPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            const Text(
-              'Agile Project Management',
+            Text(
+              Translations.get('index_page2', currentLang),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1A2B49)),
+              style: TextStyle(
+                fontSize: 28, 
+                fontWeight: FontWeight.bold, 
+                color: textColor
+              ),
             ),
-            const Text(
-              'for Education',
+            Text(
+              Translations.get('index_page3', currentLang),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2D5AF0)),
+              style: const TextStyle(
+                fontSize: 28, 
+                fontWeight: FontWeight.bold, 
+                color: Color(0xFF2D5AF0)
+              ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'TrackDev helps students learn agile methodologies by working together on real projects. Manage sprints, tasks, and track your team\'s progress.',
+            Text(
+              Translations.get('index_page4', currentLang),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.blueGrey, height: 1.5),
+              style: TextStyle(
+                fontSize: 16, 
+                color: subtitleColor, 
+                height: 1.5
+              ),
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
@@ -78,7 +141,7 @@ class IndexPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const SignInPage()),
                 );
               },
-              icon: const Text('Sign In'),
+              icon: Text(Translations.get('index_page1', currentLang)),
               label: const Icon(Icons.arrow_forward, size: 18),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2D5AF0),
@@ -91,20 +154,20 @@ class IndexPage extends StatelessWidget {
             
             _buildFeatureCard(
               Icons.layers_outlined,
-              'Sprint Management',
-              'Plan and track sprints with your team. Visualize progress with burn-down charts and sprint boards.',
+              Translations.get('index_page5', currentLang),
+              Translations.get('index_page6', currentLang),
               const Color(0xFFE8F0FE),
             ),
             _buildFeatureCard(
               Icons.check_circle_outline,
-              'Task Tracking',
-              'Create user stories and tasks. Track status, assign members, and estimate points for each item.',
+              Translations.get('index_page7', currentLang),
+              Translations.get('index_page8', currentLang),
               const Color(0xFFE8F0FE),
             ),
             _buildFeatureCard(
               Icons.groups_outlined,
-              'Team Collaboration',
-              'Work together with your team members. Comment on tasks, track history, and review contributions.',
+              Translations.get('index_page9', currentLang),
+              Translations.get('index_page10', currentLang),
               const Color(0xFFE8F0FE),
             ),
             const SizedBox(height: 40),
@@ -114,30 +177,4 @@ class IndexPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(IconData icon, String title, String description, Color bgColor) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: const Color(0xFF2D5AF0), size: 30),
-          ),
-          const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A2B49))),
-          const SizedBox(height: 8),
-          Text(description, style: const TextStyle(fontSize: 14, color: Colors.blueGrey, height: 1.4)),
-        ],
-      ),
-    );
-  }
 }

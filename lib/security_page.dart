@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
 
-class SeguretatPage extends StatefulWidget {
-  final Map<String, dynamic>? userData;
-  final VoidCallback? onProfileUpdated;
-
-  const SeguretatPage({super.key, this.userData,this.onProfileUpdated});
+class SecurityPage extends StatefulWidget {
+  const SecurityPage({super.key});
 
   @override
-  State<SeguretatPage> createState() => _SeguretatPageState();
+  State<SecurityPage> createState() => _SecurityPageState();
 }
 
-class _SeguretatPageState extends State<SeguretatPage> {
+class _SecurityPageState extends State<SecurityPage> with Theme_Page{
 
   final storage = FlutterSecureStorage();
 
@@ -30,14 +29,6 @@ class _SeguretatPageState extends State<SeguretatPage> {
   bool _hasUppercase = false;
   bool _hasNumber = false;
   bool _passwordsMatch = false;
-
-  Color hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
 
   @override
   void initState() {
@@ -94,20 +85,20 @@ class _SeguretatPageState extends State<SeguretatPage> {
 
       setState(() {
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = 'Canvi de contrasenya correcta';
+          _message = Translations.get('security_page13', currentLang);
           _isSuccess = true;
           
           _oldPassword.clear();
           _newPassword1.clear();
           _newPassword2.clear();
         } else {
-          _message = 'Contrasenya actual incorrecte';
+          _message = Translations.get('security_page14', currentLang);
           _isSuccess = false;
         }
       });
     } catch (e) {
       setState(() {
-        _message = 'Error de xarxa: $e';
+        _message = '${Translations.get('security_page15', currentLang)}: $e';
         _isSuccess = false;
       });
     }
@@ -139,30 +130,31 @@ class _SeguretatPageState extends State<SeguretatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+        backgroundColor: backgroundColor,
         elevation: 0,
         toolbarHeight: 100,
         centerTitle: true,
         title: Column(
           children:[
-            const Divider(color: Colors.black12, thickness: 1),
-            Text ('Configuració de Seguretat',
-                  style: TextStyle(
-                      color: Color(0xFF1A2B49), 
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                    ),
-                  ),
+            Divider(color: dividerColor, thickness: 1),
             Text(
-              'Gestiona la teva contrasenya i preferències de seguretat',
-              style: TextStyle(fontSize: 13),
+              Translations.get('security_page1', currentLang),
+              style: TextStyle(
+                color: textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 25,
+              ),
+            ),
+            Text(
+              Translations.get('security_page2', currentLang),
+              style: TextStyle(fontSize: 13, color: subtitleColor),
               textAlign: TextAlign.center,
               overflow: TextOverflow.visible,
             ),
-            const Divider(color: Colors.black12, thickness: 1),
+            Divider(color: dividerColor, thickness: 1),
           ],
         ),
       ),
@@ -237,12 +229,12 @@ class _SeguretatPageState extends State<SeguretatPage> {
                     ),
                   ),
                 ), 
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Contrasenya Actual',
+                Translations.get('security_page3', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -251,13 +243,16 @@ class _SeguretatPageState extends State<SeguretatPage> {
             TextField(
               controller: _oldPassword,
               obscureText: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: inputFillColor,
                 hintText: '••••••••',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.black26),
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -265,17 +260,17 @@ class _SeguretatPageState extends State<SeguretatPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Nova Contrasenya',
+                Translations.get('security_page4', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -284,13 +279,16 @@ class _SeguretatPageState extends State<SeguretatPage> {
             TextField(
               controller: _newPassword1,
               obscureText: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: inputFillColor,
                 hintText: '••••••••',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.black26),
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -298,17 +296,17 @@ class _SeguretatPageState extends State<SeguretatPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Confirmar Nova Contrasenya',
+                Translations.get('security_page5', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -317,13 +315,16 @@ class _SeguretatPageState extends State<SeguretatPage> {
             TextField(
               controller: _newPassword2,
               obscureText: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: inputFillColor,
                 hintText: '••••••••',
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.black26),
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -331,7 +332,7 @@ class _SeguretatPageState extends State<SeguretatPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
@@ -340,27 +341,27 @@ class _SeguretatPageState extends State<SeguretatPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: inputFillColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'La contrasenya ha de contenir:',
+                  Text(
+                    Translations.get('security_page6', currentLang),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A2B49),
+                      color: textColor,
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildRequirement('Almenys 8 caràcters', _hasMinLength),
-                  _buildRequirement('Una lletra minúscula', _hasLowercase),
-                  _buildRequirement('Una lletra majúscula', _hasUppercase),
-                  _buildRequirement('Un número', _hasNumber),
-                  _buildRequirement('Les contrasenyes coincideixen', _passwordsMatch),
+                  _buildRequirement(Translations.get('security_page7', currentLang), _hasMinLength),
+                  _buildRequirement(Translations.get('security_page8', currentLang), _hasLowercase),
+                  _buildRequirement(Translations.get('security_page9', currentLang), _hasUppercase),
+                  _buildRequirement(Translations.get('security_page10', currentLang), _hasNumber),
+                  _buildRequirement(Translations.get('security_page11', currentLang), _passwordsMatch),
                 ],
               ),
             ),
@@ -378,7 +379,7 @@ class _SeguretatPageState extends State<SeguretatPage> {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Actualitzar Contrasenya',
+                    Translations.get('security_page12', currentLang),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -396,7 +397,7 @@ class _SeguretatPageState extends State<SeguretatPage> {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Actualitzar Contrasenya',
+                    Translations.get('security_page12', currentLang),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),

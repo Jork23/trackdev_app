@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:trackdev_app/preferences_page.dart';
 import 'dart:convert';
 import 'index_page.dart';
-import 'perfil_page.dart';
-import 'seguretat_page.dart';
+import 'profile_page.dart';
+import 'security_page.dart';
+import 'courses_page.dart';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +17,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>{
+class _HomePageState extends State<HomePage> with Theme_Page {
   int _selectedIndex = 0;
   final storage = FlutterSecureStorage();
   Map<String, dynamic>? userData;
@@ -94,25 +98,26 @@ class _HomePageState extends State<HomePage>{
 
     List<Widget> pages = <Widget>[
       Text('Index 0: Resum'),
-      Text('Index 1: Cursos'),
+      CoursesPage(),
       Text('Index 2: Projectes'),
       Text('Index 3: Analitiques'),
       Text('Index 4: Activitat'),
 
-      PerfilPage(userData: userData, onProfileUpdated: _loadUserData,),
-      Text('Index 6: Preferències'),
-      SeguretatPage(),
-      Text('Index 7: Integracions')
+      ProfilePage(userData: userData, onProfileUpdated: _loadUserData,),
+      PreferencesPage(userData: userData, onPreferencesUpdated: loadThemeSettings,),
+      SecurityPage(),
+      Text('Index 8: Integracions')
     ];
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         elevation: 0,
         leading: Builder(
             builder: (context) {
             return IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black),
+              icon: Icon(Icons.menu, color: textColor),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -128,10 +133,10 @@ class _HomePageState extends State<HomePage>{
               size: 28,
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'TrackDev',
               style: TextStyle(
-                color: Color(0xFF1A2B49), 
+                color: textColor, 
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -141,6 +146,7 @@ class _HomePageState extends State<HomePage>{
       ),
       body: Center(child: pages[_selectedIndex]),
       drawer: Drawer(
+        backgroundColor: backgroundColor,
         child: Column(
           children: [
             DrawerHeader(
@@ -156,10 +162,10 @@ class _HomePageState extends State<HomePage>{
                         size: 28,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'TrackDev',
                         style: TextStyle(
-                          color: Color(0xFF1A2B49), 
+                          color: textColor, 
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
                         ),
@@ -167,7 +173,7 @@ class _HomePageState extends State<HomePage>{
                     ],
                   ),
                   const SizedBox(height: 20),
-                  userData == null? Center(child: LinearProgressIndicator()): Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children:[
                       Row(
@@ -186,9 +192,11 @@ class _HomePageState extends State<HomePage>{
                               children: [
                                 Text(
                                   "${userData!['fullName']}",
+                                  style: TextStyle(color: textColor),
                                 ),
                                 Text(
                                   "${userData!['email']}",
+                                  style: TextStyle(color: textColor),
                                 ),
                               ]
                             )
@@ -225,9 +233,12 @@ class _HomePageState extends State<HomePage>{
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.person_outline),
+                  Icon(Icons.person_outline, color: textColor),
                   const SizedBox(width: 15),
-                  const Text('Perfil'),
+                  Text(
+                    Translations.get('home_page1', currentLang),
+                    style: TextStyle(color: textColor),
+                  ),
                 ],
               ),
               onTap: () {
@@ -238,9 +249,12 @@ class _HomePageState extends State<HomePage>{
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.language),
+                  Icon(Icons.language, color: textColor),
                   const SizedBox(width: 15),
-                  const Text('Preferències'),
+                  Text(
+                    Translations.get('home_page2', currentLang),
+                    style: TextStyle(color: textColor),
+                  ),
                 ],
               ),
               onTap: () {
@@ -252,9 +266,12 @@ class _HomePageState extends State<HomePage>{
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.key_outlined),
+                  Icon(Icons.key_outlined, color: textColor),
                   const SizedBox(width: 15),
-                  const Text('Seguretat'),
+                  Text(
+                    Translations.get('home_page3', currentLang),
+                    style: TextStyle(color: textColor),
+                  ),
                 ],
               ),
               onTap: () {
@@ -265,9 +282,12 @@ class _HomePageState extends State<HomePage>{
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.link),
+                  Icon(Icons.link, color: textColor),
                   const SizedBox(width: 15),
-                  const Text('Integracions'),
+                  Text(
+                    Translations.get('home_page4', currentLang),
+                    style: TextStyle(color: textColor),
+                  ),
                 ],
               ),
               onTap: () {
@@ -276,13 +296,16 @@ class _HomePageState extends State<HomePage>{
               },
             ),
             const Spacer(),
-            const Divider(),
+            Divider(color: dividerColor),
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.logout),
+                  Icon(Icons.logout, color: textColor),
                   const SizedBox(width: 15),
-                  const Text('Tancar sessió'),
+                  Text(
+                    Translations.get('home_page5', currentLang),
+                    style: TextStyle(color: textColor),
+                  ),
                 ],
               ),
               onTap: _logout,
@@ -290,40 +313,54 @@ class _HomePageState extends State<HomePage>{
           ]
         ),
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: NavigationBarTheme(
+      data: NavigationBarThemeData(
+        labelTextStyle: WidgetStateProperty.all(
+          TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w500),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: iconNavigationBarColor);
+          }
+          return IconThemeData(color: textColor);
+        }),
+      ),
+      child: NavigationBar(
+        backgroundColor: backgroundColor,
+        indicatorColor: indicatorColor,
         onDestinationSelected: (int index) {
           _onItemTapped(index);
         },
-        indicatorColor: const Color(0xFFE8EFFF),
         selectedIndex: _selectedIndex > 4 ? 0 : _selectedIndex,
-        destinations: const <Widget>[
+        destinations: <Widget>[
           NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Resum',
+            selectedIcon: Icon(Icons.home, color: iconNavigationBarColor),
+            icon: Icon(Icons.home_outlined, color: textColor),
+            label: Translations.get('home_page6', currentLang),
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.school),
-            icon: Icon(Icons.school_outlined),
-            label: 'Cursos',
+            selectedIcon: Icon(Icons.school, color: iconNavigationBarColor),
+            icon: Icon(Icons.school_outlined, color: textColor),
+            label: Translations.get('home_page7', currentLang),
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.folder),
-            icon: Icon(Icons.folder_outlined),
-            label: 'Projectes',
+            selectedIcon: Icon(Icons.folder, color: iconNavigationBarColor),
+            icon: Icon(Icons.folder_outlined, color: textColor),
+            label: Translations.get('home_page8', currentLang),
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.analytics),
-            icon: Icon(Icons.analytics_outlined),
-            label: 'Analítiques',
+            selectedIcon: Icon(Icons.analytics, color: iconNavigationBarColor),
+            icon: Icon(Icons.analytics_outlined, color: textColor),
+            label: Translations.get('home_page9', currentLang),
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.history),
-            icon: Icon(Icons.history_outlined),
-            label: 'Activitat',
+            selectedIcon: Icon(Icons.history, color: iconNavigationBarColor),
+            icon: Icon(Icons.history_outlined, color: textColor),
+            label: Translations.get('home_page10', currentLang),
           ),
         ],
       ),
+    ),
     );
   }
 }

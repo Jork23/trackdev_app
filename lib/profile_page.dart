@@ -3,19 +3,25 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '../utils/theme.dart';
+import '../utils/translations.dart';
 
 
-class PerfilPage extends StatefulWidget {
+class ProfilePage extends StatefulWidget {
   final Map<String, dynamic>? userData;
   final VoidCallback? onProfileUpdated;
 
-  const PerfilPage({super.key, this.userData,this.onProfileUpdated});
+  const ProfilePage({
+    super.key, 
+    this.userData,
+    this.onProfileUpdated
+  });
 
   @override
-  State<PerfilPage> createState() => _PerfilPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _PerfilPageState extends State<PerfilPage> {
+class _ProfilePageState extends State<ProfilePage> with Theme_Page{
 
   final storage = FlutterSecureStorage();
 
@@ -39,7 +45,11 @@ class _PerfilPageState extends State<PerfilPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tria un color'),
+        backgroundColor: backgroundColor,
+        title: Text(
+          Translations.get('profile_page7', currentLang),
+          style: TextStyle(color: textColor),
+        ),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: hexToColor(_colorAvatarController.text),
@@ -99,47 +109,48 @@ class _PerfilPageState extends State<PerfilPage> {
 
       setState((){
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = 'Perfil desat correctament';
+          _message = Translations.get('profile_page10', currentLang);
           _isSuccess = true;
           widget.onProfileUpdated?.call();
         } else {
-          _message = 'Error de l\'servidor: ${response.statusCode}';
+          _message = '${Translations.get('profile_page11', currentLang)}: ${response.statusCode}';
         }
       });
     } catch (e) {
       setState(() {
-        _message = 'Error de xarxa: $e';
+        _message = '${Translations.get('profile_page12', currentLang)}: $e';
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-        elevation: 0,
+        backgroundColor: backgroundColor,
         toolbarHeight: 100,
         centerTitle: true,
         title: Column(
           children:[
-            const Divider(color: Colors.black12, thickness: 1),
-            Text ('Informació del Perfil',
-                  style: TextStyle(
-                      color: Color(0xFF1A2B49), 
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                    ),
-                  ),
+            Divider(color: dividerColor, thickness: 1),
             Text(
-              'Actualitza la teva informació de perfil i avatar',
-              style: TextStyle(fontSize: 13),
+              Translations.get('profile_page1', currentLang),
+              style: TextStyle(
+                color: textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 25,
+              ),
+            ),
+            Text(
+              Translations.get('profile_page2', currentLang),
+              style: TextStyle(fontSize: 13, color: subtitleColor),
               textAlign: TextAlign.center,
               overflow: TextOverflow.visible,
             ),
-            const Divider(color: Colors.black12, thickness: 1),
+            Divider(color: dividerColor, thickness: 1),
           ],
         ),
       ),
@@ -155,7 +166,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   backgroundColor: hexToColor(widget.userData!['color']),
                   child: Text(
                     "${widget.userData!['capitalLetters']}",
-                    style: TextStyle(color: Colors.white,fontSize: 28)
+                    style: TextStyle(color: Colors.white, fontSize: 28)
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -164,9 +175,11 @@ class _PerfilPageState extends State<PerfilPage> {
                   children: [
                     Text(
                       "${widget.userData!['fullName']}",
+                      style: TextStyle(color: textColor),
                     ),
                     Text(
                       "${widget.userData!['email']}",
+                      style: TextStyle(color: textColor),
                     ),
                     const SizedBox(height: 5),
                     Container(
@@ -196,12 +209,12 @@ class _PerfilPageState extends State<PerfilPage> {
               ]
             ),
             const SizedBox(height: 24),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Nom d\'usuari',
+                Translations.get('profile_page3', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -210,14 +223,15 @@ class _PerfilPageState extends State<PerfilPage> {
             TextField(
               controller: _userNameController,
               readOnly: true,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade100,
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.person_outline, color: Colors.black26), 
+                fillColor: inputFillColor,
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.person_outline, color: iconColor), 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -225,17 +239,17 @@ class _PerfilPageState extends State<PerfilPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Nom Complet',
+                Translations.get('profile_page4', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -243,12 +257,15 @@ class _PerfilPageState extends State<PerfilPage> {
             const SizedBox(height: 8),
             TextField(
               controller: _fullNameController,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.person_outline, color: Colors.black26), 
+                filled: true,
+                fillColor: inputFillColor,
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.person_outline, color: iconColor), 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -256,17 +273,17 @@ class _PerfilPageState extends State<PerfilPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Email',
+                Translations.get('profile_page5', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -275,12 +292,15 @@ class _PerfilPageState extends State<PerfilPage> {
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintStyle: const TextStyle(color: Colors.black26),
-                prefixIcon: const Icon(Icons.email_outlined, color: Colors.black26), 
+                filled: true,
+                fillColor: inputFillColor,
+                hintStyle: TextStyle(color: hintColor),
+                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -288,17 +308,17 @@ class _PerfilPageState extends State<PerfilPage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black12),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Color de l\'Avatar',
+                Translations.get('profile_page6', currentLang),
                 style: TextStyle(
-                  color: Color(0xFF1A2B49),
+                  color: textColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -314,7 +334,7 @@ class _PerfilPageState extends State<PerfilPage> {
                     decoration: BoxDecoration(
                       color: hexToColor(_colorAvatarController.text),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.black12),
+                      border: Border.all(color: borderColor),
                     ),
                     child: const Icon(Icons.colorize, color: Colors.white, size: 20),
                   ),
@@ -323,12 +343,15 @@ class _PerfilPageState extends State<PerfilPage> {
                 Expanded(
                   child: TextField(
                     controller: _colorAvatarController,
+                    style: TextStyle(color: textColor),
                     decoration: InputDecoration(
-                      hintStyle: const TextStyle(color: Colors.black26),
-                      prefixIcon: const Icon(Icons.palette_outlined, color: Colors.black26), 
+                      filled: true,
+                      fillColor: inputFillColor,
+                      hintStyle: TextStyle(color: hintColor),
+                      prefixIcon: Icon(Icons.palette_outlined, color: iconColor), 
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.black12),
+                        borderSide: BorderSide(color: borderColor),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -336,7 +359,7 @@ class _PerfilPageState extends State<PerfilPage> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.black12),
+                        borderSide: BorderSide(color: borderColor),
                       ),
                     ),
                   ),
@@ -353,82 +376,53 @@ class _PerfilPageState extends State<PerfilPage> {
               ]
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Introdueix un codi de color hexadecimal (ex., #3b82f6)',
+                Translations.get('profile_page8', currentLang),
                 style: TextStyle(
-                  color: Color.fromARGB(255, 64, 70, 79),
+                  color: subtitleColor,
                   fontWeight: FontWeight.w300,
                 ),
               ),
             ),
             const SizedBox(height: 12),
             if (_message.isNotEmpty)
-              if(!_isSuccess)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.red.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
+                      width: 1,
                     ),
                   ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 1,
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
+                        color: _isSuccess ? Colors.green : Colors.red, 
+                        size: 20
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _message,
+                          style: TextStyle(
+                            color: _isSuccess ? Colors.green : Colors.red,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -441,7 +435,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Desar Canvis',
+                  Translations.get('profile_page9', currentLang),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
