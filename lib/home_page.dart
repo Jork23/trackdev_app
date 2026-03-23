@@ -7,6 +7,7 @@ import 'index_page.dart';
 import 'profile_page.dart';
 import 'security_page.dart';
 import 'courses_page.dart';
+import 'projects_page.dart';
 import '../utils/theme.dart';
 import '../utils/translations.dart';
 
@@ -99,7 +100,7 @@ class _HomePageState extends State<HomePage> with Theme_Page {
     List<Widget> pages = <Widget>[
       Text('Index 0: Resum'),
       CoursesPage(),
-      Text('Index 2: Projectes'),
+      ProjectsPage(),
       Text('Index 3: Analitiques'),
       Text('Index 4: Activitat'),
 

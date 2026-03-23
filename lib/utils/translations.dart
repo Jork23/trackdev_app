@@ -112,6 +112,10 @@ class Translations {
       'courses_page1' : 'Cursos',
       'courses_page2' : 'Visualitza els teus cursos matriculats i projectes',
       'courses_page3' : 'Els meus Projectes',
+
+      'projects_page1' : 'Projectes',
+      'projects_page2' : 'Veure els teus projectes i fer seguiment del progrés',
+      'projects_page3' : 'Tots els Projectes',
     },
     'es': {
       'index_page1' : 'Entrar',
@@ -225,6 +229,10 @@ class Translations {
       'courses_page1' : 'Cursos',
       'courses_page2' : 'Visualiza tus cursos matriculados y proyectos',
       'courses_page3' : 'Mis Proyectos',
+
+      'projects_page1' : 'Proyectos',
+      'projects_page2' : 'Ver tus proyectos y realizar seguimiento del progreso',
+      'projects_page3' : 'Todos los Proyectos',
     },
     'en': {
       'index_page1' : 'Sign in',
@@ -338,6 +346,10 @@ class Translations {
       'courses_page1' : 'Courses',
       'courses_page2' : 'View your enrolled courses and projects',
       'courses_page3' : 'My Projects',
+
+      'projects_page1' : 'Projects',
+      'projects_page2' : 'View your projects and track progress',
+      'projects_page3' : 'All Projects',
     }
   };
 

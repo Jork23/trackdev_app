@@ -163,7 +163,8 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
                       ),
                       const SizedBox(height: 12),
                       ListView.builder(
-                        shrinkWrap: true,                   
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),               
                         itemCount: enrolledProjects.length,
                         itemBuilder: (context, index){
                           final project = enrolledProjects[index] ?? [];                      
