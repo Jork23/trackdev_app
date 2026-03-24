@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> with Theme_Page {
   int _selectedIndex = 0;
   final storage = FlutterSecureStorage();
   Map<String, dynamic>? userData;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -62,6 +63,11 @@ class _HomePageState extends State<HomePage> with Theme_Page {
     }
     catch (e){
       debugPrint("Error: $e");
+    }
+    finally{
+      setState((){
+        isLoading = false;
+      });
     }
   }
 
@@ -109,6 +115,16 @@ class _HomePageState extends State<HomePage> with Theme_Page {
       SecurityPage(),
       Text('Index 8: Integracions')
     ];
+    if(isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: backgroundColor,

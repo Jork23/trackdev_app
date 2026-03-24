@@ -34,6 +34,7 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
   late TextEditingController _githubController;
   String? _selectedTimezone;
   List<String> _allTimezones = [];
+  bool isLoading = true;
 
   String _message = '';
   bool _isSuccess = false;
@@ -66,6 +67,7 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
       else{
         _saveTimezone();
       }
+      isLoading = false;
     });
   }
 
@@ -114,6 +116,18 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
 
    @override
   Widget build(BuildContext context) {
+
+    if(isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+    
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(

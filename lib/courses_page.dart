@@ -20,6 +20,7 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
 
   final storage = FlutterSecureStorage();
   Map<String, dynamic> coursesData = {};
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -47,150 +48,184 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
     catch (e){
       debugPrint("Error: $e");
     }
+    finally{
+      setState((){
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+     if(isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     final courses = coursesData['courses'] ?? [];
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+    if(!isLoading && courses.isEmpty){
+      return Scaffold(
         backgroundColor: backgroundColor,
-        elevation: 0,
-        toolbarHeight: 100,
-        centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('courses_page1', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
-              ),
-              textAlign: TextAlign.center,
+        body: Center(
+          child: Text(
+            Translations.get('courses_page4', currentLang),
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
             ),
-            Text(
-              Translations.get('courses_page2', currentLang),
-              style: TextStyle(
-                fontSize: 13, 
-                color: subtitleColor
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
-            ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
+            textAlign: TextAlign.center,
+          ),
         ),
-      ),
-      body: ListView.builder(
-        itemCount: courses.length,
-        itemBuilder: (context, index){
-          final course = courses[index];
-          final enrolledProjects = course['enrolledProjects'] ?? [];
-          return Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor)
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2D5AF0),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12)
-                    )
-                  ),         
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 81, 130, 239),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.menu_book, color: Colors.white, size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              course['subject']['name'],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              "${course['startYear']} - ${course['startYear'] + 1}",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+      );
+    }
+    else{
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: backgroundColor,
+          elevation: 0,
+          toolbarHeight: 100,
+          centerTitle: true,
+          title: Column(
+            children:[
+              Divider(color: dividerColor, thickness: 1),
+              Text(
+                Translations.get('courses_page1', currentLang),
+                style: TextStyle(
+                  color: textColor, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        Translations.get('courses_page3', currentLang),
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                Translations.get('courses_page2', currentLang),
+                style: TextStyle(
+                  fontSize: 13, 
+                  color: subtitleColor
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.visible,
+              ),
+              Divider(color: dividerColor, thickness: 1),
+            ],
+          ),
+        ),
+        body: ListView.builder(
+          itemCount: courses.length,
+          itemBuilder: (context, index){
+            final course = courses[index];
+            final enrolledProjects = course['enrolledProjects'] ?? [];
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor)
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D5AF0),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12)
+                      )
+                    ),         
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 81, 130, 239),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.menu_book, color: Colors.white, size: 24),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),               
-                        itemCount: enrolledProjects.length,
-                        itemBuilder: (context, index){
-                          final project = enrolledProjects[index] ?? [];                      
-                          return Row(
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.folder_outlined, color: Color(0xFF2D5AF0), size: 20),
-                              const SizedBox(width: 8),
                               Text(
-                                project['name'],
+                                course['subject']['name'],
                                 style: const TextStyle(
-                                  color: Color(0xFF2D5AF0),
-                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                "${course['startYear']} - ${course['startYear'] + 1}",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
                                 ),
                               ),
                             ],
-                          );
-                        }
-                      )
-                    ]
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Translations.get('courses_page3', currentLang),
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),               
+                          itemCount: enrolledProjects.length,
+                          itemBuilder: (context, index){
+                            final project = enrolledProjects[index] ?? [];                      
+                            return Row(
+                              children: [
+                                const Icon(Icons.folder_outlined, color: Color(0xFF2D5AF0), size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  project['name'],
+                                  style: const TextStyle(
+                                    color: Color(0xFF2D5AF0),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        )
+                      ]
+                    )
                   )
-                )
-              ],
-            )
-          );
-        }
-      )
-    );
+                ],
+              )
+            );
+          }
+        )
+      );
+    }
   }
 }
