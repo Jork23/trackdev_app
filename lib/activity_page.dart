@@ -58,7 +58,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
 
         projectList.insert(0,{
           'id':null,
-          'name': Translations.get('Tots els projectes', currentLang),
+          'name': Translations.get('activity_page3', currentLang),
         });
         setState((){
           projectsData = {'projects': projectList};
@@ -162,12 +162,12 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     final List membersAux = selectedProjectData?['members'] ?? [];
 
     final List sprints = [
-        {'id': null, 'name': Translations.get('Tots els sprints', currentLang)},
+        {'id': null, 'name': Translations.get('activity_page4', currentLang)},
         ...sprintsAux
     ];
 
     final List members = [
-        {'id': "", 'fullName': Translations.get('Tots els membres', currentLang)},
+        {'id': "", 'fullName': Translations.get('activity_page5', currentLang)},
         ...membersAux
     ];
 
@@ -194,7 +194,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
         title: Column(
           children:[
             Divider(color: dividerColor, thickness: 1),
-            Text (Translations.get('Activitat', currentLang),
+            Text (Translations.get('activity_page1', currentLang),
               style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -232,7 +232,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                       )
                     ),         
                     child: Text(
-                      Translations.get('Projecte', currentLang),
+                      Translations.get('activity_page2', currentLang),
                       style: TextStyle(
                         color: subtitleColor, 
                         fontWeight: FontWeight.bold,
@@ -351,7 +351,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
             ),
             if(!isLoading && activities.isEmpty)
               Text(
-                Translations.get('No formes part de cap activitat', currentLang),
+                Translations.get('activity_page6', currentLang),
                 style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -393,7 +393,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 if (activity['type'] == 'TASK_STATUS_CHANGED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va canviar l\'estat de ', currentLang)}${activity['taskKey']} de ${activity['oldValue']} a ${activity['newValue']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -406,7 +406,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_ASSIGNED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va assignar a ', currentLang)}${activity['newValue']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['newValue']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -419,7 +419,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_CREATED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va crear la tasca ', currentLang)}${activity['taskKey']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -432,7 +432,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_ADDED_TO_SPRINT')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va afegir ', currentLang)} ${activity['taskKey']} a l'sprint ${activity['newValue']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -445,7 +445,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_REMOVED_FROM_SPRINT')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va eliminar ', currentLang)} ${activity['taskKey']} a l'sprint ${activity['oldValue']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -458,7 +458,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_UPDATED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va actualitzar la tasca ', currentLang)}${activity['taskKey']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -471,7 +471,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'TASK_ESTIMATION_CHANGED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va canviar l\'estimació de ', currentLang)}${activity['taskKey']} de ${activity['oldValue']} a ${activity['newValue']} punts",
+                                      "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -484,7 +484,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 else if (activity['type'] == 'PR_LINKED')...{
                                   Expanded(
                                     child: Text(
-                                      "${activity['actorFullName']}${Translations.get(' va enllaçar un pull request a ', currentLang)}${activity['taskKey']}",
+                                      "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 12
@@ -547,7 +547,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('Carregar Més', currentLang),
+                  Translations.get('activity_page7', currentLang),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
