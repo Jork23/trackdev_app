@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'sign_in_page.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 
 class NewPasswordPage extends StatefulWidget {
@@ -24,6 +24,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
   String _messageToken = '';
   bool _isSuccess = false;
   bool _isTokenValid = false;
+  bool isLoading = true;
 
   bool _hasMinLength = false;
   bool _hasLowercase = false;
@@ -57,18 +58,17 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
 
   Future<void> _validateToken(String? token) async {
 
-    final url = Uri.parse('https://trackdev.org/api/auth/reset-password/validate');
+    final url = Uri.parse('https://trackdev.org/api/auth/reset-password/validate?token=$token');
     try {
-      final response = await http.post(
+      final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token'
-        }
       );
 
       setState(() {
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _isTokenValid = true;
+          setState((){
+            _isTokenValid = true;
+          });
         } else {
           _messageToken = Translations.get('newpassword_page13', currentLang);
           _isTokenValid = false;
@@ -78,6 +78,11 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
       setState(() {
         _messageToken = Translations.get('newpassword_page15', currentLang);
         _isTokenValid = false;
+      });
+    }
+    finally{
+      setState((){
+        isLoading = false;
       });
     }
   }
@@ -153,6 +158,17 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
 
   @override
   Widget build(BuildContext context) {
+    if(isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -219,7 +235,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
                   ),
                 ),
               )
-            else
+            else...{
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -442,7 +458,8 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
                         ),
                       ),
                     ]
-                  )    
+                  )  
+            }  
           ]
         ),
       )

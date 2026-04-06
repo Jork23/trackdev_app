@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 
 class ProfilePage extends StatefulWidget {

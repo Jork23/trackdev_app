@@ -1,76 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'home_page.dart';
-import 'reset_password_page.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _SignInPageState extends State<SignInPage> with Theme_Page {
+class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
-  final _storage = const FlutterSecureStorage();
-  bool _isLoading = false;
   String _errorMessage = '';
+  bool _isLoading = false;
+  bool _isSuccess = false;
 
-  Future<void> _login() async {
+  Future<void> _sendEmail() async {
 
-    setState(() => _errorMessage = '');
+    setState(() {
+      _errorMessage = '';
+      _isSuccess = false;
+    });
 
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() => _errorMessage = Translations.get('signin_page8', currentLang));
+    if (_emailController.text.isEmpty) {
+      setState(() => _errorMessage = Translations.get('resetpassword_page6', currentLang));
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse('https://trackdev.org/api/auth/login');
+      final url = Uri.parse('https://trackdev.org/api/auth/forgot-password');
       
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
-        }),
+        body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        
-        final String token = data['token']; 
-
-        await _storage.write(key: 'auth_token', value: token);
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        }
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() => _isSuccess = true);
       } else {
-        if (mounted) {
-          setState(() => _errorMessage = Translations.get('signin_page9', currentLang));
-        }
+        setState(() => _errorMessage = Translations.get('resetpassword_page7', currentLang));
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = '${Translations.get('signin_page10', currentLang)}: $e');
-        debugPrint("Error: $e");
-      }
+      setState(() => _errorMessage = Translations.get('resetpassword_page8', currentLang));
+      debugPrint("Error: $e");
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -105,7 +86,7 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('signin_page1', currentLang),
+              Translations.get('resetpassword_page1', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -114,9 +95,21 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
             ),
             const SizedBox(height: 24),
             Align(
+              alignment: Alignment.center,
+              child: Text(
+                Translations.get('resetpassword_page2', currentLang),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: textColor, 
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('signin_page2', currentLang),
+                Translations.get('resetpassword_page3', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -129,7 +122,7 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('signin_page3', currentLang),
+                hintText: Translations.get('resetpassword_page4', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -149,58 +142,6 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
               ),
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('signin_page4', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                hintText: Translations.get('signin_page5', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
-                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
-                  );
-                }, 
-                child: Text(
-                  Translations.get('signin_page6', currentLang), 
-                  style: const TextStyle(color: Color(0xFF2D5AF0))
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
             if (_errorMessage.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
@@ -237,7 +178,7 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                onPressed: _isLoading ? null : _sendEmail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),
                   foregroundColor: Colors.white,
@@ -251,9 +192,47 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                     )
                   : Text(
-                      Translations.get('signin_page7', currentLang),
+                      Translations.get('resetpassword_page5', currentLang),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            if(_isSuccess)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Text(
+                    Translations.get('resetpassword_page9', currentLang),
+                    style: const TextStyle(
+                      color: Color(0xFF2D5AF0), 
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ),
+              ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSuccess = false;
+                    _errorMessage = '';
+                    _emailController.clear();
+                  });
+                  Navigator.pop(context);
+                }, 
+                child: Text(
+                  Translations.get('resetpassword_page10', currentLang), 
+                  style: const TextStyle(color: Color(0xFF2D5AF0))
+                ),
               ),
             ),
           ],

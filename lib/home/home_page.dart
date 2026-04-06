@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:trackdev_app/preferences_page.dart';
+import 'package:trackdev_app/configuration/preferences_page.dart';
 import 'dart:convert';
-import 'index_page.dart';
-import 'profile_page.dart';
-import 'security_page.dart';
+import '../sign_in/index_page.dart';
+import '../configuration/profile_page.dart';
+import '../configuration/security_page.dart';
 import 'courses_page.dart';
 import 'projects_page.dart';
 import 'activity_page.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

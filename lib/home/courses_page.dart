@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../project/project_details_page.dart';
 
 
 class CoursesPage extends StatefulWidget {
@@ -57,7 +58,7 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
 
   @override
   Widget build(BuildContext context) {
-     if(isLoading){
+    if(isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -73,15 +74,42 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
     if(!isLoading && courses.isEmpty){
       return Scaffold(
         backgroundColor: backgroundColor,
-        body: Center(
-          child: Text(
-            Translations.get('courses_page4', currentLang),
-            style: TextStyle(
-              color: textColor, 
-              fontWeight: FontWeight.bold,
-              fontSize: 25,
-            ),
-            textAlign: TextAlign.center,
+        body: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(48.0),
+          margin: const EdgeInsets.symmetric(vertical: 24.0),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: borderColor, width: 2),
+                ),
+                child: Icon(
+                  Icons.menu_book,
+                  size: 60,
+                  color: subtitleColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                Translations.get('courses_page4', currentLang),
+                style: TextStyle(
+                  color: textColor, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),                           
+            ],
           ),
         ),
       );
@@ -201,30 +229,43 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
                           physics: const NeverScrollableScrollPhysics(),               
                           itemCount: enrolledProjects.length,
                           itemBuilder: (context, index){
-                            final project = enrolledProjects[index] ?? [];                      
-                            return Row(
-                              children: [
-                                const Icon(Icons.folder_outlined, color: Color(0xFF2D5AF0), size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  project['name'],
-                                  style: const TextStyle(
-                                    color: Color(0xFF2D5AF0),
-                                    fontWeight: FontWeight.w500,
+                            final project = enrolledProjects[index];                      
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProjectDetailsPage(project: project),
                                   ),
-                                ),
-                              ],
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.folder_outlined, color: Color(0xFF2D5AF0), size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      project['name'],
+                                      style: const TextStyle(
+                                        color: Color(0xFF2D5AF0),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              )
                             );
                           }
                         )
                       ]
                     )
                   )
-                ],
-              )
-            );
-          }
-        )
+                ]
+              )   
+            );   
+          },
+        ),
       );
     }
   }

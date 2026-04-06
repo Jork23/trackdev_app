@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 
 class ActivityPage extends StatefulWidget {
@@ -18,7 +18,8 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
 
   final storage = const FlutterSecureStorage();
 
-  bool isLoading = true;
+  bool isLoadingActivities = true;
+  bool isLoadingProjects = true;
 
   Map<String, dynamic> activityData = {};
   Map<String, dynamic> projectsData = {};
@@ -38,6 +39,10 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     _selectedProject = null;
     _selectedSprint = null;
     _selectedMember = "";
+  }
+
+  bool _isLoading(){
+    return isLoadingActivities || isLoadingProjects;
   }
 
   Future<void> _loadProjects() async{
@@ -70,7 +75,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoading = false;
+        isLoadingProjects = false;
       });
     }
   }
@@ -84,7 +89,6 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
       if(projectId!=null) 'projectId': '$projectId',
       if(sprintId!=null) 'sprintId': '$sprintId',
       if(actorId !=null && actorId.isNotEmpty) 'actorId': actorId,
-
     };
 
     final url = Uri.https('trackdev.org', '/api/activities', params);
@@ -96,7 +100,6 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-
         final Map<String, dynamic> decodedData = jsonDecode(response.body);
         List activityList = decodedData['activities'] ?? [];
 
@@ -113,7 +116,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoading = false;
+        isLoadingActivities = false;
       });
     }
   }
@@ -171,7 +174,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
         ...membersAux
     ];
 
-    if(isLoading){
+    if(_isLoading()){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -265,6 +268,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                               }
                               activityData.clear();
                               page=0;
+                              isLoadingActivities = true;
                             });
                             _loadActivities(value, null, "");
                           },
@@ -297,6 +301,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 _selectedSprint = value;
                                 activityData.clear();
                                 page=0;
+                                isLoadingActivities = true;
                               });
                               _loadActivities(_selectedProject, value, _selectedMember);
                             },
@@ -328,6 +333,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 _selectedMember = value;
                                 activityData.clear();
                                 page=0;
+                                isLoadingActivities = true;
                               });
                               _loadActivities(_selectedProject, _selectedSprint, value);
                             },
@@ -349,190 +355,221 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                 ]
               )
             ),
-            if(!isLoading && activities.isEmpty)
-              Text(
-                Translations.get('activity_page6', currentLang),
-                style: TextStyle(
-                  color: textColor, 
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
+            if(!_isLoading() && activities.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(48.0),
+                margin: const EdgeInsets.symmetric(vertical: 24.0),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderColor),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: activities.length,
-              itemBuilder: (context, index){
-                final activity = activities[index];
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: borderColor)
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        child:Icon(                         
-                          _getIcon(activity['type']),
-                          color:_getIconColor(activity['type'])
-                        ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: borderColor, width: 2),
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(width: 5),
-                                if (activity['type'] == 'TASK_STATUS_CHANGED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
+                      child: Icon(
+                        Icons.bar_chart,
+                        size: 60,
+                        color: subtitleColor,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      Translations.get('activity_page6', currentLang),
+                      style: TextStyle(
+                        color: textColor, 
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),                           
+                  ],
+                ),
+              ),
+            if(!_isLoading() && activities.isNotEmpty)...{
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: activities.length,
+                itemBuilder: (context, index){
+                  final activity = activities[index];
+                  return Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: borderColor)
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          child:Icon(                         
+                            _getIcon(activity['type']),
+                            color:_getIconColor(activity['type'])
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(width: 5),
+                                  if (activity['type'] == 'TASK_STATUS_CHANGED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
                                       ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_ASSIGNED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['newValue']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_CREATED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_ADDED_TO_SPRINT')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_REMOVED_FROM_SPRINT')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_UPDATED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  }
+                                  else if (activity['type'] == 'TASK_ESTIMATION_CHANGED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  }
+                                  else if (activity['type'] == 'PR_LINKED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  }
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  SizedBox(width: 5),
+                                  Text(
+                                    activity['taskKey'],
+                                    style: TextStyle(
+                                      color: const Color(0xFF2D5AF0), 
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
                                     ),
                                   ),
-                                } 
-                                else if (activity['type'] == 'TASK_ASSIGNED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['newValue']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
+                                  SizedBox(width: 5),
+                                  Text(
+                                    activity['projectName'],
+                                    style: TextStyle(
+                                      color: textColor, 
+                                      fontSize: 10,
                                     ),
                                   ),
-                                } 
-                                else if (activity['type'] == 'TASK_CREATED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
+                                  SizedBox(width: 5),
+                                  Text(
+                                    activity['createdAt'],
+                                    style: TextStyle(
+                                      color: subtitleColor, 
+                                      fontSize: 10,
                                     ),
                                   ),
-                                } 
-                                else if (activity['type'] == 'TASK_ADDED_TO_SPRINT')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                } 
-                                else if (activity['type'] == 'TASK_REMOVED_FROM_SPRINT')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                } 
-                                else if (activity['type'] == 'TASK_UPDATED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                }
-                                else if (activity['type'] == 'TASK_ESTIMATION_CHANGED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                }
-                                else if (activity['type'] == 'PR_LINKED')...{
-                                  Expanded(
-                                    child: Text(
-                                      "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12
-                                      ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                }
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                SizedBox(width: 5),
-                                Text(
-                                  activity['taskKey'],
-                                  style: TextStyle(
-                                    color: const Color(0xFF2D5AF0), 
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                                Text(
-                                  activity['projectName'],
-                                  style: TextStyle(
-                                    color: textColor, 
-                                    fontSize: 10,
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                                Text(
-                                  activity['createdAt'],
-                                  style: TextStyle(
-                                    color: subtitleColor, 
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ],                              
-                            )
-                          ],
+                                ],                              
+                              )
+                            ],
+                          )
                         )
-                      )
-                    ]
-                  )
-                );
-              }
-            ),
+                      ]
+                    )
+                  );
+                }
+              ),
+            },
             SizedBox(
               width: double.infinity,
               height: 50,

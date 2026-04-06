@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
-import 'index_page.dart';
-import 'home_page.dart';
-import 'new_password_page.dart';
+import 'sign_in/index_page.dart';
+import 'home/home_page.dart';
+import 'sign_in/new_password_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

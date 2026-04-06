@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'sign_in_page.dart';
-import '../utils/theme.dart';
-import '../utils/translations.dart';
+import '../../utils/theme.dart';
+import '../../utils/translations.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
