@@ -42,7 +42,9 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
     String? token = await storage.read(key: 'auth_token');
 
     if (_nameController.text.isEmpty) {
-      setState(() => _message = Translations.get('Siusplau, omple tots els camps', currentLang));
+      setState((){ 
+        _message = Translations.get('add_subtask_page1', currentLang);
+      });
       return;
     }
 
@@ -62,16 +64,18 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
       );
 
       setState((){
-        if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = Translations.get('Tasca creada correctament', currentLang);
+        if(response.statusCode == 200 || response.statusCode == 204) {
+          _message = Translations.get('add_subtask_page2', currentLang);
           _isSuccess = true;
-        } else {
-          _message = '${Translations.get('Error del servidor', currentLang)}: ${response.statusCode}';
+        } 
+        else{
+          _message = '${Translations.get('add_subtask_page3', currentLang)}: ${response.statusCode}';
         }
       });
-    } catch (e) {
-      setState(() {
-        _message = '${Translations.get('Error de xarxa', currentLang)}: $e';
+    } 
+    catch (e){
+      setState((){
+        _message = '${Translations.get('add_subtask_page4', currentLang)}: $e';
       });
     }
   }
@@ -121,12 +125,12 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
     }
 
     final List listTypes = [
-      {'type': 'TASK', 'name': Translations.get('Tasca', currentLang)},
-      {'type': 'BUG', 'name': Translations.get('Error', currentLang)},
+      {'type': 'TASK', 'name': Translations.get('add_subtask_page5', currentLang)},
+      {'type': 'BUG', 'name': Translations.get('add_subtask_page6', currentLang)},
     ];
 
     final List listAssignees = [
-      {'id': "", 'fullName': Translations.get('Sense assignar', currentLang)},
+      {'id': "", 'fullName': Translations.get('add_subtask_page7', currentLang)},
       {'id':userData!['id'],'fullName': userData!['fullName']},
     ];
 
@@ -144,7 +148,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('Torna', currentLang),
+              Translations.get('add_subtask_page8', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -162,7 +166,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
             const SizedBox(height: 10),
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('Afegir  Sutasca', currentLang),
+              Translations.get('add_subtask_page9', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -174,7 +178,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Nom', currentLang),
+                Translations.get('add_subtask_page10', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -186,7 +190,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
               controller: _nameController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('Introdueix el nom de la tasca', currentLang),
+                hintText: Translations.get('add_subtask_page11', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -208,7 +212,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Descripció', currentLang),
+                Translations.get('add_subtask_page12', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -220,7 +224,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
               controller: _descriptionController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('Introdueix la descripcio de la tasca(opcional)', currentLang),
+                hintText: Translations.get('add_subtask_page13', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -242,7 +246,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Tipus', currentLang),
+                Translations.get('add_subtask_page14', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -287,7 +291,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Assignat', currentLang),
+                Translations.get('add_subtask_page15', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500
@@ -375,7 +379,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         side: BorderSide(color: borderColor),
                       ),
-                      child: Text(Translations.get('Cancel.lar', currentLang), style: TextStyle(color: textColor)),
+                      child: Text(Translations.get('add_subtask_page16', currentLang), style: TextStyle(color: textColor)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -386,7 +390,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
                         backgroundColor: const Color(0xFF2D5AF0),
                         padding: const EdgeInsets.symmetric(vertical: 15),
                       ),
-                      child: Text(Translations.get('Crear Tasca', currentLang), style: const TextStyle(color: Colors.white)),
+                      child: Text(Translations.get('add_subtask_page17', currentLang), style: const TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -401,7 +405,7 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with Theme_Page {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     side: BorderSide(color: borderColor),
                   ),
-                  child: Text(Translations.get('Tornar', currentLang), style: TextStyle(color: textColor)),
+                  child: Text(Translations.get('add_subtask_page18', currentLang), style: TextStyle(color: textColor)),
                 ),
               ),
             }

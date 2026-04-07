@@ -42,7 +42,9 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
     String? token = await storage.read(key: 'auth_token');
 
     if (_nameController.text.isEmpty) {
-      setState(() => _message = Translations.get('Siusplau, omple tots els camps', currentLang));
+      setState(() {
+        _message = Translations.get('add_task_page1', currentLang);
+      });
       return;
     }
 
@@ -63,15 +65,17 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
 
       setState((){
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = Translations.get('Tasca creada correctament', currentLang);
+          _message = Translations.get('add_task_page2', currentLang);
           _isSuccess = true;
-        } else {
-          _message = '${Translations.get('Error del servidor', currentLang)}: ${response.statusCode}';
+        } 
+        else{
+          _message = '${Translations.get('add_task_page3', currentLang)}: ${response.statusCode}';
         }
       });
-    } catch (e) {
-      setState(() {
-        _message = '${Translations.get('Error de xarxa', currentLang)}: $e';
+    } 
+    catch (e){
+      setState((){
+        _message = '${Translations.get('add_task_page4', currentLang)}: $e';
       });
     }
   }
@@ -121,13 +125,13 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
     }
 
     final List listTypes = [
-      {'type': 'USER_STORY', 'name': Translations.get('Història d\'Usuari', currentLang)},
-      {'type': 'TASK', 'name': Translations.get('Tasca', currentLang)},
-      {'type': 'BUG', 'name': Translations.get('Error', currentLang)},
+      {'type': 'USER_STORY', 'name': Translations.get('add_task_page5', currentLang)},
+      {'type': 'TASK', 'name': Translations.get('add_task_page6', currentLang)},
+      {'type': 'BUG', 'name': Translations.get('add_task_page7', currentLang)},
     ];
 
     final List listAssignees = [
-      {'id': "", 'fullName': Translations.get('Sense assignar', currentLang)},
+      {'id': "", 'fullName': Translations.get('add_task_page8', currentLang)},
       {'id':userData!['id'],'fullName': userData!['fullName']},
     ];
 
@@ -145,7 +149,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('Torna', currentLang),
+              Translations.get('add_task_page9', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -163,7 +167,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
             const SizedBox(height: 10),
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('Crear Tasca', currentLang),
+              Translations.get('add_task_page10', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -175,7 +179,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Nom', currentLang),
+                Translations.get('add_task_page11', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -187,7 +191,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
               controller: _nameController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('Introdueix el nom de la tasca', currentLang),
+                hintText: Translations.get('add_task_page12', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -209,7 +213,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Descripció', currentLang),
+                Translations.get('add_task_page13', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -221,7 +225,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
               controller: _descriptionController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('Introdueix la descripcio de la tasca(opcional)', currentLang),
+                hintText: Translations.get('add_task_page14', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -243,7 +247,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Tipus', currentLang),
+                Translations.get('add_task_page15', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -288,7 +292,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Assignat', currentLang),
+                Translations.get('add_task_page16', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500
@@ -376,7 +380,12 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         side: BorderSide(color: borderColor),
                       ),
-                      child: Text(Translations.get('Cancel.lar', currentLang), style: TextStyle(color: textColor)),
+                      child: Text(
+                        Translations.get('add_task_page17', currentLang), 
+                        style: TextStyle(
+                          color: textColor
+                          )
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -387,7 +396,12 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
                         backgroundColor: const Color(0xFF2D5AF0),
                         padding: const EdgeInsets.symmetric(vertical: 15),
                       ),
-                      child: Text(Translations.get('Crear Tasca', currentLang), style: const TextStyle(color: Colors.white)),
+                      child: Text(
+                        Translations.get('add_task_page10', currentLang), 
+                        style: const TextStyle(
+                          color: Colors.white
+                        )
+                      ),
                     ),
                   ),
                 ],
@@ -402,7 +416,12 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     side: BorderSide(color: borderColor),
                   ),
-                  child: Text(Translations.get('Tornar', currentLang), style: TextStyle(color: textColor)),
+                  child: Text(
+                    Translations.get('add_task_page18', currentLang), 
+                    style: TextStyle(
+                      color: textColor
+                    )
+                  ),
                 ),
               ),
             }

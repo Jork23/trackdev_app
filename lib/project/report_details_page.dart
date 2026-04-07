@@ -40,7 +40,9 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
 
   Future<void> _loadReport() async{
 
-    isLoading=true;
+    setState((){
+      isLoading = true;
+    });
 
     String? token = await storage.read(key: 'auth_token');
 
@@ -77,11 +79,11 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
   String _translateRows(String type) {
     switch (type) {
       case "STUDENTS":
-        return Translations.get('Estudiants', currentLang);
+        return Translations.get('report_details_2', currentLang);
       case "SPRINTS":
-        return Translations.get('Sprints', currentLang);
+        return Translations.get('report_details_3', currentLang);
       case "ESTIMATION_POINTS":
-        return Translations.get('Punts d\'Estimació', currentLang);
+        return Translations.get('report_details_4', currentLang);
       default:
         return type;
     }
@@ -117,7 +119,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('Torna', currentLang),
+              Translations.get('report_details_1', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -153,7 +155,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('Filtrar per Estat de Tasca', currentLang),
+              Translations.get('report_details_5', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -195,7 +197,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('Tots', currentLang), 
+                          Translations.get('report_details_6', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -224,7 +226,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('Backlog', currentLang), 
+                          Translations.get('report_details_7', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -253,7 +255,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('Prioritzada', currentLang), 
+                          Translations.get('report_details_8', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -282,7 +284,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('En Progrés', currentLang), 
+                          Translations.get('report_details_9', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -311,7 +313,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('En Verificació', currentLang), 
+                          Translations.get('report_details_10', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -340,7 +342,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('Finalitzada', currentLang), 
+                          Translations.get('report_details_11', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -379,7 +381,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                       )),
                       DataColumn(
                         label: Text(
-                          Translations.get('Total', currentLang),
+                          Translations.get('report_details_12', currentLang),
                           style: TextStyle(
                             color: textColor, 
                             fontWeight: FontWeight.bold       
@@ -406,7 +408,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                               return DataCell(
                                 Center(
                                   child: Text(
-                                    anyFilterActive ? (reportData!['data'][key] ?? 0).toString() : "0",
+                                    anyFilterActive ? (reportData!['data'][key]).toString() : "0",
                                     style: TextStyle(
                                       color: subtitleColor
                                     )
@@ -417,7 +419,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                             DataCell(
                               Center(
                                 child: Text(
-                                  anyFilterActive ? (reportData!['rowTotals'][student['id']] ?? 0).toString() : "0",
+                                  anyFilterActive ? (reportData!['rowTotals'][student['id']]).toString() : "0",
                                   style: TextStyle(
                                       color: textColor, 
                                       fontWeight: FontWeight.bold       
@@ -432,7 +434,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                         cells: <DataCell>[
                           DataCell(
                             Text(
-                              Translations.get('Total', currentLang),
+                              Translations.get('report_details_12', currentLang),
                               style: TextStyle(
                                 color: textColor, 
                                 fontWeight: FontWeight.bold       
@@ -443,7 +445,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                             return DataCell(
                               Center(
                                 child: Text(
-                                  anyFilterActive ? (reportData!['columnTotals'][sprint['id']] ?? 0).toString() : "0",
+                                  anyFilterActive ? (reportData!['columnTotals'][sprint['id']]).toString() : "0",
                                   style: TextStyle(
                                     color: subtitleColor
                                   )
@@ -454,7 +456,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           DataCell(
                             Center(
                               child: Text(
-                                anyFilterActive ? (reportData!['grandTotal'] ?? 0).toString() : "0", 
+                                anyFilterActive ? (reportData!['grandTotal']).toString() : "0", 
                                 style: TextStyle(
                                     color: textColor, 
                                     fontWeight: FontWeight.bold       

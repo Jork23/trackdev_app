@@ -131,6 +131,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
       case "TASK_UPDATED":        return Icons.timeline;
       case "TASK_ESTIMATION_CHANGED": return Icons.sync;
       case "PR_LINKED": return Icons.merge_type;
+      case "TASK_UNASSIGNED": return Icons.person_remove;
       default:                    return Icons.help_outline;
     }
   }
@@ -145,6 +146,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
       case "TASK_UPDATED":        return Colors.grey;
       case "TASK_ESTIMATION_CHANGED": return Colors.cyan;
       case "PR_LINKED": return Colors.pinkAccent;
+      case "TASK_UNASSIGNED": return Colors.orange;
       default:                    return Colors.grey;
     }
   }
@@ -442,7 +444,20 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                   else if (activity['type'] == 'TASK_ASSIGNED')...{
                                     Expanded(
                                       child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['newValue']}",
+                                        "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['taskKey']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 12
+                                        ),
+                                        softWrap: true,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  } 
+                                  else if (activity['type'] == 'TASK_UNASSIGNED')...{
+                                    Expanded(
+                                      child: Text(
+                                        "${activity['actorFullName']}${Translations.get('activity_page21', currentLang)}${activity['oldValue']}${Translations.get('activity_page17', currentLang)}${activity['taskKey']}",
                                         style: TextStyle(
                                           color: textColor,
                                           fontSize: 12

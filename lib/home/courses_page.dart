@@ -29,6 +29,55 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
     _loadCourses();
   }
 
+  Future<void> _loadProject(int idProject) async{
+
+    String? token = await storage.read(key: 'auth_token');
+
+    final url = Uri.parse('https://trackdev.org/api/projects');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> allProjects = data['projects'] ?? [];
+
+        Map<String, dynamic>? projectCorrecte;
+
+      for (var p in allProjects) {
+          if (p['id'] == idProject) {
+            projectCorrecte = p;
+            break;
+          }
+        }
+        setState((){
+          isLoading = false;
+        });
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProjectDetailsPage(project: projectCorrecte!),
+          ),
+        );    
+      }
+      else{
+        setState((){
+          isLoading = false;
+        });
+      }
+    }
+    catch (e){
+      debugPrint("Error: $e");
+      setState((){
+        isLoading = false;
+      });
+    }
+
+  }
+
   Future<void> _loadCourses() async{
 
     String? token = await storage.read(key: 'auth_token');
@@ -232,12 +281,10 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
                             final project = enrolledProjects[index];                      
                             return InkWell(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProjectDetailsPage(project: project),
-                                  ),
-                                );
+                                setState((){
+                                  isLoading = true;
+                                });
+                                _loadProject(project['id']);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0),

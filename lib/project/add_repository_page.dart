@@ -29,7 +29,9 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
     String? token = await storage.read(key: 'auth_token');
 
     if (_nameController.text.isEmpty || _urlController.text.isEmpty || _tokenController.text.isEmpty) {
-      setState(() => _message = Translations.get('Siusplau, omple tots els camps', currentLang));
+      setState(() {
+        _message = Translations.get('add_repository_page1', currentLang);
+      });
       return;
     }
 
@@ -48,16 +50,18 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
       );
 
       setState((){
-        if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = Translations.get('Repositori desat correctament', currentLang);
+        if(response.statusCode == 200 || response.statusCode == 204){
+          _message = Translations.get('add_repository_page2', currentLang);
           _isSuccess = true;
-        } else {
-          _message = '${Translations.get('Error del servidor', currentLang)}: ${response.statusCode}';
+        } 
+        else{
+          _message = '${Translations.get('add_repository_page3', currentLang)}: ${response.statusCode}';
         }
       });
-    } catch (e) {
-      setState(() {
-        _message = '${Translations.get('Error de xarxa', currentLang)}: $e';
+    } 
+    catch (e){
+      setState((){
+        _message = '${Translations.get('add_repository_page4', currentLang)}: $e';
       });
     }
   }
@@ -78,7 +82,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('Torna', currentLang),
+              Translations.get('add_repository_page5', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -96,7 +100,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             const SizedBox(height: 10),
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('Afegir Repositori de GitHub', currentLang),
+              Translations.get('add_repository_page6', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -108,7 +112,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Nom a Mostrar', currentLang),
+                Translations.get('add_repository_page7', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -120,7 +124,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
               controller: _nameController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('El meu repositori', currentLang),
+                hintText: Translations.get('add_repository_page8', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -143,7 +147,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('URL del Repositori', currentLang),
+                Translations.get('add_repository_page9', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -178,7 +182,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('URL completa del teu repositori de GitHub', currentLang),
+                Translations.get('add_repository_page10', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontSize: 10,
@@ -189,7 +193,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Token d\'Accés', currentLang),
+                Translations.get('add_repository_page11', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -224,7 +228,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('Token d\'accés personal amb permisos repo i admin:repo_hook', currentLang),
+                Translations.get('add_repository_page12', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontSize: 10,
@@ -277,7 +281,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       side: BorderSide(color: borderColor),
                     ),
-                    child: Text(Translations.get('Cancel.lar', currentLang), style: TextStyle(color: textColor)),
+                    child: Text(Translations.get('add_repository_page13', currentLang), style: TextStyle(color: textColor)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -288,12 +292,11 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
                       backgroundColor: const Color(0xFF2D5AF0),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
-                    child: Text(Translations.get('Afegir Repositori', currentLang), style: const TextStyle(color: Colors.white)),
+                    child: Text(Translations.get('add_repository_page14', currentLang), style: const TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
             )
-            
           ],
         ),
       ),
