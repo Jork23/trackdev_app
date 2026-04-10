@@ -79,11 +79,11 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
   String _translateRows(String type) {
     switch (type) {
       case "STUDENTS":
-        return Translations.get('report_details_2', currentLang);
+        return Translations.get('report_details_page2', currentLang);
       case "SPRINTS":
-        return Translations.get('report_details_3', currentLang);
+        return Translations.get('report_details_page3', currentLang);
       case "ESTIMATION_POINTS":
-        return Translations.get('report_details_4', currentLang);
+        return Translations.get('report_details_page4', currentLang);
       default:
         return type;
     }
@@ -119,7 +119,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('report_details_1', currentLang),
+              Translations.get('report_details_page1', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -155,7 +155,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('report_details_5', currentLang),
+              Translations.get('report_details_page5', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_6', currentLang), 
+                          Translations.get('report_details_page6', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -226,7 +226,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_7', currentLang), 
+                          Translations.get('report_details_page7', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -255,7 +255,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_8', currentLang), 
+                          Translations.get('report_details_page8', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -284,7 +284,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_9', currentLang), 
+                          Translations.get('report_details_page9', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -313,7 +313,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_10', currentLang), 
+                          Translations.get('report_details_page10', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -342,7 +342,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_11', currentLang), 
+                          Translations.get('report_details_page11', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -381,7 +381,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                       )),
                       DataColumn(
                         label: Text(
-                          Translations.get('report_details_12', currentLang),
+                          Translations.get('report_details_page12', currentLang),
                           style: TextStyle(
                             color: textColor, 
                             fontWeight: FontWeight.bold       
@@ -434,7 +434,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with Theme_Page {
                         cells: <DataCell>[
                           DataCell(
                             Text(
-                              Translations.get('report_details_12', currentLang),
+                              Translations.get('report_details_page12', currentLang),
                               style: TextStyle(
                                 color: textColor, 
                                 fontWeight: FontWeight.bold       

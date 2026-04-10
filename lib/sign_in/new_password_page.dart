@@ -282,7 +282,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               TextField(
                 controller: _newPassword2,
                 obscureText: true,
@@ -373,7 +373,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
                     ),
                   ),
                 ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               if (_messagePassword.isNotEmpty)
                 if(!_isSuccess)
                   Padding(

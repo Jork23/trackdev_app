@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'report_details_page.dart';
 import 'tasks_project_page.dart';
 import 'task_details_page.dart';
+import 'sprint_details_page.dart';
 
 
 class ProjectDetailsPage extends StatefulWidget {
@@ -94,11 +95,11 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
   String _translateType(String type) {
     switch (type) {
       case "BUG":
-        return Translations.get('proj_det_2', currentLang);
+        return Translations.get('proj_details_page20', currentLang);
       case "TASK":
-        return Translations.get('proj_det_3', currentLang);
+        return Translations.get('proj_details_page21', currentLang);
       case "USER_STORY":
-        return Translations.get('proj_det_4', currentLang);
+        return Translations.get('proj_details_page22', currentLang);
       default:
         return type;
     }
@@ -109,13 +110,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
       case "BACKLOG":
         return Translations.get('Backlog', currentLang);
       case "TODO":
-        return Translations.get('proj_det_5', currentLang);
+        return Translations.get('proj_details_page23', currentLang);
       case "INPROGRESS":
-        return Translations.get('proj_det_6', currentLang);
+        return Translations.get('proj_details_page24', currentLang);
       case "VERIFY":
-        return Translations.get('proj_det_7', currentLang);
+        return Translations.get('proj_details_page25', currentLang);
       case "DONE":
-        return Translations.get('proj_det_8', currentLang);
+        return Translations.get('proj_details_page26', currentLang);
       default:
         return status;
     }
@@ -281,7 +282,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
               onPressed: () => Navigator.pop(context),
             ),
             Text(
-              Translations.get('proj_det_1', currentLang),
+              Translations.get('proj_details_page1', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -379,7 +380,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         child: Row(
                           children: [
                             Text(
-                              "${Translations.get('proj_det_10', currentLang)}(${repositoris.length})",
+                              "${Translations.get('proj_details_page27', currentLang)}(${repositoris.length})",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -406,7 +407,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               child: Text(
-                                Translations.get('proj_det_11', currentLang), 
+                                Translations.get('proj_details_page29', currentLang), 
                                 style: TextStyle(color: textColor),
                               ),
                             ),
@@ -441,7 +442,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                Translations.get('proj_det_12', currentLang),
+                                Translations.get('proj_details_page12', currentLang),
                                 style: TextStyle(
                                   color: textColor, 
                                   fontWeight: FontWeight.bold,
@@ -513,7 +514,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                                         ),
                                       ),
                                       child: Text(
-                                        repository['webhookActive'] ? Translations.get('proj_det_13', currentLang) : Translations.get('proj_det_14', currentLang),
+                                        repository['webhookActive'] ? Translations.get('proj_details_page13', currentLang) : Translations.get('proj_details_page14', currentLang),
                                         style: TextStyle(
                                           color: repository['webhookActive'] ? const Color(0xFF1E8E3E) : const Color(0xFFD93025),
                                           fontSize: 10,
@@ -558,7 +559,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_det_15', currentLang)}(${reportsData.length})",
+                          "${Translations.get('proj_details_page28', currentLang)}(${reportsData.length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -567,7 +568,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         ),
                       ),
                       if(!_isLoading() && widget.project['members'].isEmpty)
-                       _buildEmptyState(icon: Icons.assessment, message: 'proj_det_16'),
+                       _buildEmptyState(icon: Icons.assessment, message: 'proj_details_page16'),
                       if(!_isLoading() && reportsData.isNotEmpty)...{
                         ListView.builder(
                           shrinkWrap: true,
@@ -617,7 +618,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                                             ),
                                           ),
                                           Text(
-                                            "${Translations.get('proj_det_17', currentLang)} ${report['rowType']} | ${Translations.get('proj_det_18', currentLang)} ${report['columnType']}" ,
+                                            "${Translations.get('proj_details_page17', currentLang)} ${report['rowType']} | ${Translations.get('proj_details_page18', currentLang)} ${report['columnType']}" ,
                                             style: TextStyle(color: subtitleColor, fontSize: 12),
                                           ),
                                         ],
@@ -654,7 +655,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_det_10', currentLang)}(${widget.project['sprints'].length})",
+                          "${Translations.get('proj_details_page10', currentLang)}(${widget.project['sprints'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -663,7 +664,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         ),
                       ),
                       if(!_isLoading() && widget.project['members'].isEmpty)
-                       _buildEmptyState(icon: Icons.calendar_today_outlined, message: 'proj_det_12'),
+                       _buildEmptyState(icon: Icons.calendar_today_outlined, message: 'proj_details_page12'),
                       if(!_isLoading() && widget.project['sprints'].isNotEmpty)...{
                         ListView.builder(
                           shrinkWrap: true,
@@ -674,7 +675,12 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                             final sprint = widget.project['sprints'][index];
                             return InkWell(
                               onTap: () {
-                                
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SprintDetailsPage(sprint: sprint),
+                                  ),
+                                );
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -763,7 +769,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         child: Row(
                           children: [
                             Text(
-                              "${Translations.get('proj_det_15', currentLang)}(${tasks.length})",
+                              "${Translations.get('proj_details_page15', currentLang)}(${tasks.length})",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -791,7 +797,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
                                 child: Text(
-                                  Translations.get('proj_det_11', currentLang), 
+                                  Translations.get('proj_details_page11', currentLang), 
                                   style: TextStyle(color: textColor),
                                 ),
                               ),
@@ -800,7 +806,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         ),
                       ),
                       if(!_isLoading() && widget.project['members'].isEmpty)
-                       _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('proj_det_16', currentLang)),                        
+                       _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('proj_details_page16', currentLang)),                        
                       if(!_isLoading() && tasks.isNotEmpty)...{
                         ListView.builder(
                           shrinkWrap: true,
@@ -919,7 +925,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                                                     border: Border.all(color: const Color(0xFF34D399)),
                                                   ),
                                                   child: Text(
-                                                    '${task['estimationPoints']} ${Translations.get('proj_det_17', currentLang)}',
+                                                    '${task['estimationPoints']} ${Translations.get('proj_details_page17', currentLang)}',
                                                     style: TextStyle(
                                                       color: const Color(0xFF34D399),
                                                       fontSize: 7,
@@ -993,7 +999,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_det_18', currentLang)}(${widget.project['members'].length})",
+                          "${Translations.get('proj_details_page18', currentLang)}(${widget.project['members'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -1002,7 +1008,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with Theme_Page
                         ),
                       ),
                       if(!_isLoading() && widget.project['members'].isEmpty)
-                       _buildEmptyState(icon: Icons.group, message: Translations.get('proj_det_19', currentLang)),                     
+                       _buildEmptyState(icon: Icons.group, message: Translations.get('proj_details_page19', currentLang)),                     
                       if(!_isLoading() && widget.project['members'].isNotEmpty)...{
                         ListView.builder(
                           shrinkWrap: true,
