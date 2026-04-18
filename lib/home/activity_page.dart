@@ -14,21 +14,23 @@ class ActivityPage extends StatefulWidget {
   State<ActivityPage> createState() => _ActivityPageState();
 }
 
-class _ActivityPageState extends State<ActivityPage> with Theme_Page{
+class _ActivityPageState extends State<ActivityPage> with ThemePage{
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
-  bool isLoadingActivities = true;
-  bool isLoadingProjects = true;
+  bool _isLoadingActivities = true;
+  bool _isLoadingProjects = true;
 
-  Map<String, dynamic> activityData = {};
-  Map<String, dynamic> projectsData = {};
+  final Map<String, dynamic> _activityData = {};
+  Map<String, dynamic> _projectsData = {};
 
   int? _selectedProject;
   int? _selectedSprint;
   String? _selectedMember;
 
-  int page = 0;
+  int _page = 0;
+
+  bool _hasNext = false;
 
 
   @override
@@ -41,13 +43,18 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     _selectedMember = "";
   }
 
+  String _formatDate(String isoDate) {
+    final dt = DateTime.parse(isoDate);
+    return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+  }
+
   bool _isLoading(){
-    return isLoadingActivities || isLoadingProjects;
+    return _isLoadingActivities || _isLoadingProjects;
   }
 
   Future<void> _loadProjects() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/projects');
     try {
@@ -65,8 +72,10 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
           'id':null,
           'name': Translations.get('activity_page3', currentLang),
         });
+        if (!mounted) return;
+
         setState((){
-          projectsData = {'projects': projectList};
+          _projectsData = {'projects': projectList};
         });
       }
     }
@@ -75,16 +84,17 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingProjects = false;
+        _isLoadingProjects = false;
       });
     }
   }
 
   Future<void> _loadActivities(int? projectId, int? sprintId, String? actorId) async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
+
     final params ={
-      'page': page.toString(),
+      'page': _page.toString(),
       'size': '20',
       if(projectId!=null) 'projectId': '$projectId',
       if(sprintId!=null) 'sprintId': '$sprintId',
@@ -99,24 +109,26 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                   'Content-Type': 'application/json',},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         final Map<String, dynamic> decodedData = jsonDecode(response.body);
         List activityList = decodedData['activities'] ?? [];
 
         setState((){
-          activityData['activities'] ??= [];
-          activityData['activities'].addAll(activityList);
-          page++;
+          _activityData['activities'] ??= [];
+          _activityData['activities'].addAll(activityList);
+          _hasNext = decodedData['hasNext'];
+          _page++;
         });
       }
-    } catch (e) {
-      setState(() {
-        debugPrint("Error: $e");
-      });
+    } 
+    catch (e) {
+      debugPrint("Error: $e");
     }
     finally{
       setState((){
-        isLoadingActivities = false;
+        _isLoadingActivities = false;
       });
     }
   }
@@ -151,12 +163,48 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
     }
   }
 
+  String _getText(Map<String, dynamic> activity) {
+    switch (activity['type']) {
+      case 'TASK_STATUS_CHANGED':
+        return "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}";
+      case 'TASK_ASSIGNED':
+        return "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['taskKey']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}";
+      case 'TASK_UNASSIGNED':
+        return "${activity['actorFullName']}${Translations.get('activity_page21', currentLang)}${activity['oldValue']}${Translations.get('activity_page17', currentLang)}${activity['taskKey']}";
+      case 'TASK_CREATED':
+        return "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}";
+      case 'TASK_ADDED_TO_SPRINT':
+        return "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}";
+      case 'TASK_REMOVED_FROM_SPRINT':
+        return "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}";
+      case 'TASK_UPDATED':
+        return "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}";
+      case 'TASK_ESTIMATION_CHANGED':
+        return "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}";
+      case 'PR_LINKED':
+        return "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}";
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
+    if(_isLoading()){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     Map<String, dynamic>? selectedProjectData;
 
-    for (var p in (projectsData['projects'] ?? [])) {
+    for (var p in (_projectsData['projects'] ?? [])) {
       if (p['id'] == _selectedProject) {
         selectedProjectData = p;
         break;
@@ -176,18 +224,7 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
         ...membersAux
     ];
 
-    if(_isLoading()){
-      return Scaffold(
-        backgroundColor: backgroundColor,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: const Color(0xFF2D5AF0),
-          )
-        ),
-      );
-    }
-
-    final activities = activityData['activities'] ?? [];
+    final activities = _activityData['activities'] ?? [];
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -239,9 +276,9 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                     child: Text(
                       Translations.get('activity_page2', currentLang),
                       style: TextStyle(
-                        color: subtitleColor, 
+                        color: textColor, 
                         fontWeight: FontWeight.bold,
-                        fontSize: 25,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -253,7 +290,13 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                         DropdownMenu<int?>(
                           initialSelection: _selectedProject,
                           width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor),
+                          textStyle: TextStyle(color: textColor, fontSize: 14),
+                          inputDecorationTheme: InputDecorationTheme(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                           menuStyle: MenuStyle(
                             backgroundColor: WidgetStateProperty.all(cardColor),
                             surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
@@ -268,13 +311,13 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                                 _selectedSprint = null;
                                 _selectedMember = "";
                               }
-                              activityData.clear();
-                              page=0;
-                              isLoadingActivities = true;
+                              _activityData.clear();
+                              _page=0;
+                              _isLoadingActivities = true;
                             });
                             _loadActivities(value, null, "");
                           },
-                          dropdownMenuEntries: (projectsData['projects'] as List? ?? []).map((proj) {
+                          dropdownMenuEntries: (_projectsData['projects'] as List? ?? []).map((proj) {
                             return DropdownMenuEntry<int?>(
                               value: proj['id'], 
                               label: proj['name'],
@@ -290,7 +333,13 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                           DropdownMenu<int?>(
                             initialSelection: _selectedSprint,
                             width: MediaQuery.of(context).size.width - 72,
-                            textStyle: TextStyle(color: textColor),
+                            textStyle: TextStyle(color: textColor, fontSize: 14),
+                            inputDecorationTheme: InputDecorationTheme(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                             menuStyle: MenuStyle(
                               backgroundColor: WidgetStateProperty.all(cardColor),
                               surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
@@ -301,9 +350,9 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                             onSelected: (int? value) async {
                               setState(() {
                                 _selectedSprint = value;
-                                activityData.clear();
-                                page=0;
-                                isLoadingActivities = true;
+                                _activityData.clear();
+                                _page=0;
+                                _isLoadingActivities = true;
                               });
                               _loadActivities(_selectedProject, value, _selectedMember);
                             },
@@ -322,7 +371,13 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                           DropdownMenu<String?>(
                             initialSelection: _selectedMember,
                             width: MediaQuery.of(context).size.width - 72,
-                            textStyle: TextStyle(color: textColor),
+                            textStyle: TextStyle(color: textColor, fontSize: 14),
+                            inputDecorationTheme: InputDecorationTheme(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                             menuStyle: MenuStyle(
                               backgroundColor: WidgetStateProperty.all(cardColor),
                               surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
@@ -333,9 +388,9 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                             onSelected: (String? value) async {
                               setState(() {
                                 _selectedMember = value;
-                                activityData.clear();
-                                page=0;
-                                isLoadingActivities = true;
+                                _activityData.clear();
+                                _page=0;
+                                _isLoadingActivities = true;
                               });
                               _loadActivities(_selectedProject, _selectedSprint, value);
                             },
@@ -428,152 +483,53 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                               Row(
                                 children: [
                                   SizedBox(width: 5),
-                                  if (activity['type'] == 'TASK_STATUS_CHANGED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
+                                  Expanded(
+                                    child: Text(
+                                      _getText(activity),
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 15
                                       ),
+                                      overflow: TextOverflow.visible,
                                     ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_ASSIGNED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['taskKey']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_UNASSIGNED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page21', currentLang)}${activity['oldValue']}${Translations.get('activity_page17', currentLang)}${activity['taskKey']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_CREATED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_ADDED_TO_SPRINT')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_REMOVED_FROM_SPRINT')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  } 
-                                  else if (activity['type'] == 'TASK_UPDATED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  }
-                                  else if (activity['type'] == 'TASK_ESTIMATION_CHANGED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  }
-                                  else if (activity['type'] == 'PR_LINKED')...{
-                                    Expanded(
-                                      child: Text(
-                                        "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 12
-                                        ),
-                                        softWrap: true,
-                                        overflow: TextOverflow.visible,
-                                      ),
-                                    ),
-                                  }
+                                  ),
                                 ],
                               ),
+                              const SizedBox(height: 2,),
                               Row(
                                 children: [
                                   SizedBox(width: 5),
                                   Text(
-                                    activity['taskKey'],
+                                    activity?['taskKey'] ?? '',
                                     style: TextStyle(
                                       color: const Color(0xFF2D5AF0), 
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 10,
+                                      fontSize: 13,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   SizedBox(width: 5),
                                   Text(
-                                    activity['projectName'],
+                                    activity?['projectName'] ?? '',
                                     style: TextStyle(
                                       color: textColor, 
-                                      fontSize: 10,
+                                      fontSize: 13,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    activity['createdAt'],
-                                    style: TextStyle(
-                                      color: subtitleColor, 
-                                      fontSize: 10,
-                                    ),
-                                  ),
+                                  if(activity?['createdAt'] != null)...{
+                                    SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        _formatDate(activity?['createdAt']),
+                                        style: TextStyle(
+                                          color: subtitleColor, 
+                                          fontSize: 13,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                  }
                                 ],                              
                               )
                             ],
@@ -585,25 +541,29 @@ class _ActivityPageState extends State<ActivityPage> with Theme_Page{
                 }
               ),
             },
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed:(){
-                  _loadActivities(_selectedProject, _selectedSprint, _selectedMember);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  Translations.get('activity_page7', currentLang),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            if(_hasNext)
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed:(){
+                    _loadActivities(_selectedProject, _selectedSprint, _selectedMember);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5AF0),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    Translations.get('activity_page7', currentLang),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
                 ),
               ),
-            ),
           ]
         )
       )

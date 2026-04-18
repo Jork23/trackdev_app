@@ -17,11 +17,11 @@ class ProjectsPage extends StatefulWidget {
   State<ProjectsPage> createState() => _ProjectsPageState();
 }
 
-class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
+class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
 
-  final storage = FlutterSecureStorage();
-  Map<String, dynamic> projectsData = {};
-  bool isLoading = true;
+  static const _storage = FlutterSecureStorage();
+  Map<String, dynamic> _projectsData = {};
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
 
   Future<void> _loadProjects() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/projects');
     try {
@@ -40,9 +40,11 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          projectsData = jsonDecode(response.body);
+          _projectsData = jsonDecode(response.body);
         });
       }
     }
@@ -51,14 +53,14 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -69,9 +71,9 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
       );
     }
 
-    final projects = projectsData['projects'] ?? [];
+    final projects = _projectsData['projects'] ?? [];
 
-    if(!isLoading && projects.isEmpty){  
+    if(projects.isEmpty){  
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Container(
@@ -133,7 +135,6 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
                 ),
-                textAlign: TextAlign.center,
               ),
               Text(
                 Translations.get('projects_page2', currentLang),
@@ -141,8 +142,6 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
                   fontSize: 13, 
                   color: subtitleColor
                 ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
               ),
               Divider(color: dividerColor, thickness: 1),
             ],
@@ -178,7 +177,6 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Padding(
@@ -218,14 +216,18 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color:Color.fromARGB(255,0,166,62)),
                                   ),
-                                  child: const Icon(Icons.folder_open_outlined, color: Color.fromARGB(255,0,166,62), size: 24),
+                                  child: const Icon(
+                                    Icons.folder_open_outlined,
+                                    color: Color.fromARGB(255,0,166,62),
+                                    size: 24
+                                  ),
                                 ),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        project['name'],
+                                        project?['name'] ?? '',
                                         style: TextStyle(
                                           color: textColor,
                                           fontWeight: FontWeight.bold,
@@ -233,32 +235,42 @@ class _ProjectsPageState extends State<ProjectsPage> with Theme_Page{
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.calendar_today_outlined, color: iconColor, size: 12),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                          "${project['course']['startYear']} - ${project['course']['startYear'] + 1}",
-                                            style: TextStyle(
-                                              color: subtitleColor,
-                                              fontSize: 13,
+                                      if(project?['course']?['startYear'] != null)
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today_outlined,
+                                              color: iconColor,
+                                              size: 12
                                             ),
-                                          ),
-                                        ]
-                                      ),
-                                      Row(
-                                        children: [                                  
-                                          Icon(Icons.menu_book, color: iconColor, size: 12),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                          "${project['course']['subject']['name']}",
-                                            style: TextStyle(
-                                              color: subtitleColor,
-                                              fontSize: 13,
+                                            const SizedBox(width: 4),
+                                            Text(
+                                            "${project?['course']?['startYear']} - ${project?['course']?['startYear'] + 1}",
+                                              style: TextStyle(
+                                                color: subtitleColor,
+                                                fontSize: 13,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      )
+                                          ]
+                                        ),
+                                        Row(
+                                          children: [                                  
+                                            Icon(
+                                              Icons.menu_book,
+                                              color: iconColor,
+                                              size: 12
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              project?['course']?['subject']?['name'] ?? '',
+                                              style: TextStyle(
+                                                color: subtitleColor,
+                                                fontSize: 13,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        )
                                     ],
                                   )
                                 )

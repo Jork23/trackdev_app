@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-mixin Theme_Page<T extends StatefulWidget> on State<T> {
+bool globalIsDarkMode = false;
+
+mixin ThemePage<T extends StatefulWidget> on State<T> {
   final storage = const FlutterSecureStorage();
   
-  bool isDarkMode = false;
+  bool isDarkMode = globalIsDarkMode;
   String currentLang = 'ca';
 
   @override

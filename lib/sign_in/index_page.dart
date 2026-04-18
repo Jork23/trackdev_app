@@ -10,9 +10,9 @@ class IndexPage extends StatefulWidget {
   State<IndexPage> createState() => _IndexPageState();
 }
 
-class _IndexPageState extends State<IndexPage> with Theme_Page {
+class _IndexPageState extends State<IndexPage> with ThemePage {
 
-    Widget _buildFeatureCard(IconData icon, String title, String description, Color bgColor) {
+  Widget _buildFeatureCard(IconData icon, String title, String description, Color bgColor) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 20),
@@ -58,6 +58,7 @@ class _IndexPageState extends State<IndexPage> with Theme_Page {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -81,21 +82,27 @@ class _IndexPageState extends State<IndexPage> with Theme_Page {
           ],
         ),
         actions: [
-          ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignInPage()),
-                );
-              },
-              label: Text(Translations.get('index_page1', currentLang)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SignInPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D5AF0),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            child: Text(
+              Translations.get('index_page1', currentLang),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold
               ),
             ),
+          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -134,24 +141,31 @@ class _IndexPageState extends State<IndexPage> with Theme_Page {
               ),
             ),
             const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignInPage()),
-                );
-              },
-              icon: Text(Translations.get('index_page1', currentLang)),
-              label: const Icon(Icons.arrow_forward, size: 18),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignInPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2D5AF0),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  Translations.get('index_page1', currentLang),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 50),
-            
+            const SizedBox(height: 50),           
             _buildFeatureCard(
               Icons.layers_outlined,
               Translations.get('index_page5', currentLang),
@@ -176,5 +190,4 @@ class _IndexPageState extends State<IndexPage> with Theme_Page {
       ),
     );
   }
-
 }

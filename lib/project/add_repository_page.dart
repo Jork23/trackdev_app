@@ -15,18 +15,32 @@ class AddRepositoryPage extends StatefulWidget {
   State<AddRepositoryPage> createState() => _AddRepositoryPageState();
 }
 
-class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
+class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
   final TextEditingController _tokenController = TextEditingController();
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
+
   String _message = '';
   bool _isSuccess = false;
 
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _urlController.dispose();
+    _tokenController.dispose();
+    super.dispose();
+  }
+
   Future<void> _addRepository() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
+
+    if (!mounted) return;
 
     if (_nameController.text.isEmpty || _urlController.text.isEmpty || _tokenController.text.isEmpty) {
       setState(() {
@@ -49,6 +63,8 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
         }),
       );
 
+      if (!mounted) return;
+
       setState((){
         if(response.statusCode == 200 || response.statusCode == 204){
           _message = Translations.get('add_repository_page2', currentLang);
@@ -60,14 +76,32 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
       });
     } 
     catch (e){
+      if (!mounted) return;
       setState((){
         _message = '${Translations.get('add_repository_page4', currentLang)}: $e';
+      });
+    }
+    finally{
+      setState((){
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    
+    if(_isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -77,16 +111,40 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
         toolbarHeight: 50,
         title: Row(
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: iconColor, size: 20),
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                  Text(
+                    Translations.get('add_repository_page5', currentLang),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ]
+              ),
             ),
+            const SizedBox(width: 15),
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
+            ),
+            const SizedBox(width: 8),
             Text(
-              Translations.get('add_repository_page5', currentLang),
+              'TrackDev',
               style: TextStyle(
-                color: textColor,
+                color: textColor, 
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 20,
               ),
             ),
           ],
@@ -272,31 +330,68 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with Theme_Page {
                   ),
                 ),
               ),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      side: BorderSide(color: borderColor),
+            if(!_isSuccess)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        side: BorderSide(color: borderColor),
+                      ),
+                      child: Text(
+                        Translations.get('add_repository_page13', currentLang),
+                        style: TextStyle(color: textColor)
+                      ),
                     ),
-                    child: Text(Translations.get('add_repository_page13', currentLang), style: TextStyle(color: textColor)),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    height: 50,
+                    child: Expanded(
+                      child: ElevatedButton(
+                        onPressed: (){
+                          setState((){
+                            _isLoading = false;
+                          });
+                          _addRepository();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2D5AF0),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          Translations.get('add_repository_page14', currentLang),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    side: BorderSide(color: borderColor),
+                  ),
+                  child: Text(
+                    Translations.get('add_repository_page5', currentLang),
+                    style: TextStyle(color: textColor)
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _addRepository,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2D5AF0),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    child: Text(Translations.get('add_repository_page14', currentLang), style: const TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ],
-            )
+              )
           ],
         ),
       ),

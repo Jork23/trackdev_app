@@ -12,12 +12,18 @@ class ResetPasswordPage extends StatefulWidget {
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
+class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
   final TextEditingController _emailController = TextEditingController();
 
   String _errorMessage = '';
   bool _isLoading = false;
   bool _isSuccess = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   Future<void> _sendEmail() async {
 
@@ -27,11 +33,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
     });
 
     if (_emailController.text.isEmpty) {
-      setState(() => _errorMessage = Translations.get('resetpassword_page6', currentLang));
+      setState(() {
+        _errorMessage = Translations.get('resetpassword_page6', currentLang);
+      });
       return;
     }
-
-    setState(() => _isLoading = true);
 
     try {
       final url = Uri.parse('https://trackdev.org/api/auth/forgot-password');
@@ -42,21 +48,44 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
         body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        setState(() => _isSuccess = true);
-      } else {
-        setState(() => _errorMessage = Translations.get('resetpassword_page7', currentLang));
-      }
-    } catch (e) {
-      setState(() => _errorMessage = Translations.get('resetpassword_page8', currentLang));
+      if (!mounted) return;
+
+      setState(() {
+        if (response.statusCode == 200 || response.statusCode == 204) {
+          _isSuccess = true;
+        } 
+        else {
+          _errorMessage = Translations.get('resetpassword_page7', currentLang);
+        }
+        });
+    } 
+    catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = Translations.get('resetpassword_page8', currentLang);
+      });
       debugPrint("Error: $e");
-    } finally {
-      setState(() => _isLoading = false);
+    } 
+    finally {
+      setState((){
+         _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if(_isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SingleChildScrollView(
@@ -178,23 +207,22 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with Theme_Page {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _sendEmail,
+                onPressed: (){
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  _sendEmail();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
                 ),
-                child: _isLoading 
-                  ? const SizedBox(
-                      height: 20, 
-                      width: 20, 
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                    )
-                  : Text(
-                      Translations.get('resetpassword_page5', currentLang),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                child: Text(
+                  Translations.get('resetpassword_page5', currentLang),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 15),

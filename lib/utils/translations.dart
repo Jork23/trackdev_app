@@ -113,6 +113,7 @@ class Translations {
       'courses_page2' : 'Visualitza els teus cursos matriculats i projectes',
       'courses_page3' : 'Els meus Projectes',
       'courses_page4' : 'No formes part de cap curs',
+      'courses_page5' : 'Cap projecte assignat',
 
       'projects_page1' : 'Projectes',
       'projects_page2' : 'Veure els teus projectes i fer seguiment del progrés',
@@ -139,7 +140,7 @@ class Translations {
       'activity_page18' : ' punts',
       'activity_page19' : ' a l\'sprint ',
       'activity_page20' : ' de l\'sprint ',
-      'activity_page21' : ' va designar',
+      'activity_page21' : ' va designar ',
 
       'add_repository_page1' : 'Siusplau, omple tots els camps',
       'add_repository_page2' : 'Repositori desat correctament',
@@ -272,6 +273,10 @@ class Translations {
       'proj_details_page27': 'Repositoris de GitHub',
       'proj_details_page28': 'Informes',
       'proj_details_page29': 'Afegir repositori',
+      'proj_details_page30': 'files',
+      'proj_details_page31': 'columnes',
+      'proj_details_page32' : 'Estudiants',
+      'proj_details_page33' : 'Sprints',
 
       'task_details_page1': 'Detalls de la Tasca',
       'task_details_page2': 'Assignat',
@@ -394,9 +399,9 @@ class Translations {
       'sprint_details_page20': 'Una subtasca en un sprint futur no es pot moure.',
       'sprint_details_page21': 'Una tasca en un sprint futur només pot tornar al Backlog.',
       'sprint_details_page22': 'Torna',
-      'sprint_details_page23': '    Afegir tasca    ',
+      'sprint_details_page23': ' Afegir tasca ',
       'sprint_details_page24': 'Backlog',
-      'sprint_details_page25': '    Afegir Subtasca   ',
+      'sprint_details_page25': ' Afegir Subtasca ',
       'sprint_details_page26': 'Tasques sense història d\'usuari',
     },
     'es': {
@@ -512,6 +517,7 @@ class Translations {
       'courses_page2' : 'Visualiza tus cursos matriculados y proyectos',
       'courses_page3' : 'Mis Proyectos',
       'courses_page4' : 'No formas parte de ningún curso',
+      'courses_page5' : 'Ningún proyecto asignado',
 
       'projects_page1' : 'Proyectos',
       'projects_page2' : 'Ver tus proyectos y realizar seguimiento del progreso',
@@ -538,7 +544,7 @@ class Translations {
       'activity_page18' : ' puntos',
       'activity_page19' : ' al sprint ',
       'activity_page20' : ' del sprint ',
-      'activity_page21' : ' designó',
+      'activity_page21' : ' designó ',
 
       'add_repository_page1' : 'Por favor, rellena todos los campos',
       'add_repository_page2' : 'Repositorio guardado correctamente',
@@ -671,7 +677,11 @@ class Translations {
       'proj_details_page27': 'Repositorios de GitHub',
       'proj_details_page28': 'Informes',
       'proj_details_page29': 'Añadir repositorio',
-
+      'proj_details_page30': 'filas',
+      'proj_details_page31': 'columnas',
+      'proj_details_page32' : 'Estudiantes',
+      'proj_details_page33' : 'Sprints',
+      
       'task_details_page1': 'Detalles de la Tarea',
       'task_details_page2': 'Asignado',
       'task_details_page3': 'Sin asignar',
@@ -793,9 +803,9 @@ class Translations {
       'sprint_details_page20': 'Una subtarea en un sprint futuro no se puede mover.',
       'sprint_details_page21': 'Una tarea en un sprint futuro solo puede volver al Backlog.',
       'sprint_details_page22': 'Volver',
-      'sprint_details_page23': '    Añadir tarea    ',
+      'sprint_details_page23': ' Añadir tarea ',
       'sprint_details_page24': 'Backlog',
-      'sprint_details_page25': '    Añadir Subtarea   ',
+      'sprint_details_page25': ' Añadir Subtarea ',
       'sprint_details_page26': 'Tareas sin historia de usuario',
     },
     'en': {
@@ -911,6 +921,7 @@ class Translations {
       'courses_page2' : 'View your enrolled courses and projects',
       'courses_page3' : 'My Projects',
       'courses_page4' : 'No formas parte de ningún course',
+      'courses_page5' : 'No project assigned',
 
       'projects_page1' : 'Projects',
       'projects_page2' : 'View your projects and track progress',
@@ -937,7 +948,7 @@ class Translations {
       'activity_page18' : ' points',
       'activity_page19' : ' to sprint ',
       'activity_page20' : ' from sprint ',
-      'activity_page21' : ' designed',
+      'activity_page21' : ' designed ',
 
       'add_repository_page1' : 'Please fill in all fields',
       'add_repository_page2' : 'Repository saved successfully',
@@ -1070,6 +1081,10 @@ class Translations {
       'proj_details_page27': 'GitHub Repositories',
       'proj_details_page28': 'Reports',
       'proj_details_page29': 'Add repository',
+      'proj_details_page30': 'rows',
+      'proj_details_page31': 'columns',
+      'proj_details_page32': 'Students',
+      'proj_details_page33' : 'Sprints',
 
       'task_details_page1': 'Task Details',
       'task_details_page2': 'Assigned',
@@ -1192,9 +1207,9 @@ class Translations {
       'sprint_details_page20': 'A subtask in a future sprint cannot be moved.',
       'sprint_details_page21': 'A task in a future sprint can only return to the Backlog.',
       'sprint_details_page22': 'Back',
-      'sprint_details_page23': '    Add task    ',
+      'sprint_details_page23': ' Add task ',
       'sprint_details_page24': 'Backlog',
-      'sprint_details_page25': '    Add Subtask   ',
+      'sprint_details_page25': ' Add Subtask ',
       'sprint_details_page26': 'Tasks without user story',
     }
   };

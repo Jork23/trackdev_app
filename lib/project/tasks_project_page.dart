@@ -17,14 +17,14 @@ class TaskProjectPage extends StatefulWidget {
   State<TaskProjectPage> createState() => _TaskProjectPageState();
 }
 
-class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
+class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
   final TextEditingController _searchController = TextEditingController();
 
-  bool isLoading = true;
+  bool _isLoading = true;
 
-  Map<String, dynamic> taskData = {};
+  Map<String, dynamic> _taskData = {};
 
   String? _selectedType = "";
   String? _selectedStatus = "";
@@ -33,12 +33,11 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
   String? _selectedSortOrder = "desc";
   String _selectedSearch = "";
 
-  int page = 0;
-  int size = 10;
+  int _page = 0;
+  int _size = 10;
 
-  int totalElements = 0;
-  int totalPages = 0;
-  int currentPage = 0;
+  int _totalElements = 0;
+  int _totalPages = 0;
 
   @override
   void initState() {
@@ -61,8 +60,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
       _selectedSortOrder = "desc";
       _selectedSearch = "";
       _searchController.clear();
-      page = 0;
-      isLoading = true;
+      _page = 0;
+      _isLoading = true;
     });
     _loadTask(widget.project['id'], null, "", "", "", "desc", "");
   }
@@ -133,11 +132,11 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
 
   Future<void> _loadTask(int? projectId, int? sprintId, String? assigneeId, String? status, String? type, String? sortOrder, String? search) async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final params ={
-      'page': page.toString(),
-      'size': size.toString(),
+      'page': _page.toString(),
+      'size': _size.toString(),
       'projectId': '$projectId',
       if(sprintId!=null) 'sprintId': '$sprintId',
       if(assigneeId !=null && assigneeId.isNotEmpty) 'assigneeId': assigneeId,
@@ -155,22 +154,22 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                   'Content-Type': 'application/json',},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {     
         setState((){
-          taskData = jsonDecode(response.body);
-          totalElements = taskData['totalElements'] ?? 0;
-          totalPages = taskData['totalPages'] ?? 0;
-          currentPage = taskData['currentPage'] ?? 0;
+          _taskData = jsonDecode(response.body);
+          _totalElements = _taskData['totalElements'] ?? 0;
+          _totalPages = _taskData['totalPages'] ?? 0;
         });
       }
-    } catch (e) {
-      setState(() {
-        debugPrint("Error: $e");
-      });
+    } 
+    catch (e) {
+      debugPrint("Error: $e");
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -215,7 +214,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
 
     final List<int> pageSizeOptions = [5, 10, 20, 50];
 
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -226,7 +225,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
       );
     }
 
-    final tasks = taskData['tasks'] ?? [];
+    final tasks = _taskData['tasks'] ?? [];
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -237,16 +236,40 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
         toolbarHeight: 50,
         title: Row(
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: iconColor, size: 20),
+           ElevatedButton(
               onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                  Text(
+                    Translations.get('sprint_details_page22', currentLang),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ]
+              ),
             ),
+            const SizedBox(width: 15),
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
+            ),
+            const SizedBox(width: 8),
             Text(
-              Translations.get('task_proj_page14', currentLang),
+              'TrackDev',
               style: TextStyle(
-                color: textColor,
+                color: textColor, 
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 20,
               ),
             ),
           ],
@@ -268,24 +291,6 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                     fontSize: 25,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  ' • ',
-                  style: TextStyle(
-                    color: subtitleColor,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.project['name'],
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 25,
-                  ),
-                ),
                 const Spacer(),
                 ElevatedButton(
                   onPressed: () async{
@@ -296,7 +301,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                       ),
                     );
                     setState((){
-                      isLoading = true; 
+                      _isLoading = true; 
                     });
                     _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                   },
@@ -399,8 +404,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onSelected: (String? value) async {
                             setState(() {
                               _selectedType = value;
-                              page = 0;
-                              isLoading = true;
+                              _page = 0;
+                              _isLoading = true;
                             });
                             _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -436,8 +441,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onSelected: (String? value) async {
                             setState(() {
                               _selectedStatus = value;
-                              page = 0;
-                              isLoading = true;
+                              _page = 0;
+                              _isLoading = true;
                             });
                             _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -473,8 +478,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onSelected: (int? value) async {
                             setState(() {
                               _selectedSprintId = value;
-                              page = 0;
-                              isLoading = true;
+                              _page = 0;
+                              _isLoading = true;
                             });
                             _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -510,8 +515,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onSelected: (String? value) async {
                             setState(() {
                               _selectedAssignenId = value;
-                              page = 0;
-                              isLoading = true;
+                              _page = 0;
+                              _isLoading = true;
                             });
                               _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -547,8 +552,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onSelected: (String? value) async {
                             setState(() {
                               _selectedSortOrder = value;
-                              page = 0;
-                              isLoading = true;
+                              _page = 0;
+                              _isLoading = true;
                             });
                             _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -589,7 +594,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           onChanged: (value) {
                             setState(() {
                               _selectedSearch = value;
-                              page = 0;
+                              _page = 0;
                             });
                             _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -600,7 +605,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                 ]
               )
             ),
-            if(!isLoading && tasks.isEmpty)
+            if(!_isLoading && tasks.isEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(48.0),
@@ -648,7 +653,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                   ],
                 ),
               ),
-            if(!isLoading && tasks.isNotEmpty)...{
+            if(!_isLoading && tasks.isNotEmpty)...{
               Divider(color: dividerColor, thickness: 1),
               ListView.builder(
                 shrinkWrap: true,
@@ -666,7 +671,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                         ),
                       );
                       setState((){
-                        isLoading = true; 
+                        _isLoading = true; 
                       });
                       _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                     },
@@ -696,7 +701,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                 Row(
                                   children: [
                                     Text(
-                                      task['taskKey'],
+                                      task?['taskKey'] ?? '',
                                       style: TextStyle(
                                         color: subtitleColor,
                                         fontWeight: FontWeight.bold,
@@ -706,7 +711,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                     const SizedBox(width: 5),
                                     Expanded(
                                       child: Text(
-                                        task['name'],
+                                        task?['name'] ?? '',
                                         style: TextStyle(
                                           color: textColor,
                                           fontWeight: FontWeight.bold,
@@ -719,23 +724,24 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                 ),
                                 Row(
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: _getTaskBackgroundColor(task['type']),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: _getTaskColor(task['type']), width: 1),
-                                      ),
-                                      child: Text(
-                                        _translateType(task['type']),
-                                        style: TextStyle(
-                                          color: _getTaskColor(task['type']),
-                                          fontSize: 7,
-                                          fontWeight: FontWeight.bold,
+                                    if(task?['type'] != null)...{
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getTaskBackgroundColor(task?['type']),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: _getTaskColor(task?['type']), width: 1),
+                                        ),
+                                        child: Text(
+                                          _translateType(task?['type']),
+                                          style: TextStyle(
+                                            color: _getTaskColor(task?['type']),
+                                            fontSize: 7,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
+                                      Text(
                                         ' • ',
                                         style: TextStyle(
                                           color: subtitleColor,
@@ -743,14 +749,16 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    Text(
-                                      _translateStatus(task['status']),
-                                      style: TextStyle(
-                                        color: subtitleColor,
-                                        fontSize: 10,
+                                    },
+                                    if(task?['status'] != null)
+                                      Text(
+                                        _translateStatus(task?['status']),
+                                        style: TextStyle(
+                                          color: subtitleColor,
+                                          fontSize: 10,
+                                        ),
                                       ),
-                                    ),
-                                    if(task['estimationPoints']!=null && task['estimationPoints']!=0)...{
+                                    if(task?['estimationPoints']!=null && task?['estimationPoints']!=0)...{
                                         Text(
                                         ' • ',
                                         style: TextStyle(
@@ -767,7 +775,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                           border: Border.all(color: const Color(0xFF34D399)),
                                         ),
                                         child: Text(
-                                          '${task['estimationPoints']} ${Translations.get('task_proj_page22', currentLang)}',
+                                          '${task?['estimationPoints']} ${Translations.get('task_proj_page22', currentLang)}',
                                           style: TextStyle(
                                             color: const Color(0xFF34D399),
                                             fontSize: 7,
@@ -776,7 +784,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                         ),
                                       ),
                                     },
-                                    if(task['assignee']!=null)...{
+                                    if(task?['assignee']!=null)...{
                                       Text(
                                         ' • ',
                                         style: TextStyle(
@@ -787,9 +795,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                       ),
                                       CircleAvatar(
                                         radius: 10,
-                                        backgroundColor: hexToColor(task['assignee']['color']),
+                                        backgroundColor: hexToColor(task?['assignee']?['color']),
                                         child: Text(
-                                          "${task['assignee']['capitalLetters']}",
+                                          "${task?['assignee']?['capitalLetters']}",
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 10,
@@ -797,10 +805,12 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                                         ),
                                       ),
                                       const SizedBox(width: 2),
-                                      Flexible(
+                                      Expanded(
                                         child: Text(
-                                          "${task['assignee']['fullName']}",
-                                          style: TextStyle(color: textColor, fontSize: 10),
+                                          task?['assignee']?['fullName'] ?? '',
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontSize: 10),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -828,7 +838,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                 child: Column(
                   children: [
                     Text(
-                      '${Translations.get('task_proj_page23', currentLang)} ${page * size + 1} - ${(page * size + tasks.length)} ${Translations.get('task_proj_page24', currentLang)} $totalElements ${Translations.get('task_proj_page25', currentLang)}',
+                      '${Translations.get('task_proj_page23', currentLang)} ${_page * _size + 1} - ${(_page * _size + tasks.length)} ${Translations.get('task_proj_page24', currentLang)} $_totalElements ${Translations.get('task_proj_page25', currentLang)}',
                       style: TextStyle(
                         color: textColor,
                         fontSize: 16,
@@ -840,11 +850,11 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: page > 0
+                          onPressed: _page > 0
                           ? () {
                               setState(() {
-                                page--;
-                                isLoading = true;
+                                _page--;
+                                _isLoading = true;
                               });
                               _loadTask(
                                 widget.project['id'], 
@@ -863,11 +873,12 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                             style: TextStyle(fontSize: 16),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: page > 0 ? const Color(0xFF2D5AF0) : backgroundColor,
-                            foregroundColor: page > 0 ? Colors.white : subtitleColor,
+                            backgroundColor: _page > 0 ? const Color(0xFF2D5AF0) : backgroundColor,
+                            foregroundColor: _page > 0 ? Colors.white : subtitleColor,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             disabledBackgroundColor: backgroundColor,
                             disabledForegroundColor: subtitleColor,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                         ),
                         Container(
@@ -878,7 +889,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                             border: Border.all(color: borderColor),
                           ),
                           child: Text(
-                            '${page + 1} / $totalPages',
+                            '${_page + 1} / $_totalPages',
                             style: TextStyle(
                               color: textColor,
                               fontSize: 18,
@@ -887,11 +898,11 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                           ),
                         ),
                         ElevatedButton.icon(
-                          onPressed: page < (totalPages - 1) 
+                          onPressed: _page < (_totalPages - 1) 
                           ? () {
                               setState(() {
-                                page++;
-                                isLoading = true;
+                                _page++;
+                                _isLoading = true;
                               });
                               _loadTask(
                                 widget.project['id'], 
@@ -910,11 +921,12 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                             style: TextStyle(fontSize: 16),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: page < totalPages - 1 ? const Color(0xFF2D5AF0) : backgroundColor,
-                            foregroundColor: page < totalPages - 1 ? Colors.white : subtitleColor,
+                            backgroundColor: _page < _totalPages - 1 ? const Color(0xFF2D5AF0) : backgroundColor,
+                            foregroundColor: _page < _totalPages - 1 ? Colors.white : subtitleColor,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             disabledBackgroundColor: backgroundColor,
                             disabledForegroundColor: subtitleColor,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                         ),
                       ],
@@ -939,7 +951,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                             border: Border.all(color: borderColor),
                           ),
                           child: DropdownButton<int>(
-                            value: size,
+                            value: _size,
                             dropdownColor: cardColor,
                             style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
                             underline: Container(),
@@ -952,9 +964,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with Theme_Page{
                             onChanged: (int? newSize) {
                               if (newSize != null) {
                                 setState(() {
-                                  size = newSize;
-                                  page = 0;
-                                  isLoading = true;
+                                  _size = newSize;
+                                  _page = 0;
+                                  _isLoading = true;
                                 });
                                 _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                               }

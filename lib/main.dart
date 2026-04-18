@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'sign_in/index_page.dart';
 import 'home/home_page.dart';
 import 'sign_in/new_password_page.dart';
+import 'utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +13,8 @@ void main() async {
   const storage = FlutterSecureStorage();
   
   String? token = await storage.read(key: 'auth_token');
+  String? mode = await storage.read(key: 'app_mode');
+  globalIsDarkMode = (mode == 'dark');
   bool isTokenValid = false;
 
   if (token != null) {
@@ -26,29 +29,39 @@ void main() async {
         },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if(response.statusCode == 200 || response.statusCode == 204){
         isTokenValid = true;
-      } else {
+      } 
+      else{
         await storage.delete(key: 'auth_token');
       }
-    } catch (e) {
+    } 
+    catch (e){
       isTokenValid = false;
       debugPrint("Error: $e");
     }
   }
   
-  runApp(MyApp(isTokenValid: isTokenValid));
+  runApp(MyApp(isTokenValid: isTokenValid, isDarkMode: mode == 'dark'));
 }
 
 class MyApp extends StatelessWidget {
   final bool isTokenValid;
+  final bool isDarkMode;
 
-  const MyApp({super.key, required this.isTokenValid});
+  const MyApp({super.key, required this.isTokenValid, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+      ),
+      darkTheme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFF1A2B49),
+      ),
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       routerConfig: _router(isTokenValid),
     );
   }

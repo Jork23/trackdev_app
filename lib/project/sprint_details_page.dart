@@ -17,21 +17,21 @@ class SprintDetailsPage extends StatefulWidget {
   State<SprintDetailsPage> createState() => _SprintDetailsPageState();
 }
 
-class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
+class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
 
-  final storage = const FlutterSecureStorage();
+  static  const _storage = FlutterSecureStorage();
 
-  bool isLoadingSprint = true;
-  bool isLoadingProject = true;
-  bool isLoadingTasks = true;
-  bool isLoadingSprintsProject = true;
-  bool isLoadingUser = true;
+  bool _isLoadingSprint = true;
+  bool _isLoadingProject = true;
+  bool _isLoadingTasks = true;
+  bool _isLoadingSprintsProject = true;
+  bool _isLoadingUser = true;
 
-  Map<String, dynamic>? sprintData;
-  Map<String, dynamic>? projectData;
-  Map<String, dynamic>? allTaskData;
-  Map<String, dynamic>? sprintsProjectData;
-  Map<String, dynamic>? userData;
+  Map<String, dynamic>? _sprintData;
+  Map<String, dynamic>? _projectData;
+  Map<String, dynamic>? _allTaskData;
+  Map<String, dynamic>? _sprintsProjectData;
+  Map<String, dynamic>? _userData;
 
   @override
   void initState(){
@@ -48,12 +48,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
   }
 
   bool _isLoading(){
-    return isLoadingSprint || isLoadingProject || isLoadingTasks;
+    return _isLoadingSprint || _isLoadingProject || _isLoadingTasks || _isLoadingSprintsProject || _isLoadingUser;
   }
 
   Future<void> _loadProjectData() async{
-    String? token = await storage.read(key: 'auth_token');
-    final projectId = sprintData?['project']['id'].toString();
+    String? token = await _storage.read(key: 'auth_token');
+    final projectId = _sprintData?['project']['id'].toString();
 
     final url = Uri.parse('https://trackdev.org/api/projects/$projectId');
     try {
@@ -62,9 +62,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          projectData = jsonDecode(response.body); 
+          _projectData = jsonDecode(response.body); 
         });
       }
     }
@@ -73,14 +75,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingProject = false;
+        _isLoadingProject = false;
       });
     }
   }
 
   Future<void> _loadSprintsProjectData() async{
-    String? token = await storage.read(key: 'auth_token');
-    final projectId = sprintData?['project']['id'].toString();
+    String? token = await _storage.read(key: 'auth_token');
+    final projectId = _sprintData?['project']['id'].toString();
 
     final url = Uri.parse('https://trackdev.org/api/projects/$projectId/sprints');
     try {
@@ -89,9 +91,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          sprintsProjectData = jsonDecode(response.body); 
+          _sprintsProjectData = jsonDecode(response.body); 
         });
       }
     }
@@ -100,14 +104,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingSprintsProject = false;
+        _isLoadingSprintsProject = false;
       });
     }
   }
 
   Future<void> _loadTasksData() async{
-    String? token = await storage.read(key: 'auth_token');
-    final projectId = sprintData?['project']['id'].toString();
+    String? token = await _storage.read(key: 'auth_token');
+    final projectId = _sprintData?['project']['id'].toString();
 
     final url = Uri.parse('https://trackdev.org/api/projects/$projectId/tasks');
     try {
@@ -116,9 +120,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          allTaskData = jsonDecode(response.body); 
+          _allTaskData = jsonDecode(response.body); 
         });
       }
     }
@@ -127,14 +133,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingTasks = false;
+        _isLoadingTasks = false;
       });
     }
   }
 
   Future<void> _loadUserData() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/auth/self');
     try {
@@ -143,9 +149,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          userData = jsonDecode(response.body); 
+          _userData = jsonDecode(response.body); 
         });
       }
     }
@@ -154,14 +162,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingUser = false;
+        _isLoadingUser = false;
       });
     }
   }
 
   Future<void> _loadSprintData() async{
     
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     final url = Uri.parse('https://trackdev.org/api/sprints/${widget.sprint['id']}/board');
     try {
       final response = await http.get(
@@ -169,9 +177,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          sprintData = jsonDecode(response.body); 
+          _sprintData = jsonDecode(response.body); 
         });
       }
     }
@@ -180,7 +190,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingSprint = false;
+        _isLoadingSprint = false;
       });
     }
   }
@@ -288,7 +298,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
 
   String? _canEditStatusReason(String newStatus, Map<String,dynamic> task) {
 
-    if(userData!['id'] != task['assignee']?['id']){
+    if(_userData!['id'] != task['assignee']?['id']){
       return Translations.get('sprint_details_page8', currentLang);
     }
 
@@ -351,14 +361,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
 
   String? _canEditSprintReason(Map<String,dynamic> task, int? newSprintId) {
 
-    if(userData!['id'] != task['assignee']?['id']){
+    if(_userData!['id'] != task['assignee']?['id']){
       return Translations.get('sprint_details_page8', currentLang);
     }
 
     final bool goingToBacklog = newSprintId == -1;
     final currentSprints = task['activeSprints'] as List;
     final bool currentlyInBacklog = currentSprints.isEmpty;
-    final projectSprints = sprintsProjectData?['sprints'] as List;
+    final projectSprints = _sprintsProjectData?['sprints'] as List;
 
     bool targetIsFuture = false;
     bool currentIsActive = false;
@@ -424,7 +434,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
   }
 
   Future<void> _updateSprint(int? sprintId, Map<String, dynamic> task) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/tasks/${task['id']}');
 
@@ -457,7 +467,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
   }
 
   Future<void> _updateStatus(String? newStatus, Map<String, dynamic> task) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${task['id']}');
     try {
@@ -501,6 +511,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     );
   }
 
+  String _formatDate(String isoDate) {
+    final dt = DateTime.parse(isoDate);
+    return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+  }
+
   @override
   Widget build(BuildContext context) {
     if(_isLoading()){
@@ -518,16 +533,16 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     List<Map<String, dynamic>> usersTasks = [];
     List<Map<String, dynamic>> backlogTasks = [];
 
-    for (var t in allTaskData!['tasks']) {
+    for (var t in _allTaskData?['tasks']) {
       if (t['parentTaskId'] == null && t['activeSprints'].isEmpty) {
         backlogTasks.add(t);
       }
       for ( var s in t['activeSprints']){
-        if(s['id'] == sprintData?['id'] && t['type'] == 'USER_STORY'){
+        if(s['id'] == _sprintData?['id'] && t['type'] == 'USER_STORY'){
           userStories.add(t);
           break;
         }
-        if(s['id'] == sprintData?['id'] && t['type'] != 'USER_STORY' && t['parentTaskId'] == null ){
+        if(s['id'] == _sprintData?['id'] && t['type'] != 'USER_STORY' && t['parentTaskId'] == null ){
           usersTasks.add(t);
           break;
         } 
@@ -543,40 +558,76 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
         toolbarHeight: 60,
         title: Row(
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: iconColor, size: 20),
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                  Text(
+                    Translations.get('sprint_details_page22', currentLang),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ]
+              ),
             ),
+            const SizedBox(width: 15),
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
+            ),
+            const SizedBox(width: 8),
             Text(
-              Translations.get('sprint_details_page22', currentLang),
+              'TrackDev',
               style: TextStyle(
-                color: textColor,
+                color: textColor, 
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 20,
               ),
             ),
             const Spacer(),
-            ElevatedButton(
-               onPressed: () async{
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddTaskPage(project: projectData),
+            SizedBox(
+              height: 40,
+              child: Expanded(
+                child: ElevatedButton(
+                  onPressed: ()async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddTaskPage(project: _projectData),
+                      ),
+                    );
+                    setState((){
+                      _isLoadingTasks = true; 
+                    });
+                    _loadTasksData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5AF0),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                    padding: EdgeInsets.only(right: 10,left: 10),
+                  ),
+                  child: Text(
+                    Translations.get('sprint_details_page23', currentLang),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
                     ),
-                  );
-                  setState((){
-                    isLoadingTasks = true; 
-                  });
-                  _loadTasksData();
-                },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
-              child: Text(
-                Translations.get('sprint_details_page23', currentLang), 
-                style: const TextStyle(color: Colors.white)),
-            ),
+            )
           ]
         )
       ),
@@ -589,64 +640,71 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                 Divider(color: dividerColor, thickness: 1),
                 Row(
                   children: [
-                    Text(
-                      sprintData!['name'],
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getIconBackgroundColor(sprintData!['status']),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _getIconColor(sprintData!['status']), width: 1),
-                      ),
-                      child: Text(
-                        sprintData!['status'],
+                    if(_sprintData?['name']!=null)...{
+                      Text(
+                        _sprintData?['name'],
                         style: TextStyle(
-                          color: _getIconColor(sprintData!['status']),
-                          fontSize: 10,
+                          color: textColor,
                           fontWeight: FontWeight.bold,
+                          fontSize: 22,
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 5),
+                    },
+                    if(_sprintData?['status']!=null)                 
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getIconBackgroundColor(_sprintData?['status']),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _getIconColor(_sprintData?['status']), width: 1),
+                        ),
+                        child: Text(
+                          _sprintData?['status'],
+                          style: TextStyle(
+                            color: _getIconColor(_sprintData?['status']),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 Row(
                   children: [
-                    Icon(
-                      Icons.folder_shared,
-                      color: iconColor,
-                      size: 13,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      sprintData!['project']['name'],
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                    if(_sprintData?['project']?['name'] != null)...{
+                      Icon(
+                        Icons.folder_shared,
+                        color: iconColor,
+                        size: 13,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      color: iconColor,
-                      size: 13,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      "${sprintData!['startDate']} - ${sprintData!['endDate']}",
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(width: 5),
+                      Text(
+                        _sprintData?['project']?['name'],
+                        style: TextStyle(
+                          color: subtitleColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                    },
+                    if(_sprintData?['startDate'] != null && _sprintData?['endDate'] != null)...{
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        color: iconColor,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        "${_formatDate(_sprintData?['startDate'])} - ${_formatDate(_sprintData?['endDate'])}",
+                        style: TextStyle(
+                          color: subtitleColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    }
                   ],
                 ),
                 Divider(color: dividerColor, thickness: 1),
@@ -676,11 +734,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         else {
                           await _updateSprint(-1, task);
                           setState(() {
-                            isLoadingTasks = true;
+                            _isLoadingTasks = true;
                           });
                           await _loadTasksData();
                           setState(() {
-                            isLoadingTasks = false;
+                            _isLoadingTasks = false;
                           });                  
                         }
                       },
@@ -733,7 +791,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                         ),
                                       );
                                       setState((){
-                                        isLoadingTasks = true;
+                                        _isLoadingTasks = true;
                                       });
                                       _loadTasksData();
                                     },
@@ -852,9 +910,6 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                             ]
                           )
                         ),
-
-
-
                         SizedBox(
                           width: 840,
                           child: DragTarget<Map<String, dynamic>>(
@@ -864,18 +919,18 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                             },
                             onAcceptWithDetails: (details) async{
                               final task = details.data;
-                              final reason = _canEditSprintReason(task, sprintData!['id']);
+                              final reason = _canEditSprintReason(task, _sprintData!['id']);
                               if (reason != null) {
                                 _showCannotEditSnackBar(reason);
                               } 
                               else {
-                                await _updateSprint(sprintData!['id'], task);
+                                await _updateSprint(_sprintData!['id'], task);
                                 setState(() {
-                                  isLoadingTasks = true;
+                                  _isLoadingTasks = true;
                                 });
                                 await _loadTasksData();
                                 setState(() {
-                                  isLoadingTasks = false;
+                                  _isLoadingTasks = false;
                                 });
                               }
                             },
@@ -903,7 +958,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                               ),
                                             );
                                             setState((){
-                                              isLoadingTasks = true;
+                                              _isLoadingTasks = true;
                                             });
                                             _loadTasksData();
                                           },
@@ -944,6 +999,36 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Widget _unassignedTasksRow(List<Map<String, dynamic>> usersTasks) {
     List<Map<String, dynamic>> toDoTasks = [];
     List<Map<String, dynamic>> inProgressTasks = [];
@@ -953,28 +1038,28 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     for(var c in usersTasks){
       if(c['status'] == 'TODO' ){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             toDoTasks.add(c);
           }
         }
       }
       if(c['status'] == 'INPROGRESS'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             inProgressTasks.add(c);
           }
         }
       }
       if(c['status'] == 'VERIFY'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             verifyTasks.add(c);
           }
         }
       }
       if(c['status'] == 'DONE'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             doneTasks.add(c);
           }
         }
@@ -1043,12 +1128,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       } 
                       else {
                         setState(() {
-                          isLoadingTasks = true;
+                          _isLoadingTasks = true;
                         });
                         await _updateStatus("TODO", task);
                         await _loadTasksData();
                         setState(() {
-                          isLoadingTasks = false;
+                          _isLoadingTasks = false;
                         });
                       }
                     },
@@ -1077,7 +1162,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                   ),
                                 );
                                 setState((){
-                                  isLoadingTasks = true;
+                                  _isLoadingTasks = true;
                                 });
                                 _loadTasksData();
                               },
@@ -1113,12 +1198,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       } 
                       else {
                         setState(() {
-                          isLoadingTasks = true;
+                          _isLoadingTasks = true;
                         });
                         await _updateStatus("INPROGRESS", task);
                         await _loadTasksData();
                         setState(() {
-                          isLoadingTasks = false;
+                          _isLoadingTasks = false;
                         });
                       }
                     },
@@ -1147,7 +1232,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                   ),
                                 );
                                 setState((){
-                                  isLoadingTasks = true;
+                                  _isLoadingTasks = true;
                                 });
                                 _loadTasksData();
                               },
@@ -1183,12 +1268,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       } 
                       else {
                         setState(() {
-                          isLoadingTasks = true;
+                          _isLoadingTasks = true;
                         });
                         await _updateStatus("VERIFY", task);
                         await _loadTasksData();
                         setState(() {
-                          isLoadingTasks = false;
+                          _isLoadingTasks = false;
                         });
                       }
                     },
@@ -1217,7 +1302,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                   ),
                                 );
                                 setState((){
-                                  isLoadingTasks = true;
+                                  _isLoadingTasks = true;
                                 });
                                 _loadTasksData();
                               },
@@ -1253,12 +1338,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       } 
                       else {
                         setState(() {
-                          isLoadingTasks = true;
+                          _isLoadingTasks = true;
                         });
                         await _updateStatus("DONE", task);
                         await _loadTasksData();
                         setState(() {
-                          isLoadingTasks = false;
+                          _isLoadingTasks = false;
                         });
                       }
                     },
@@ -1287,7 +1372,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                   ),
                                 );
                                 setState((){
-                                  isLoadingTasks = true;
+                                  _isLoadingTasks = true;
                                 });
                                 _loadTasksData();
                               },
@@ -1317,6 +1402,47 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
   }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Widget _taskCardSprint(Map<String, dynamic> task, bool isDragging, bool feedback) {
 
     final List children = task['childTasks'] ?? [];
@@ -1329,28 +1455,28 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
     for(var c in children){
       if(c['status'] == 'TODO' ){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             toDoTasks.add(c);
           }
         }
       }
       if(c['status'] == 'INPROGRESS'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             inProgressTasks.add(c);
           }
         }
       }
       if(c['status'] == 'VERIFY'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             verifyTasks.add(c);
           }
         }
       }
       if(c['status'] == 'DONE'){
         for(var s in c['activeSprints']){
-          if(s['id']==sprintData?['id']){
+          if(s['id']==_sprintData?['id']){
             doneTasks.add(c);
           }
         }
@@ -1406,33 +1532,38 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    task['name'],
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                  if(task['name']!= null)...{
+                    const SizedBox(width: 5),
+                    Text(
+                      task['name'],
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    "  ${task['taskKey']}",
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 7,
-                      fontWeight: FontWeight.bold,
+                  },
+                  if(task['taskKey'] != null)...{
+                    const SizedBox(width: 5),
+                    Text(
+                      "  ${task['taskKey']}",
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 7,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    ' • ',
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                  },
+                  if(task['assignee'] != null)...{
+                    Text(
+                      ' • ',
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  if(task['assignee'] != null)
                     Text(
                       task['assignee']['fullName'],
                       style: TextStyle(
@@ -1440,29 +1571,37 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         fontSize: 7,
                         fontWeight: FontWeight.bold,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  },
                   const Spacer(),
                   ElevatedButton(
                     onPressed: () async{
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddSubtaskPage(task: task),
-                          ),
-                        );
-                        setState((){
-                          isLoadingTasks = true; 
-                        });
-                        _loadTasksData();
-                      },
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddSubtaskPage(task: task),
+                        ),
+                      );
+                      setState((){
+                        _isLoadingTasks = true; 
+                      });
+                      _loadTasksData();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2D5AF0),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      minimumSize: Size.zero,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                      padding: EdgeInsets.only(right: 10,left: 10),
                     ),
                     child: Text(
-                      Translations.get('sprint_details_page25', currentLang), 
-                      style: const TextStyle(color: Colors.white, fontSize: 10)),
+                      Translations.get('sprint_details_page25', currentLang),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold
+                      ),
+                    )
                   ),
                 ]
               ),
@@ -1488,12 +1627,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         } 
                         else {
                           setState(() {
-                            isLoadingTasks = true;
+                            _isLoadingTasks = true;
                           });
                           await _updateStatus("TODO", task);
                           await _loadTasksData();
                           setState(() {
-                            isLoadingTasks = false;
+                            _isLoadingTasks = false;
                           });
                         }
                       },
@@ -1522,7 +1661,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTasks = true;
+                                    _isLoadingTasks = true;
                                   });
                                   _loadTasksData();
                                 },
@@ -1559,12 +1698,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         } 
                         else {
                           setState(() {
-                            isLoadingTasks = true;
+                            _isLoadingTasks = true;
                           });
                           await _updateStatus("INPROGRESS", task);
                           await _loadTasksData();
                           setState(() {
-                            isLoadingTasks = false;
+                            _isLoadingTasks = false;
                           });
                         }
                       },
@@ -1593,7 +1732,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTasks = true;
+                                    _isLoadingTasks = true;
                                   });
                                   _loadTasksData();
                                 },
@@ -1630,12 +1769,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         } 
                         else {
                           setState(() {
-                            isLoadingTasks = true;
+                            _isLoadingTasks = true;
                           });
                           await _updateStatus("VERIFY", task);
                           await _loadTasksData();
                           setState(() {
-                            isLoadingTasks = false;
+                            _isLoadingTasks = false;
                           });
                         }
                       },
@@ -1664,7 +1803,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTasks = true;
+                                    _isLoadingTasks = true;
                                   });
                                   _loadTasksData();
                                 },
@@ -1701,12 +1840,12 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         } 
                         else {
                           setState(() {
-                            isLoadingTasks = true;
+                            _isLoadingTasks = true;
                           });
                           await _updateStatus("DONE", task);
                           await _loadTasksData();
                           setState(() {
-                            isLoadingTasks = false;
+                            _isLoadingTasks = false;
                           });
                         }
                       },
@@ -1735,7 +1874,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTasks = true;
+                                    _isLoadingTasks = true;
                                   });
                                   _loadTasksData();
                                 },
@@ -1764,6 +1903,31 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
       )
     );
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1806,28 +1970,39 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                   ),
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  task['name'],
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                if(task['name'] != null)
+                  Text(
+                    task['name'],
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
-                Text(
-                  "  ${task['taskKey']} ",
-                  style: TextStyle(
-                    color: subtitleColor,
-                    fontSize: 7,
-                    fontWeight: FontWeight.bold,
+                if(task['taskKey'] != null)
+                  Text(
+                    "  ${task['taskKey']} ",
+                    style: TextStyle(
+                      color: subtitleColor,
+                      fontSize: 7,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                if(task['assignee'] != null)
+                if(task['assignee'] != null)...{
+                  Text(
+                      ' • ',
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                  ),
                   Text(
                     task['assignee']['fullName'],
                     style: TextStyle(
@@ -1835,7 +2010,9 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                       fontSize: 7,
                       fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   )
+                }
               ],
             ),
             const SizedBox(height: 8),
@@ -1856,7 +2033,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                         ),
                       );
                       setState((){
-                        isLoadingTasks = true;
+                        _isLoadingTasks = true;
                       });
                       _loadTasksData();
                     },
@@ -1890,6 +2067,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with Theme_Page{
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),

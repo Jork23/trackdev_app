@@ -9,19 +9,17 @@ import '../project/project_details_page.dart';
 
 class CoursesPage extends StatefulWidget {
 
-  const CoursesPage({
-    super.key, 
-  });
+  const CoursesPage({super.key, });
 
   @override
   State<CoursesPage> createState() => _CoursesPageState();
 }
 
-class _CoursesPageState extends State<CoursesPage> with Theme_Page{
+class _CoursesPageState extends State<CoursesPage> with ThemePage{
 
-  final storage = FlutterSecureStorage();
-  Map<String, dynamic> coursesData = {};
-  bool isLoading = true;
+  static const _storage = FlutterSecureStorage();
+  Map<String, dynamic> _coursesData = {};
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -31,7 +29,7 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
 
   Future<void> _loadProject(int idProject) async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/projects');
     try {
@@ -40,39 +38,46 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
+
         final Map<String, dynamic> data = jsonDecode(response.body);
         final List<dynamic> allProjects = data['projects'] ?? [];
 
-        Map<String, dynamic>? projectCorrecte;
+        Map<String, dynamic>? project;
 
-      for (var p in allProjects) {
+        for (var p in allProjects) {
           if (p['id'] == idProject) {
-            projectCorrecte = p;
+            project = p;
             break;
           }
         }
         setState((){
-          isLoading = false;
+          _isLoading = false;
         });
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProjectDetailsPage(project: projectCorrecte!),
-          ),
-        );    
-      }
-      else{
-        setState((){
-          isLoading = false;
-        });
+        if(mounted){
+          if (project == null) {
+            setState(() { _isLoading = false; });
+            return;
+          }
+          final Map<String, dynamic> safeProject = project;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProjectDetailsPage(project: safeProject),
+            ),
+          );
+        }   
       }
     }
     catch (e){
+      if (!mounted) return;
       debugPrint("Error: $e");
-      setState((){
-        isLoading = false;
+    }
+    finally{
+      setState(() {
+        _isLoading = false;
       });
     }
 
@@ -80,7 +85,7 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
 
   Future<void> _loadCourses() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/courses');
     try {
@@ -89,9 +94,11 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          coursesData = jsonDecode(response.body); 
+          _coursesData = jsonDecode(response.body); 
         });
       }
     }
@@ -100,14 +107,14 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -118,9 +125,9 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
       );
     }
 
-    final courses = coursesData['courses'] ?? [];
+    final courses = _coursesData['courses'] ?? [];
 
-    if(!isLoading && courses.isEmpty){
+    if(courses.isEmpty){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Container(
@@ -182,7 +189,6 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
                 ),
-                textAlign: TextAlign.center,
               ),
               Text(
                 Translations.get('courses_page2', currentLang),
@@ -191,128 +197,152 @@ class _CoursesPageState extends State<CoursesPage> with Theme_Page{
                   color: subtitleColor
                 ),
                 textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
               ),
               Divider(color: dividerColor, thickness: 1),
             ],
           ),
         ),
-        body: ListView.builder(
-          itemCount: courses.length,
-          itemBuilder: (context, index){
-            final course = courses[index];
-            final enrolledProjects = course['enrolledProjects'] ?? [];
-            return Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor)
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12)
-                      )
-                    ),         
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 81, 130, 239),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.menu_book, color: Colors.white, size: 24),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                course['subject']['name'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                "${course['startYear']} - ${course['startYear'] + 1}",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          Translations.get('courses_page3', currentLang),
-                          style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),               
-                          itemCount: enrolledProjects.length,
-                          itemBuilder: (context, index){
-                            final project = enrolledProjects[index];                      
-                            return InkWell(
-                              onTap: () {
-                                setState((){
-                                  isLoading = true;
-                                });
-                                _loadProject(project['id']);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.folder_outlined, color: Color(0xFF2D5AF0), size: 20),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      project['name'],
-                                      style: const TextStyle(
-                                        color: Color(0xFF2D5AF0),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              )
-                            );
-                          }
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: courses.length,
+            itemBuilder: (context, index){
+              final course = courses[index];
+              final enrolledProjects = course['enrolledProjects'] ?? [];
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderColor)
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2D5AF0),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12)
                         )
-                      ]
+                      ),         
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 81, 130, 239),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.menu_book,
+                              color: Colors.white,
+                              size: 24
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  course?['subject']?['name'] ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),                             
+                                if(course?['startYear'] != null)
+                                  Text(
+                                    "${course?['startYear']} - ${course?['startYear'] + 1}",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            Translations.get('courses_page3', currentLang),
+                            style: TextStyle(
+                              color: textColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          if(enrolledProjects.length > 0)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),               
+                              itemCount: enrolledProjects.length,
+                              itemBuilder: (context, index){
+                                final project = enrolledProjects[index];                      
+                                return InkWell(
+                                  onTap: () {
+                                    setState((){
+                                      _isLoading = true;
+                                    });
+                                    _loadProject(project['id']);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.folder_outlined,
+                                          color: Color(0xFF2D5AF0),
+                                          size: 20
+                                        ),
+                                        const SizedBox(width: 8),  
+                                        Expanded(                                   
+                                          child: Text(
+                                            project?['name'] ?? '',
+                                            style: const TextStyle(
+                                              color: Color(0xFF2D5AF0),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                  )
+                                );
+                              }
+                            )
+                          else
+                            Text(
+                              Translations.get('courses_page5', currentLang),
+                              style: const TextStyle(
+                                color: Color(0xFF2D5AF0),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ]
+                      )
                     )
-                  )
-                ]
-              )   
-            );   
-          },
-        ),
+                  ]
+                )   
+              );   
+            },
+          ),
+        )
       );
     }
   }

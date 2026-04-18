@@ -13,9 +13,9 @@ class SecurityPage extends StatefulWidget {
   State<SecurityPage> createState() => _SecurityPageState();
 }
 
-class _SecurityPageState extends State<SecurityPage> with Theme_Page{
+class _SecurityPageState extends State<SecurityPage> with ThemePage{
 
-  final storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
   late TextEditingController _oldPassword;
   late TextEditingController _newPassword1;
@@ -23,6 +23,8 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
 
   String _message = '';
   bool _isSuccess = false;
+
+  bool _isLoading = false;
 
   bool _hasMinLength = false;
   bool _hasLowercase = false;
@@ -59,6 +61,8 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
 
   @override
   void dispose() {
+    _newPassword1.removeListener(_validatePassword);
+    _newPassword2.removeListener(_validatePassword);
     _oldPassword.dispose();
     _newPassword1.dispose();
     _newPassword2.dispose();
@@ -67,7 +71,7 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
 
   Future<void> _changePasswordEdit() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/auth/password');
     try {
@@ -83,23 +87,33 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       setState(() {
-        if (response.statusCode == 200 || response.statusCode == 204) {
+        if(response.statusCode == 200 || response.statusCode == 204){
           _message = Translations.get('security_page13', currentLang);
           _isSuccess = true;
           
           _oldPassword.clear();
           _newPassword1.clear();
           _newPassword2.clear();
-        } else {
+        } 
+        else{
           _message = Translations.get('security_page14', currentLang);
           _isSuccess = false;
         }
       });
-    } catch (e) {
-      setState(() {
+    } 
+    catch (e){
+      if (!mounted) return;
+      setState((){
         _message = '${Translations.get('security_page15', currentLang)}: $e';
         _isSuccess = false;
+      });
+    }
+    finally{
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -129,6 +143,18 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
 
   @override
   Widget build(BuildContext context) {
+    
+    if(_isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -150,9 +176,9 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
             ),
             Text(
               Translations.get('security_page2', currentLang),
-              style: TextStyle(fontSize: 13, color: subtitleColor),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
+              style: TextStyle(
+                fontSize: 13,
+                color: subtitleColor),
             ),
             Divider(color: dividerColor, thickness: 1),
           ],
@@ -165,70 +191,38 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
           children: [     
             const SizedBox(height: 16),
             if (_message.isNotEmpty)
-              if(!_isSuccess)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.red.shade200,
-                        width: 1,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
+                      color: _isSuccess ? Colors.green : Colors.red, 
+                      size: 20
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _message,
+                        style: TextStyle(
+                          color: _isSuccess ? Colors.green : Colors.red,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ), 
+                  ],
+                ),
+              ),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -366,42 +360,33 @@ class _SecurityPageState extends State<SecurityPage> with Theme_Page{
               ),
             ),
             const SizedBox(height: 24),
-            if(_isPasswordValid())
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _changePasswordEdit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D5AF0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    Translations.get('security_page12', currentLang),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isPasswordValid() ?
+                  (){   
+                    setState(() {
+                      _isLoading = true;
+                    }); 
+                    _changePasswordEdit(); 
+                  }
+                  : 
+                  (){},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isPasswordValid() ? Color(0xFF2D5AF0) : Color.fromARGB(255, 127, 150, 226),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
                 ),
-              )
-            else
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 127, 150, 226),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    Translations.get('security_page12', currentLang),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                child: Text(
+                  Translations.get('security_page12', currentLang),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
             const SizedBox(height: 24),
           ]
         ),

@@ -15,7 +15,7 @@ class NewPasswordPage extends StatefulWidget {
   State<NewPasswordPage> createState() => _NewPasswordPageState();
 }
 
-class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
+class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
 
   late TextEditingController _newPassword1;
   late TextEditingController _newPassword2;
@@ -24,7 +24,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
   String _messageToken = '';
   bool _isSuccess = false;
   bool _isTokenValid = false;
-  bool isLoading = true;
+  bool _isLoading = true;
 
   bool _hasMinLength = false;
   bool _hasLowercase = false;
@@ -59,22 +59,26 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
   Future<void> _validateToken(String? token) async {
 
     final url = Uri.parse('https://trackdev.org/api/auth/reset-password/validate?token=$token');
+
     try {
       final response = await http.get(
         url,
       );
 
+      if (!mounted) return;
+
       setState(() {
         if (response.statusCode == 200 || response.statusCode == 204) {
-          setState((){
-            _isTokenValid = true;
-          });
-        } else {
+          _isTokenValid = true;
+        } 
+        else {
           _messageToken = Translations.get('newpassword_page13', currentLang);
           _isTokenValid = false;
         }
       });
-    } catch (e) {
+    } 
+    catch (e) {
+      if (!mounted) return;
       setState(() {
         _messageToken = Translations.get('newpassword_page15', currentLang);
         _isTokenValid = false;
@@ -82,7 +86,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -113,6 +117,8 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       setState(() {
         if (response.statusCode == 200 || response.statusCode == 204) {
           _messagePassword = Translations.get('newpassword_page12', currentLang);
@@ -120,12 +126,15 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
           
           _newPassword1.clear();
           _newPassword2.clear();
-        } else {
+        }
+        else {
           _messagePassword = Translations.get('newpassword_page14', currentLang);
           _isSuccess = false;
         }
       });
-    } catch (e) {
+    }
+    catch (e) {
+      if (!mounted) return;
       setState(() {
         _messagePassword = '${Translations.get('newpassword_page15', currentLang)}: $e';
         _isSuccess = false;
@@ -158,7 +167,8 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
 
   @override
   Widget build(BuildContext context) {
-    if(isLoading){
+
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -189,9 +199,11 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
             ),
             Text(
               Translations.get('newpassword_page2', currentLang),
-              style: TextStyle(fontSize: 13, color: subtitleColor),
+              style: TextStyle(
+                fontSize: 13,
+                color: subtitleColor
+              ),
               textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
             ),
             Divider(color: dividerColor, thickness: 1),
           ],
@@ -337,128 +349,75 @@ class _NewPasswordPageState extends State<NewPasswordPage> with Theme_Page{
                 ),
               ),
               const SizedBox(height: 24),
-              if(_isPasswordValid())
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _changePasswordEdit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2D5AF0),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      Translations.get('newpassword_page11', currentLang),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isPasswordValid() ? _changePasswordEdit : () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isPasswordValid() ? const Color(0xFF2D5AF0) : const Color.fromARGB(255, 127, 150, 226),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
                   ),
-                )
-              else
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 127, 150, 226),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      Translations.get('newpassword_page12', currentLang),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                  child: Text(
+                    _isPasswordValid() ? Translations.get('newpassword_page11', currentLang) : Translations.get('newpassword_page12', currentLang),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
+              ),
               SizedBox(height: 24),
               if (_messagePassword.isNotEmpty)
-                if(!_isSuccess)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.red.shade200,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _messagePassword,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color:  _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color:  _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
+                        width: 1,
                       ),
                     ),
-                  )
-                else
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.green.shade200,
-                              width: 1,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isSuccess ? Icons.check_circle_outline : Icons.error_outline,
+                          color: _isSuccess ? Colors.green : Colors.red,
+                          size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _messagePassword,
+                            style: TextStyle(
+                              color: _isSuccess ?Colors.green :Colors.red,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  _messagePassword,
-                                  style: const TextStyle(
-                                    color: Colors.green,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SignInPage()),
-                          );
-                        },
-                        icon: Text(Translations.get('newpassword_page16', currentLang)),
-                        label: const Icon(Icons.arrow_forward, size: 18),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2D5AF0),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                      ),
-                    ]
-                  )  
+                      ],
+                    ),
+                  ),
+                ),                
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignInPage()),
+                  );
+                },
+                icon: Text(Translations.get('newpassword_page16', currentLang)),
+                label: const Icon(Icons.arrow_forward, size: 18),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2D5AF0),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              )
             }  
           ]
         ),

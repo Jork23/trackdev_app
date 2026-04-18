@@ -18,9 +18,9 @@ class TaskDetailsPage extends StatefulWidget {
   State<TaskDetailsPage> createState() => _TaskDetailsPageState();
 }
 
-class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
+class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -28,34 +28,34 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   final TextEditingController _pointsController = TextEditingController();
   final Map<int, TextEditingController> _commentControllers = {};
   
-  bool isEditingDescription = false;
-  bool isEditingName = false;
-  bool isEditingSprint = false;
-  bool isEditingNewComment = false;
-  bool isEditingPoints = false;
-  bool isEditingStatus = false;
-  bool isEditingType = false;
-  bool isDeletingTask = false;
+  bool _isEditingDescription = false;
+  bool _isEditingName = false;
+  bool _isEditingSprint = false;
+  bool _isEditingNewComment = false;
+  bool _isEditingPoints = false;
+  bool _isEditingStatus = false;
+  bool _isEditingType = false;
+  bool _isDeletingTask = false;
   final Map<int, bool> _editingComments = {};
 
-  late bool isTaskAssignen;
+  late bool _isTaskAssignen;
 
   int? _selectedSprintId;
 
-  Map<String, dynamic>? userData;
-  Map<String, dynamic>? commentData;
-  Map<String, List<dynamic>> pullRequestData = {};
-  Map<String, dynamic>? task;
-  Map<String, dynamic>? parentTaskData;
+  Map<String, dynamic>? _userData;
+  Map<String, dynamic>? _commentData;
+  final Map<String, List<dynamic>> _pullRequestData = {};
+  Map<String, dynamic>? _taskData;
+  Map<String, dynamic>? _parentTaskData;
 
-  bool isLoadingUser = true;
-  bool isLoadingTask = true;
-  bool isLoadingComment = true;
-  bool isLoadingSprint = false;
-  bool isLoadingPullRequests = true;
-  bool isLoadingParentTask = true;
+  bool _isLoadingUser = true;
+  bool _isLoadingTask = true;
+  bool _isLoadingComment = true;
+  bool _isLoadingSprint = false;
+  bool _isLoadingPullRequests = true;
+  bool _isLoadingParentTask = true;
 
-  final Map<String, String> taskType = {
+  final Map<String, String> _taskType = {
     'TASK': 'Tasca',
     'BUG': 'Error',
   };
@@ -71,9 +71,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
       _loadParentTask();
     }
     else{
-      isLoadingParentTask = false;
+      _isLoadingParentTask = false;
     }
-    isTaskAssignen = widget.task['assignee'] != null;
+    _isTaskAssignen = widget.task['assignee'] != null;
     if (widget.task['activeSprints'] != null && widget.task['activeSprints'].isNotEmpty) {
       _selectedSprintId = widget.task['activeSprints'][0]['id'];
     }
@@ -120,11 +120,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   String? _canDeleteTaskReason() {
 
-    if (task!['status'] == 'DONE') {
+    if (_taskData!['status'] == 'DONE') {
       return Translations.get('task_details_page55', currentLang);
     }
 
-    if (task!['childTasks'].length != 0) {
+    if (_taskData!['childTasks'].length != 0) {
       return Translations.get('task_details_page56', currentLang);
     }
 
@@ -132,25 +132,25 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   }
 
   String? _canEditPointsReason() {
-    if(task!['status'] != 'VERIFY' && task!['status'] != 'DONE') {
+    if(_taskData!['status'] != 'VERIFY' && _taskData!['status'] != 'DONE') {
       return Translations.get('task_details_page57', currentLang);
     }
     return null;
   }
 
   String? _canEditTypeReason() {
-    if (task!['type'] == 'USER_STORY') {
+    if (_taskData!['type'] == 'USER_STORY') {
       return Translations.get('task_details_page58', currentLang);
     }
-    if (task!['type'] == 'BUG') {
+    if (_taskData!['type'] == 'BUG') {
       return Translations.get('task_details_page59', currentLang);
     }
     return null;
   }
 
   String? _canEditStatusReason(String newStatus) {
-    final current = task!['status'];
-    final hasPullRequests = task!['pullRequests'] != null && task!['pullRequests'].isNotEmpty;
+    final current = _taskData!['status'];
+    final hasPullRequests = _taskData!['pullRequests'] != null && _taskData!['pullRequests'].isNotEmpty;
 
     if (current == newStatus) return null;
 
@@ -192,9 +192,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   String? _canEditSprintReason(int? newSprintId) {
 
     final bool goingToBacklog = newSprintId == -1;
-    final currentSprints = task!['activeSprints'] as List;
+    final currentSprints = _taskData!['activeSprints'] as List;
     final bool currentlyInBacklog = currentSprints.isEmpty;
-    final projectSprints = task!['project']['sprints'] as List;
+    final projectSprints = _taskData!['project']['sprints'] as List;
 
     bool targetIsFuture = false;
     bool currentIsActive = false;
@@ -221,14 +221,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
       }
     }
 
-    if( task!['type'] == 'USER_STORY'){
+    if( _taskData!['type'] == 'USER_STORY'){
       if(!_isAllSubstasksInBackLog()){
         return Translations.get('task_details_page68', currentLang);
       }
       return null;
     }
 
-    if(task!['parentTaskId'] != null){
+    if(_taskData!['parentTaskId'] != null){
       if(goingToBacklog){
         return Translations.get('task_details_page69', currentLang);
       }
@@ -260,12 +260,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   }
 
   bool _isLoading(){
-    return isLoadingUser || isLoadingTask || isLoadingComment || isLoadingSprint || isLoadingPullRequests || isLoadingParentTask;
+    return _isLoadingUser || _isLoadingTask || _isLoadingComment || _isLoadingSprint || _isLoadingPullRequests || _isLoadingParentTask;
   }
 
   bool _isAllSubstasksInBackLog(){
 
-    final subtasks = task?['childTasks'] as List?;
+    final subtasks = _taskData?['childTasks'] as List?;
 
     if (subtasks == null || subtasks.isEmpty) return true;
 
@@ -281,7 +281,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   bool _isUnassignedSubtasks(){
 
-    final subtasks = task?['childTasks'] as List?;
+    final subtasks = _taskData?['childTasks'] as List?;
 
     if (subtasks == null || subtasks.isEmpty) return false;
 
@@ -295,7 +295,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   }
 
   Future<void> _assignAllUnassignedSubtasks() async {
-    final subtasks = task?['childTasks'] as List?;
+    final subtasks = _taskData?['childTasks'] as List?;
 
     if (subtasks == null || subtasks.isEmpty) return;
 
@@ -305,8 +305,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
       }
     }
 
+    if (!mounted) return;
+
     setState(() {
-      isLoadingTask=true;
+      _isLoadingTask=true;
       _loadTask(); 
     });
 
@@ -314,7 +316,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   Future<void> _assignSubtask(int subtaskId) async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/tasks/$subtaskId/assign');
     try {
@@ -332,7 +334,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   Future<void> _assignTask() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}/assign');
     try {
@@ -341,10 +343,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
           _loadTask();
-          isTaskAssignen = true;
+          _isTaskAssignen = true;
         });
       }
     }
@@ -355,19 +359,21 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   Future<void> _unassignTask() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}/assign');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}/assign');
     try {
       final response = await http.delete(
         url,
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
           _loadTask();
-          isTaskAssignen = false;
+          _isTaskAssignen = false;
         });
       }
     }
@@ -377,9 +383,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
   }
 
   Future<void> _updateComment(int commentId, String content) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}/comments/$commentId');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}/comments/$commentId');
     try {
       final response = await http.patch(
         url,
@@ -396,7 +402,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         _loadCommentData();
       }
       else{
-        isLoadingComment = false;
+        _isLoadingComment = false;
       }
     } catch (e) {
       debugPrint("Error: $e");
@@ -410,9 +416,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   Future<void> _addComment() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}/comments');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}/comments');
     try {
       final response = await http.post(
         url,
@@ -429,7 +435,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         _loadCommentData();
       }
       else{
-        isLoadingComment = false;
+        _isLoadingComment = false;
       }
     }
     catch (e){
@@ -437,14 +443,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingNewComment = false;
+        _isEditingNewComment = false;
       });
     }
   }
   
   Future<void> _loadCommentData() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}/comments');
     try {
@@ -453,9 +459,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          commentData = jsonDecode(response.body); 
+          _commentData = jsonDecode(response.body); 
         });
       }
     }
@@ -464,14 +472,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingComment = false;
+        _isLoadingComment = false;
       });
     }
   }
 
   Future<void> _loadUserData() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/auth/self');
     try {
@@ -480,9 +488,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          userData = jsonDecode(response.body); 
+          _userData = jsonDecode(response.body); 
         });
       }
     }
@@ -491,14 +501,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingUser = false;
+        _isLoadingUser = false;
       });
     }
   }
 
   Future<void> _loadAllPullRequestData() async {
-    setState(() => isLoadingPullRequests = true);
-    String? token = await storage.read(key: 'auth_token');
+
+    String? token = await _storage.read(key: 'auth_token');
 
     try {
       if (widget.task['pullRequests'] != null) {
@@ -510,9 +520,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
             headers: {'Authorization': 'Bearer $token'},
           );
 
+          if (!mounted) return;
+
           if(response.statusCode == 200){
             setState(() {
-              pullRequestData[pr['id']] = jsonDecode(response.body)['history'];
+              _pullRequestData[pr['id']] = jsonDecode(response.body)['history'];
             });
           }
         }
@@ -523,14 +535,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingPullRequests = false;
+        _isLoadingPullRequests = false;
       });
     }
   }
 
   Future<void> _loadTask() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}');
     try {
@@ -542,10 +554,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         },
       );
 
+      if (!mounted) return;
+
       if (response.statusCode ==  200 || response.statusCode == 204) {
         setState(() {
-          task = jsonDecode(response.body);
-          isLoadingTask=false;
+          _taskData = jsonDecode(response.body);
+          _isLoadingTask=false;
         });
       }
     } catch (e) {
@@ -553,7 +567,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingTask=false;
+        _isLoadingTask=false;
       });
     }
 
@@ -561,7 +575,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
   Future<void> _loadParentTask() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['parentTaskId']}');
     try {
@@ -573,9 +587,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         },
       );
 
+      if (!mounted) return;
+
       if (response.statusCode ==  200 || response.statusCode == 204) {
         setState(() {
-          parentTaskData = jsonDecode(response.body);
+          _parentTaskData = jsonDecode(response.body);
         });
       }
     } catch (e) {
@@ -583,14 +599,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isLoadingParentTask=false;
+        _isLoadingParentTask=false;
       });
     }
 
   }
 
   Future<void> _updateSprint(int? sprintId) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}');
 
@@ -607,6 +623,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
             'activeSprints': [],
           }),
         );
+
+        if (!mounted) return;
+
         if (response.statusCode == 200  || response.statusCode == 204) {
           setState(() {
             _loadTask();
@@ -630,9 +649,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
           }),
         );
 
+        if (!mounted) return;
+
         if (response.statusCode == 200  || response.statusCode == 204) {
           setState(() {
-            isLoadingTask = true;
+            _isLoadingTask = true;
             _loadTask();
           });
         }
@@ -641,14 +662,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
       }
       finally{
         setState((){
-          isLoadingSprint = false;
+          _isLoadingSprint = false;
         });
       }
     }
   }
 
   Future<void> _updateDescription() async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}');
     try {
@@ -663,6 +684,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200  || response.statusCode == 204) {
         setState(() {
           _loadTask();
@@ -673,15 +696,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingDescription = false;
+        _isEditingDescription = false;
       });
     }
   }
 
   Future<void> _updateStatus(String? newStatus) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${_taskData!['id']}');
     try {
       final response = await http.patch(
         url,
@@ -694,6 +717,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200  || response.statusCode == 204) {
         setState(() {
           _loadTask();
@@ -704,15 +729,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingStatus = false;
+        _isEditingStatus = false;
       });
     }
   }
 
   Future<void> _updateType(String? newType) async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${_taskData!['id']}');
     try {
       final response = await http.patch(
         url,
@@ -725,6 +750,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200  || response.statusCode == 204) {
         setState(() {
           _loadTask();
@@ -735,13 +762,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingType = false;
+        _isEditingType = false;
       });
     }
   }
 
   Future<void> _updateName() async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}');
     try {
@@ -756,6 +783,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200  || response.statusCode == 204) {
         setState(() {
           _loadTask();
@@ -766,15 +795,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingName = false;
+        _isEditingName = false;
       });
     }
   }
 
   Future<void> _updatePoints() async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
-    final url = Uri.parse('https://trackdev.org/api/tasks/${task!['id']}');
+    final url = Uri.parse('https://trackdev.org/api/tasks/${_taskData!['id']}');
     try {
       final response = await http.patch(
         url,
@@ -787,6 +816,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200  || response.statusCode == 204) {
         setState(() {
           _loadTask();
@@ -797,13 +828,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     }
     finally{
       setState((){
-        isEditingPoints = false;
+        _isEditingPoints = false;
       });
     }
   }
 
   Future<void> _deleteTask() async {
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
     
     final url = Uri.parse('https://trackdev.org/api/tasks/${widget.task['id']}');
     try {
@@ -815,12 +846,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         },
       );
 
-    } catch (e) {
+    } 
+    catch (e) {
       debugPrint("Error: $e");
     }
     finally{
       setState((){
-        isLoadingTask=false;
+        _isLoadingTask=false;
       });
     }
   }
@@ -923,6 +955,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
+  String _formatDate(String isoDate) {
+    final dt = DateTime.parse(isoDate);
+    return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -937,8 +974,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
       );
     }
 
-    final projectSprints = task?['project']['sprints'] ?? [];
-    final commentsTask = commentData?['comments'] ?? [];
+    final projectSprints = _taskData?['project']['sprints'] ?? [];
+    final commentsTask = _commentData?['comments'] ?? [];
 
     List<dynamic> listSprints = [];
 
@@ -959,35 +996,61 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         toolbarHeight: 60,
         title: Row(
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: iconColor, size: 20),
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
-            ),
-            Text(
-              Translations.get('task_details_page32', currentLang),
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                  Text(
+                    Translations.get('task_details_page32', currentLang),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ]
               ),
             ),
-            if (isTaskAssignen && userData!['id'] == task?['assignee']?['id']) ...{
+            if (_userData!['id'] != _taskData?['assignee']?['id']) ...{
+              const SizedBox(width: 15),
+              const Icon(
+                Icons.layers_outlined, 
+                color: Color(0xFF2D5AF0),
+                size: 28,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'TrackDev',
+                style: TextStyle(
+                  color: textColor, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+            },
+            if (_isTaskAssignen && _userData!['id'] == _taskData?['assignee']?['id']) ...{
               const Spacer(),
               Column(
                 children: [
-                  if (!isDeletingTask)
+                  if (!_isDeletingTask)
                     TextButton(
                       onPressed: () {
                         final String? reason  = _canDeleteTaskReason();
                         if (reason  != null) {
                           setState(() { 
-                            isDeletingTask = false; 
+                            _isDeletingTask = false; 
                           });
                           _showCannotEditSnackBar(reason);
                           return;
                         }
                         setState(() {
-                          isDeletingTask = true;
+                          _isDeletingTask = true;
                         });
                       },
                       style: TextButton.styleFrom(
@@ -1003,7 +1066,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           const Icon(
                             Icons.delete_outline,
                             color: Color(0xFFFF5252),
-                            size: 20,
+                            size: 18,
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -1011,7 +1074,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             style: TextStyle(
                               color: const Color(0xFFFF5252), 
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -1028,7 +1091,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isDeletingTask)
+            if (_isDeletingTask)
               Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: SizedBox(
@@ -1039,7 +1102,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         child: OutlinedButton(
                           onPressed: () {
                             setState(() {
-                              isDeletingTask = false;
+                              _isDeletingTask = false;
                             });
                           },
                           style: OutlinedButton.styleFrom(
@@ -1057,11 +1120,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         child: ElevatedButton(
                           onPressed: () async {
                             setState(() {
-                              isLoadingTask = true;
+                              _isLoadingTask = true;
                             });
                             await _deleteTask();
                             if (!mounted) return;
-                            Navigator.of(context).pop();
+                            Navigator.pop;
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color.fromARGB(255, 240, 45, 45),
@@ -1079,23 +1142,24 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+            Divider(color: dividerColor, thickness: 1),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(task!['status']),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: borderColor),
+                if(_taskData?['status'] != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(_taskData?['status']),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Icon(
+                      _getStatusIcon(_taskData?['status']),
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
-                  child: Icon(
-                    _getStatusIcon(task!['status']),
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -1103,85 +1167,95 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                     children: [
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: _getTaskBackgroundColor(task!['type']),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: _getTaskColor(task!['type'])),
-                            ),
-                            child: Text(
-                              _translateType(task!['type']),
-                              style: TextStyle(
-                                color: _getTaskColor(task!['type']),
-                                fontSize: 7,
-                                fontWeight: FontWeight.bold,
+                          if(_taskData?['type'] != null)...{
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _getTaskBackgroundColor(_taskData?['type']),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _getTaskColor(_taskData?['type'])),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(task!['status']),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: borderColor),
-                            ),
-                            child: Text(
-                              _translateStatus(task!['status']),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 7,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF064E3B),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFF34D399)),
-                            ),
-                            child: Text(
-                              '${task!['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
-                              style: TextStyle(
-                                color: const Color(0xFF34D399),
-                                fontSize: 7,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if(!isEditingName)
-                        Row(
-                          children: [
-                            Text(
-                              task!['taskKey'],
-                              style: TextStyle(
-                                color: subtitleColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                              child: Text(
+                                _translateType(_taskData?['type']),
+                                style: TextStyle(
+                                  color: _getTaskColor(_taskData?['type']),
+                                  fontSize: 7,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              task!['name'],
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 20,
+                          },
+                          if(_taskData?['status'] != null)...{
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(_taskData?['status']),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Text(
+                                _translateStatus(_taskData?['status']),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 7,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            if (!isEditingName && isTaskAssignen)...{
-                              if(userData!['id'] == task?['assignee']?['id'])...{
+                            const SizedBox(width: 8),
+                          },
+                          if(_taskData?['estimationPoints'] != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF064E3B),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFF34D399)),
+                              ),
+                              child: Text(
+                                '${_taskData?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                style: TextStyle(
+                                  color: const Color(0xFF34D399),
+                                  fontSize: 7,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      if(!_isEditingName)
+                        Row(
+                          children: [
+                            if(_taskData?['taskKey'] != null)...{
+                              Text(
+                                _taskData?['taskKey'],
+                                style: TextStyle(
+                                  color: subtitleColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            },
+                            Expanded (
+                              child: Text(
+                                _taskData?['name'],
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 20,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (!_isEditingName && _isTaskAssignen)...{
+                              if(_userData?['id'] == _taskData?['assignee']?['id'] && _taskData?['name'] != null)...{
                                 IconButton(
                                   icon: Icon(Icons.edit, color: iconColor, size: 15),
                                   onPressed: () {
                                     setState(() {
-                                      isEditingName = true;
-                                      _nameController.text = task!['name'];
+                                      _isEditingName = true;
+                                      _nameController.text = _taskData?['name'];
                                     });
                                   },
                                 )
@@ -1192,6 +1266,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                       else
                         Column(
                           children: [
+                            const SizedBox(height: 5,),
                             TextField(
                               controller: _nameController,
                               style: TextStyle(color: textColor),
@@ -1221,7 +1296,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                   child: OutlinedButton(
                                     onPressed: () {
                                       setState(() {
-                                        isEditingName = false;
+                                        _isEditingName = false;
                                       });
                                     },
                                     style: OutlinedButton.styleFrom(
@@ -1240,7 +1315,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     onPressed: (){
                                       _updateName();
                                       setState(() {
-                                        isLoadingTask = true;
+                                        _isLoadingTask = true;
                                       });    
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -1256,41 +1331,48 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             )
                           ],
                         ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            color: iconColor,
-                            size: 13,
-                          ),
-                          Text(
-                            '${Translations.get('task_details_page34', currentLang)} ${task!['createdAt']}',
-                            style: TextStyle(
-                              color: subtitleColor,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ]
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.group_outlined,
-                            color: iconColor,
-                            size: 13,
-                          ),
-                          Text(
-                            '${Translations.get('task_details_page35', currentLang)} ${task!['reporter']?['fullName']}',
-                            style: TextStyle(
-                              color: subtitleColor,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      )
                     ],
                   ),
                 ),
+              ],
+            ),
+            Divider(color: dividerColor, thickness: 1),
+
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if(_taskData?['createdAt'] != null)...{
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    color: iconColor,
+                    size: 15,
+                  ),
+                  Text(
+                    ' ${Translations.get('task_details_page34', currentLang)} ${_formatDate(_taskData?['createdAt'])}',
+                    style: TextStyle(
+                      color: subtitleColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                }
+              ]
+            ),
+            Row(
+              children: [
+                if(_taskData?['reporter']?['fullName'] != null)...{
+                  Icon(
+                    Icons.group_outlined,
+                    color: iconColor,
+                    size: 15,
+                  ),
+                  Text(
+                    ' ${Translations.get('task_details_page35', currentLang)} ${_taskData?['reporter']?['fullName']}',
+                    style: TextStyle(
+                      color: subtitleColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                }
               ],
             ),
             const SizedBox(height: 24),
@@ -1331,14 +1413,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           ),
                         ),
                         const Spacer(),
-                        if (!isEditingDescription && isTaskAssignen)...{
-                          if(userData!['id'] == task?['assignee']?['id'])...{
+                        if (!_isEditingDescription && _isTaskAssignen)...{
+                          if(_userData?['id'] == _taskData?['assignee']?['id'])...{
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.white, size: 20),
                               onPressed: () {
                                 setState(() {
-                                  isEditingDescription = true;
-                                  _descriptionController.text = task!['description'] ?? '';
+                                  _isEditingDescription = true;
+                                  _descriptionController.text = _taskData?['description'] ?? '';
                                 });
                               },
                             )
@@ -1352,7 +1434,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (isEditingDescription)
+                        if (_isEditingDescription)
                           Column(
                             children: [
                               TextField(
@@ -1384,7 +1466,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     child: OutlinedButton(
                                       onPressed: () {
                                         setState(() {
-                                          isEditingDescription = false;
+                                          _isEditingDescription = false;
                                         });
                                       },
                                       style: OutlinedButton.styleFrom(
@@ -1403,7 +1485,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                       onPressed: (){
                                         _updateDescription();
                                         setState(() {
-                                          isLoadingTask = true;
+                                          _isLoadingTask = true;
                                         });    
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -1421,7 +1503,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           )
                         else
                           Text(
-                            (task!['description'] == null || task!['description'].isEmpty) ? Translations.get('task_details_page15', currentLang) : task!['description'],
+                            (_taskData?['description'] == null) ? Translations.get('task_details_page15', currentLang) : _taskData?['description'],
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -1480,19 +1562,19 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             fontSize: 20,
                           ),
                         ),
-                        if(isTaskAssignen)...{
-                          if(userData!['id'] != task?['assignee']['id'])...{
+                        if(_isTaskAssignen)...{
+                          if(_userData?['id'] != _taskData?['assignee']?['id'])...{
                             const SizedBox(height: 5),
                           }
                         },
                         Row(
                           children: [
-                            if(isTaskAssignen)...{
+                            if(_isTaskAssignen && _taskData?['assignee']?['color'] != null && _taskData?['assignee']?['fullName'] != null)...{
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: hexToColor(task!['assignee']['color']),
+                                backgroundColor: hexToColor(_taskData?['assignee']?['color']),
                                 child: Text(
-                                  task!['assignee']['capitalLetters'],
+                                  _taskData?['assignee']?['capitalLetters'],
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1501,7 +1583,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                task!['assignee']['fullName'],
+                                _taskData?['assignee']?['fullName'],
                                 style: TextStyle(
                                   color: subtitleColor,
                                   fontSize: 16,
@@ -1517,14 +1599,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                 ),
                               ),
                             },
-                            if(isTaskAssignen)...{
-                              if(userData!['id'] == task?['assignee']['id'])...{
+                            if(_isTaskAssignen)...{
+                              if(_userData?['id'] == _taskData?['assignee']?['id'])...{
                                 const Spacer(),
                                 TextButton(
                                   onPressed: () {
                                     _unassignTask();
                                     setState(() {
-                                      isLoadingTask = true;
+                                      _isLoadingTask = true;
                                     });
                                   },
                                   style: TextButton.styleFrom(
@@ -1562,7 +1644,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                 onPressed: () {
                                   _assignTask();
                                   setState(() {
-                                    isLoadingTask = true;
+                                    _isLoadingTask = true;
                                   });
                                 },
                                 style: TextButton.styleFrom(
@@ -1608,25 +1690,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         SizedBox(height: 5),
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: hexToColor(task!['reporter']['color']),
-                              child: Text(
-                                task!['reporter']['capitalLetters'],
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                            if(_taskData?['reporter']?['color'] != null && _taskData?['reporter']?['capitalLetters'] != null)
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: hexToColor(_taskData?['reporter']?['color']),
+                                child: Text(
+                                  _taskData?['reporter']?['capitalLetters'],
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              task!['reporter']['fullName'],
-                              style: TextStyle(
-                                color: subtitleColor,
-                                fontSize: 16,
-                              ),                             
-                            ),
+                            if(_taskData?['reporter']?['fullName'] != null)...{
+                              const SizedBox(width: 8),
+                              Text(
+                                _taskData?['reporter']?['fullName'],
+                                style: TextStyle(
+                                  color: subtitleColor,
+                                  fontSize: 16,
+                                ),                             
+                              ),
+                            }
                           ]
                         ),
                         SizedBox(height: 5),
@@ -1640,7 +1725,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           ),
                         ),
                         SizedBox(height: 5),
-                        if (isEditingPoints)
+                        if (_isEditingPoints)
                           Column(
                             children: [
                               TextField(
@@ -1648,7 +1733,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                 keyboardType: TextInputType.number,
                                 style: TextStyle(color: textColor),
                                 decoration: InputDecoration(
-                                  hintText: task?['estimationPoints'].toString(),
+                                  hintText: _taskData?['estimationPoints'].toString(),
                                   hintStyle: TextStyle(color: hintColor),
                                   filled: true,
                                   fillColor: inputFillColor,
@@ -1673,7 +1758,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     child: OutlinedButton(
                                       onPressed: () {
                                         setState(() {
-                                          isEditingPoints = false;
+                                          _isEditingPoints = false;
                                         });
                                       },
                                       style: OutlinedButton.styleFrom(
@@ -1692,7 +1777,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                       onPressed: () {
                                         _updatePoints();      
                                         setState(() {
-                                          isLoadingTask = true;
+                                          _isLoadingTask = true;
                                         });                                
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -1712,24 +1797,25 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         else
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF064E3B),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0xFF34D399)),
-                                ),
-                                child: Text(
-                                  '${task!['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
-                                  style: TextStyle(
-                                    color: const Color(0xFF34D399),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
+                              if(_taskData?['estimationPoints'] != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF064E3B),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFF34D399)),
+                                  ),
+                                  child: Text(
+                                    '${_taskData?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                    style: TextStyle(
+                                      color: const Color(0xFF34D399),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
                               const Spacer(),
-                              if (isTaskAssignen && userData!['id'] == task?['assignee']['id'])
+                              if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'])
                                 IconButton(
                                   icon: Icon(Icons.edit, color: iconColor, size: 15),
                                   onPressed: () {
@@ -1739,8 +1825,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                       return;
                                     }
                                     setState(() {
-                                      isEditingPoints = true;
-                                      _pointsController.text = task!['estimationPoints'].toString();
+                                      _isEditingPoints = true;
+                                      _pointsController.text = _taskData?['estimationPoints'].toString() ?? "0";
                                     });
                                   },
                                 ),
@@ -1757,27 +1843,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           ),
                         ),
                         SizedBox(height: 5),
-                        if (!isEditingType)...{
+                        if (!_isEditingType)...{
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: _getTaskBackgroundColor(task!['type']),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: _getTaskColor(task!['type'])),
-                                ),
-                                child: Text(
-                                  _translateType(task!['type']),
-                                  style: TextStyle(
-                                    color: _getTaskColor(task!['type']),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
+                              if(_taskData?['type'] != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: _getTaskBackgroundColor(_taskData?['type']),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: _getTaskColor(_taskData?['type'])),
+                                  ),
+                                  child: Text(
+                                    _translateType(_taskData?['type']),
+                                    style: TextStyle(
+                                      color: _getTaskColor(_taskData?['type']),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
                               const Spacer(),
-                              if (isTaskAssignen && userData!['id'] == task?['assignee']['id'])
+                              if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'])
                                 IconButton(
                                   icon: Icon(Icons.edit, color: iconColor, size: 16),
                                   onPressed: () {
@@ -1787,7 +1874,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                       return;
                                     }
                                     setState(() {
-                                      isEditingType = true;
+                                      _isEditingType = true;
                                     });
                                   },
                                 ),
@@ -1796,7 +1883,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         }
                         else...{
                           DropdownMenu<String>(
-                            initialSelection: task!['type'],
+                            initialSelection: _taskData?['type'],
                             width: MediaQuery.of(context).size.width,
                             textStyle: TextStyle(color: textColor, fontSize: 14),
                             inputDecorationTheme: InputDecorationTheme(
@@ -1814,12 +1901,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             ),
                             onSelected: (String? value) async {
                                 setState(() {
-                                  isLoadingTask = true;
-                                  isEditingType = false;
+                                  _isLoadingTask = true;
+                                  _isEditingType = false;
                                 });
                                 await _updateType(value);
                             },
-                            dropdownMenuEntries: taskType.entries.map((entry) {
+                            dropdownMenuEntries: _taskType.entries.map((entry) {
                             return DropdownMenuEntry<String>(
                               value: entry.key,
                               label: entry.value,
@@ -1842,43 +1929,44 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           ),
                         ),
                         SizedBox(height: 5),
-                        if (!isEditingStatus)...{
+                        if (!_isEditingStatus)...{
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor(task!['status']),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: borderColor),
-                                ),
-                                child: Text(
-                                  _translateStatus(task!['status']),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
+                              if(_taskData?['status'] != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: _getStatusColor(_taskData?['status']),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: borderColor),
+                                  ),
+                                  child: Text(
+                                    _translateStatus(_taskData?['status']),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
                               const Spacer(),
-                             if (isTaskAssignen && userData!['id'] == task?['assignee']['id'] && task!['type'] != 'USER_STORY')
-                              IconButton(
-                                icon: Icon(Icons.edit, color: iconColor, size: 16),
-                                onPressed: (){
-                                  setState(() {
-                                    isEditingStatus = true;
-                                  });
-                                }
-                              ),
+                              if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'] && _taskData!['type'] != 'USER_STORY')
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: iconColor, size: 16),
+                                  onPressed: (){
+                                    setState(() {
+                                      _isEditingStatus = true;
+                                    });
+                                  }
+                                ),
                             ]
                           ),
                         }
                         else...{
                           DropdownMenu<String>(
-                            initialSelection: task!['status'],
+                            initialSelection: _taskData?['status'],
                             width: MediaQuery.of(context).size.width,
-                            textStyle: TextStyle(color: textColor, fontSize: 14),
+                            textStyle: TextStyle(color: Colors.white, fontSize: 14),
                             inputDecorationTheme: InputDecorationTheme(
                               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                               border: OutlineInputBorder(
@@ -1893,21 +1981,24 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                               ),
                             ),
                             onSelected: (String? value) async {
-                              if (value == null || value == task!['status']) {
-                                setState(() { isEditingStatus = false; });
+                              if (value == null || value == _taskData?['status']) {
+                                setState(() { 
+                                  _isEditingStatus = false; 
+                                });
                                 return;
                               }
 
                               final reason = _canEditStatusReason(value);
                               if (reason != null) {
-                                setState(() { isEditingStatus = false; });
+                                setState(() { 
+                                  _isEditingStatus = false; 
+                                });
                                 _showCannotEditSnackBar(reason);
                                 return;
                               }
-
                               setState(() {
-                                isLoadingTask = true;
-                                isEditingStatus = false;
+                                _isLoadingTask = true;
+                                _isEditingStatus = false;
                               });
                               await _updateStatus(value);
                             },
@@ -1931,33 +2022,33 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                           ),
                         ),
                         SizedBox(height: 5),           
-                        TextButton(
-                            onPressed: () async{
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProjectDetailsPage(project: task!['project']!)
-                                ),
-                              );
-                              setState((){
-                                isLoadingTask = true;
-                                isLoadingComment = true;
-                                isLoadingPullRequests = true;
-                              });
-                              _loadTask();
-                              _loadCommentData();
-                              _loadAllPullRequestData();
-                            },                           
-                            child: Text(
-                              task!['project']['name'],
-                              style: TextStyle(
-                                color: subtitleColor,
-                                fontSize: 16,
+                        InkWell(
+                          onTap: () async{
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProjectDetailsPage(project: _taskData?['project']!)
                               ),
+                            );
+                            setState((){
+                              _isLoadingTask = true;
+                              _isLoadingComment = true;
+                              _isLoadingPullRequests = true;
+                            });
+                            _loadTask();
+                            _loadCommentData();
+                            _loadAllPullRequestData();
+                          },                         
+                          child: Text(
+                            _taskData?['project']?['name'],
+                            style: TextStyle(
+                              color: subtitleColor,
+                              fontSize: 16,
                             ),
                           ),
+                        ),
                         SizedBox(height: 5),
-                        if(task?['parentTaskId'] != null)...{
+                        if(_taskData?['parentTaskId'] != null)...{
                           Divider(color: dividerColor, thickness: 1),
                           SizedBox(height: 5),
                           Text(
@@ -1968,25 +2059,25 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             ),
                           ),
                           SizedBox(height: 5),
-                          TextButton(
-                            onPressed: () async{
+                          InkWell(
+                            onTap: () async{
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => TaskDetailsPage(task: parentTaskData!)
+                                  builder: (context) => TaskDetailsPage(task: _parentTaskData!)
                                 ),
                               );
                               setState((){
-                                isLoadingTask = true;
-                                isLoadingComment = true;
-                                isLoadingPullRequests = true;
+                                _isLoadingTask = true;
+                                _isLoadingComment = true;
+                                _isLoadingPullRequests = true;
                               });
                               _loadTask();
                               _loadCommentData();
                               _loadAllPullRequestData();
                             },                           
                             child: Text(
-                              parentTaskData?['name'],
+                              _parentTaskData?['name'],
                               style: TextStyle(
                                 color: subtitleColor,
                                 fontSize: 16,
@@ -2007,19 +2098,19 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                               ),
                             ),
                             const Spacer(),
-                            if (isTaskAssignen && userData!['id'] == task?['assignee']['id'])...{
+                            if (_isTaskAssignen && _userData!['id'] == _taskData?['assignee']['id'])...{
                               IconButton(
                                 icon: Icon(Icons.edit, color: iconColor, size: 16),
                                 onPressed: () {
                                   setState(() {
-                                    isEditingSprint = true;
+                                    _isEditingSprint = true;
                                   });
                                 },
                               )
                             }
                           ],
                         ),
-                        if(isEditingSprint)
+                        if(_isEditingSprint)
                           DropdownMenu<int>(
                             initialSelection: _selectedSprintId,
                             width: MediaQuery.of(context).size.width,
@@ -2039,22 +2130,26 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             ),
                             onSelected: (int? value) async {
                               if (value == null || value == _selectedSprintId) {
-                                setState(() { isEditingSprint = false; });
+                                setState(() { 
+                                  _isEditingSprint = false; 
+                                });
                                 return;
                               }
 
                               final reason = _canEditSprintReason(value);
                               if (reason != null) {
-                                setState(() { isEditingSprint = false; });
+                                setState(() { 
+                                  _isEditingSprint = false; 
+                                });
                                 _showCannotEditSnackBar(reason);
                                 return;
                               }
 
                               setState(() {
-                                isLoadingSprint = true;
-                                isLoadingTask = true;
+                                _isLoadingSprint = true;
+                                _isLoadingTask = true;
                                 _selectedSprintId = value;
-                                isEditingSprint = false;
+                                _isEditingSprint = false;
                               });
                               await _updateSprint(value);
                             },
@@ -2069,12 +2164,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                               );
                             }).toList(),
                           ),
-                        if(task?['activeSprints'].isEmpty)...{
+                        if(_taskData?['activeSprints'].isEmpty)...{
                           Text(
                             'Backlog',
                             style: TextStyle(
                               color: subtitleColor,
-                              fontSize: 12,
+                              fontSize: 16,
                             ),
                           ),
                         }
@@ -2083,9 +2178,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: task?['activeSprints'].length,
+                            itemCount: _taskData?['activeSprints'].length,
                             itemBuilder: (context, index) {
-                              final sprint = task?['activeSprints'][index];
+                              final sprint = _taskData?['activeSprints'][index];
                               return InkWell(
                                 onTap: () async{
                                   await Navigator.push(
@@ -2095,9 +2190,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTask = true;
-                                    isLoadingComment = true;
-                                    isLoadingPullRequests = true;
+                                    _isLoadingTask = true;
+                                    _isLoadingComment = true;
+                                    _isLoadingPullRequests = true;
                                   });
                                   _loadTask();
                                   _loadCommentData();
@@ -2107,7 +2202,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                   sprint['name'],
                                   style: TextStyle(
                                     color: subtitleColor,
-                                    fontSize: 12,
+                                    fontSize: 16,
                                   ),
                                 )
                               );
@@ -2125,7 +2220,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
 
             // 3. Subtasques
             SizedBox(height: 10),
-            if (task!['type'] == 'USER_STORY')...{
+            if (_taskData?['type'] == 'USER_STORY')...{
               Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -2151,7 +2246,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          "${Translations.get('task_details_page16', currentLang)}(${task?['childTasks'].length})",
+                          "${Translations.get('task_details_page16', currentLang)}(${_taskData?['childTasks'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -2166,11 +2261,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => AddSubtaskPage(task: task),
+                                    builder: (context) => AddSubtaskPage(task: _taskData),
                                   ),
                                 );
                                 setState((){
-                                  isLoadingTask = true; 
+                                  _isLoadingTask = true; 
                                 });
                                 _loadTask();
                               },
@@ -2209,14 +2304,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (task?['childTasks'].length > 0)...{
+                        if (_taskData?['childTasks'].length > 0)...{
                           ListView.builder(
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: task?['childTasks'].length,
+                            itemCount: _taskData?['childTasks'].length,
                             itemBuilder: (context, index) {
-                              final tas = task?['childTasks'][index];
+                              final tas = _taskData?['childTasks'][index];
                               return InkWell(
                                 onTap: () async{
                                   await Navigator.push(
@@ -2226,7 +2321,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     ),
                                   );
                                   setState((){
-                                    isLoadingTask = true; 
+                                    _isLoadingTask = true; 
                                   });
                                   _loadTask();
                                   },
@@ -2235,19 +2330,20 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: _getStatusColor(tas!['status']),
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: borderColor),
+                                      if(tas?['status'] != null)
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: _getStatusColor(tas?['status']),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: borderColor),
+                                          ),
+                                          child: Icon(
+                                            _getStatusIcon(tas?['status']),
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
                                         ),
-                                        child: Icon(
-                                          _getStatusIcon(tas!['status']),
-                                          color: Colors.white,
-                                          size: 14,
-                                        ),
-                                      ),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Column(
@@ -2255,22 +2351,25 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                           children: [
                                             Row(
                                               children: [
-                                                Text(
-                                                  tas!['taskKey'],
-                                                  style: TextStyle(
-                                                    color: subtitleColor,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 10,
+                                                if(tas?['taskKey'] != null)...{
+                                                  Text(
+                                                    tas?['taskKey'],
+                                                    style: TextStyle(
+                                                      color: subtitleColor,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 10,
+                                                    ),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  tas!['name'],
-                                                  style: TextStyle(
-                                                    color: textColor,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),                                              
+                                                  const SizedBox(width: 8),
+                                                },
+                                                if(tas?['name'] != null)
+                                                  Text(
+                                                    tas?['name'],
+                                                    style: TextStyle(
+                                                      color: textColor,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),                                              
                                               ]
                                             ),                                        
                                             Row(
@@ -2285,15 +2384,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                                   ),
                                                 }
                                                 else...{
+                                                  if(tas?['assignee']?['fullName'] != null)
                                                   Text(
-                                                    tas!['assignee']['fullName'],
+                                                    tas?['assignee']?['fullName'],
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontSize: 10,
                                                     ),
                                                   ),
                                                 },
-                                                if(tas!['estimationPoints'] != 0)...{
+                                                if(tas?['estimationPoints'] != 0 && tas?['estimationPoints'] != null)...{
                                                   Text(
                                                     ' • ',
                                                     style: TextStyle(
@@ -2303,7 +2403,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                                     ),
                                                   ),
                                                   Text(
-                                                    '${tas!['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                                    '${tas?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontSize: 10,
@@ -2334,22 +2434,23 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: _getTaskBackgroundColor(tas!['type']),
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(color: _getTaskColor(tas!['type'])),
-                                            ),
-                                            child: Text(
-                                              _translateType(tas!['type']),
-                                              style: TextStyle(
-                                                color: _getTaskColor(tas!['type']),
-                                                fontSize: 7,
-                                                fontWeight: FontWeight.bold,
+                                          if(tas?['type'] != null)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: _getTaskBackgroundColor(tas?['type']),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: _getTaskColor(tas?['type'])),
+                                              ),
+                                              child: Text(
+                                                _translateType(tas?['type']),
+                                                style: TextStyle(
+                                                  color: _getTaskColor(tas?['type']),
+                                                  fontSize: 7,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
-                                          ),
                                         ]
                                       )                                                                                                                        
                                     ],
@@ -2414,17 +2515,17 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (task!['pullRequests'].length > 0)...{
+                        if (_taskData!['pullRequests'].length > 0)...{
                           ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: task!['pullRequests'].length,
+                            itemCount: _taskData?['pullRequests'].length,
                             itemBuilder: (context, index) {
-                              final pr = task!['pullRequests'][index];
-                              final List<dynamic> history = pullRequestData[pr['id']] ?? [];
+                              final pr = _taskData!['pullRequests'][index];
+                              final List<dynamic> history = _pullRequestData[pr?['id']] ?? [];
 
                               final sortedHistory = List<dynamic>.from(history)
-                                ..sort((a, b) => DateTime.parse(a['changedAt']).compareTo(DateTime.parse(b['changedAt'])));
+                                ..sort((a, b) => DateTime.parse(a?['changedAt']).compareTo(DateTime.parse(b?['changedAt'])));
 
                               return Container(
                                 width: double.infinity,
@@ -2445,45 +2546,50 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                           Row(
                                             children: [
                                               Icon(
-                                                pr['merged'] ? Icons.merge_type: Icons.call_split,
-                                                color: pr['merged'] ? Colors.purpleAccent : Colors.green,
+                                                pr?['merged'] ? Icons.merge_type: Icons.call_split,
+                                                color: pr?['merged'] ? Colors.purpleAccent : Colors.green,
                                                 size: 20,
                                               ),
                                               const SizedBox(width: 6),
-                                              Expanded(
-                                                child: Text(
-                                                  pr['title'],
-                                                  style: TextStyle(
-                                                    color: textColor,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
+                                              if(pr?['title'] != null)
+                                                Expanded(
+                                                  child: Text(
+                                                    pr?['title'],
+                                                    style: TextStyle(
+                                                      color: textColor,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: pr['merged'] ? const Color(0xFF3B1F6E) : const Color(0xFF1A4D2E),
-                                                  borderRadius: BorderRadius.circular(20),
-                                                  border: Border.all(
-                                                    color: pr['merged'] ? Colors.purpleAccent : Colors.green,
+                                              if(pr?['merged'] != null)...{
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: pr?['merged'] ? const Color(0xFF3B1F6E) : const Color(0xFF1A4D2E),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    border: Border.all(
+                                                      color: pr?['merged'] ? Colors.purpleAccent : Colors.green,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    pr?['merged'] ? 'task_details_page49' : 'task_details_page50',
+                                                    style: TextStyle(
+                                                      color: pr?['merged'] ? Colors.purpleAccent : Colors.green,
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ),
-                                                child: Text(
-                                                  pr['merged'] ? 'task_details_page49' : 'task_details_page50',
-                                                  style: TextStyle(
-                                                    color: pr['merged'] ? Colors.purpleAccent : Colors.green,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
+                                              }
                                             ],
                                           ),
+                                          if(pr?['repoFullName'] != null && pr?['prNumber'] != null && pr?['author']?['fullName'] != null)
                                           const SizedBox(height: 6),
                                           Text(
-                                            '${pr['repoFullName']} #${pr['prNumber']} ${Translations.get('task_details_page53', currentLang)} ${pr['author']['fullName']}',
+                                            '${pr?['repoFullName']} #${pr?['prNumber']} ${Translations.get('task_details_page53', currentLang)} ${pr?['author']?['fullName']}',
                                             style: TextStyle(
                                               color: subtitleColor,
                                               fontSize: 11,
@@ -2520,7 +2626,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                               itemCount: sortedHistory.length,
                                               itemBuilder: (context, hIndex) {
                                                 final item = sortedHistory[hIndex];
-                                                final bool isMerged = item['type'] == 'pr_merged';
+                                                final bool isMerged = item?['type'] == 'pr_merged';
 
                                                 return IntrinsicHeight(
                                                   child: Row(
@@ -2559,14 +2665,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                                             children: [
                                                               Row(
                                                                 children: [
-                                                                  Text(
-                                                                    '${item['authorFullName']} ',
-                                                                    style: TextStyle(
-                                                                      color: textColor,
-                                                                      fontWeight: FontWeight.bold,
-                                                                      fontSize: 10,
+                                                                  if(item?['authorFullName'] != null)
+                                                                    Text(
+                                                                      '${item?['authorFullName']} ',
+                                                                      style: TextStyle(
+                                                                        color: textColor,
+                                                                        fontWeight: FontWeight.bold,
+                                                                        fontSize: 10,
+                                                                      ),
+                                                                      overflow: TextOverflow.ellipsis,
                                                                     ),
-                                                                  ),
                                                                   Text(
                                                                     isMerged ? Translations.get('task_details_page51', currentLang) : Translations.get('va obrir ', currentLang),
                                                                     style: TextStyle(
@@ -2575,24 +2683,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                                                       fontSize: 10,
                                                                     ),
                                                                   ),
-                                                                  Text(
-                                                                    '#${pr['prNumber']} ${pr['title']}',
-                                                                    style: TextStyle(
-                                                                      color: subtitleColor,
-                                                                      fontWeight: FontWeight.bold,
-                                                                      fontSize: 10,
-                                                                    ),
-                                                                  ),                                                                  
+                                                                  if(pr?['prNumber'] != null && pr?['title'] != null)
+                                                                    Text(
+                                                                      '#${pr?['prNumber']} ${pr?['title']}',
+                                                                      style: TextStyle(
+                                                                        color: subtitleColor,
+                                                                        fontWeight: FontWeight.bold,
+                                                                        fontSize: 10,
+                                                                      ),
+                                                                      overflow: TextOverflow.ellipsis,
+                                                                    ),                                                                  
                                                                 ],
                                                               ),
-                                                              Text(
-                                                                item['changedAt'],
-                                                                style: TextStyle(
-                                                                  color: subtitleColor,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  fontSize: 10,
-                                                                ),
-                                                              ),     
+                                                              if(item?['changedAt'] != null)
+                                                                Text(
+                                                                  _formatDate(item?['changedAt']),
+                                                                  style: TextStyle(
+                                                                    color: subtitleColor,
+                                                                    fontWeight: FontWeight.bold,
+                                                                    fontSize: 10,
+                                                                  ),
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                ),     
                                                             ],
                                                           ),
                                                         ),
@@ -2676,7 +2788,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              isEditingNewComment = true;
+                              _isEditingNewComment = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
@@ -2697,7 +2809,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (isEditingNewComment)...{
+                        if (_isEditingNewComment)...{
                           Column(
                             children: [
                               TextField(
@@ -2729,7 +2841,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     child: OutlinedButton(
                                       onPressed: () {
                                         setState(() {
-                                          isEditingNewComment= false;
+                                          _isEditingNewComment= false;
                                         });
                                       },
                                       style: OutlinedButton.styleFrom(
@@ -2748,7 +2860,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                       onPressed: () {
                                         _addComment();
                                         setState(() {
-                                          isLoadingComment = true;
+                                          _isLoadingComment = true;
                                         }); 
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -2773,10 +2885,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                             itemCount: commentsTask.length,
                             itemBuilder: (context, index) {
                               final comment = commentsTask[index];
-                              final isEditing = _editingComments[comment['id']] ?? false;
+                              final isEditing = _editingComments[comment?['id']] ?? false;
                               
-                              if (!_commentControllers.containsKey(comment['id'])) {
-                                _commentControllers[comment['id']] = TextEditingController(text: comment['content']);
+                              if (!_commentControllers.containsKey(comment?['id'])) {
+                                _commentControllers[comment?['id']] = TextEditingController(text: comment?['content']);
                               }
                               
                               return Padding(
@@ -2793,41 +2905,44 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                     children: [
                                       Row(
                                         children: [
-                                          CircleAvatar(
-                                            radius: 12,
-                                            backgroundColor: hexToColor(comment['author']['color']),
-                                            child: Text(
-                                              comment['author']['capitalLetters'],
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
+                                          if(comment?['author']?['color'] != null && comment?['author']?['capitalLetters'] != null)
+                                            CircleAvatar(
+                                              radius: 12,
+                                              backgroundColor: hexToColor(comment?['author']?['color']),
+                                              child: Text(
+                                                comment?['author']?['capitalLetters'],
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                comment['author']['fullName'],
-                                                style: TextStyle(
-                                                  color: textColor,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
+                                          if(comment?['author']?['fullName'] != null && comment?['createdAt'] != null)...{
+                                            const SizedBox(width: 8),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  comment?['author']?['fullName'],
+                                                  style: TextStyle(
+                                                    color: textColor,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                comment['createdAt'],
-                                                style: TextStyle(
-                                                  color: subtitleColor,
-                                                  fontSize: 12,
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  _formatDate(comment?['createdAt']),
+                                                  style: TextStyle(
+                                                    color: subtitleColor,
+                                                    fontSize: 12,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
+                                              ],
+                                            ),
+                                          },
                                           const Spacer(),
-                                          if (comment['author']['id'] == userData!['id'] && !isEditing)
+                                          if (comment?['author']?['id'] == _userData?['id'] && !isEditing)
                                             IconButton(
                                               icon: Icon(Icons.edit, color: iconColor, size: 16),
                                               onPressed: () {
@@ -2843,14 +2958,19 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                         Row(
                                           children: [
                                             const SizedBox(width: 32),
-                                            Text(
-                                              comment['content'],
-                                              style: TextStyle(
-                                                color: textColor,
-                                                fontSize: 14,
-                                                height: 1.5,
-                                              ),
-                                            )
+                                            if(comment?['content'] != null)
+                                              Expanded(
+                                                child: Text(
+                                                  comment?['content'],
+                                                  style: TextStyle(
+                                                    color: textColor,
+                                                    fontSize: 14,
+                                                    height: 1.5,
+                                                  ),
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.visible,
+                                                ),
+                                              )
                                           ],
                                         )
                                       }
@@ -2907,7 +3027,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with Theme_Page{
                                                     onPressed: () {
                                                       _updateComment(comment['id'], _commentControllers[comment['id']]!.text);
                                                       setState(() {
-                                                        isLoadingComment = true;
+                                                        _isLoadingComment = true;
                                                       }); 
                                                       
                                                     },

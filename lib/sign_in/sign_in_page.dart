@@ -15,24 +15,34 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> with Theme_Page {
+class _SignInPageState extends State<SignInPage> with ThemePage {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   final _storage = const FlutterSecureStorage();
-  bool _isLoading = false;
+  bool isLoading = false;
   String _errorMessage = '';
+
+@override
+void dispose() {
+  _emailController.dispose();
+  _passwordController.dispose();
+  super.dispose();
+}
 
   Future<void> _login() async {
 
-    setState(() => _errorMessage = '');
+    setState((){
+       _errorMessage = '';
+    });
 
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() => _errorMessage = Translations.get('signin_page8', currentLang));
+      setState(() {
+        isLoading = false;
+        _errorMessage = Translations.get('signin_page8', currentLang);
+      });
       return;
     }
-
-    setState(() => _isLoading = true);
 
     try {
       final url = Uri.parse('https://trackdev.org/api/auth/login');
@@ -53,29 +63,51 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
 
         await _storage.write(key: 'auth_token', value: token);
 
-        if (mounted) {
+        if (!mounted) return;
+
+        if(mounted){
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
         }
-      } else {
-        if (mounted) {
-          setState(() => _errorMessage = Translations.get('signin_page9', currentLang));
-        }
+      } 
+      else{
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = Translations.get('signin_page9', currentLang);
+        });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = '${Translations.get('signin_page10', currentLang)}: $e');
-        debugPrint("Error: $e");
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    } 
+    catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = '${Translations.get('signin_page10', currentLang)}: $e';
+      });
+      debugPrint("Error: $e");
+    }
+    finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    if(isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SingleChildScrollView(
@@ -237,23 +269,25 @@ class _SignInPageState extends State<SignInPage> with Theme_Page {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                onPressed: () {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  _login();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
                 ),
-                child: _isLoading 
-                  ? const SizedBox(
-                      height: 20, 
-                      width: 20, 
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                    )
-                  : Text(
-                      Translations.get('signin_page7', currentLang),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                child: Text(
+                  Translations.get('signin_page7', currentLang),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
               ),
             ),
           ],

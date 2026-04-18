@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:timezone/data/latest.dart' as tzData;
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/theme.dart';
@@ -19,11 +19,11 @@ class PreferencesPage extends StatefulWidget {
   State<PreferencesPage> createState() => _PreferencesPageState();
 }
 
-class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
+class _PreferencesPageState extends State<PreferencesPage> with ThemePage{
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
-  final List<Map<String, String>> langs = [
+  final List<Map<String, String>> _langs = [
     {'code': 'ca', 'name': 'Català'},
     {'code': 'es', 'name': 'Castellano'},
     {'code': 'en', 'name': 'English'},
@@ -31,10 +31,12 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
 
   late String _selectedLang;
   bool _isDarkMode = false;
+
   late TextEditingController _githubController;
   String? _selectedTimezone;
   List<String> _allTimezones = [];
-  bool isLoading = true;
+
+  bool _isLoading = true;
 
   String _message = '';
   bool _isSuccess = false;
@@ -43,50 +45,41 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
   void initState() {
     super.initState();
     _loadSettings();
-    _selectedLang=langs.first['code']!;
-    _githubController = TextEditingController(text: widget.userData!['githubInfo']?['login'] ?? '');
-    _selectedTimezone = widget.userData!['timezone'] ?? 'UTC';
+    _selectedLang=_langs.first['code']!;
+    _githubController = TextEditingController(text: widget.userData?['githubInfo']?['login'] ?? '');
+    _selectedTimezone = widget.userData?['timezone'] ?? 'UTC';
 
 
-    tzData.initializeTimeZones();
+    tz_data.initializeTimeZones();
     _allTimezones = tz.timeZoneDatabase.locations.keys.toList();
     _allTimezones.sort();
 
   }
 
-  Future<void> _loadSettings() async {
-    String? lang = await storage.read(key: 'app_lang');
-    String? mode = await storage.read(key: 'app_mode');
-    String? allTimezones = await storage.read(key: 'app_timezone');
-    setState(() {
-      if (lang != null) _selectedLang = lang;
-      if (mode != null) _isDarkMode = mode == 'dark';
-      if (allTimezones != null){
-         _allTimezones = allTimezones.split(',');
-      }
-      else{
-        _saveTimezone();
-      }
-      isLoading = false;
-    });
-  }
+Future<void> _loadSettings() async {
+  final lang = await storage.read(key: 'app_lang');
+  final mode = await storage.read(key: 'app_mode');
+  
+  tz_data.initializeTimeZones();
+  final locations = tz.timeZoneDatabase.locations.keys.toList()..sort();
 
-  Future<void> _saveTimezone() async{
-    tzData.initializeTimeZones();
-    _allTimezones = tz.timeZoneDatabase.locations.keys.toList();
-    _allTimezones.sort();
-    await storage.write(key: 'app_timezone', value: _allTimezones.join(','));
+  if (!mounted) return;
 
-    if (mounted) setState(() {});
-  }
+  setState(() {
+    _allTimezones = locations;
+    if (lang != null) _selectedLang = lang;
+    if (mode != null) _isDarkMode = mode == 'dark';
+    _isLoading = false;
+  });
+}
 
   Future<void> _saveSetting(String key, String value) async {
-    await storage.write(key: key, value: value);
+    await _storage.write(key: key, value: value);
   }
 
   Future<void> _saveProfilEdit(String key, dynamic value) async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/users');
     try {
@@ -99,25 +92,113 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
         }),
       );
 
+      if (!mounted) return;
+
       setState((){
         if (response.statusCode == 200 || response.statusCode == 204) {
           _message = '$key ${Translations.get('preferences_page15', currentLang)}';
           _isSuccess = true;
-        } else {
+        } 
+        else {
           _message = '${Translations.get('preferences_page16', currentLang)}: ${response.statusCode}';
         }
       });
-    } catch (e) {
+    } 
+    catch (e) {
+      if (!mounted) return;
       setState(() {
         _message = '${Translations.get('preferences_page17', currentLang)}: $e';
       });
     }
+    finally{
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
+  void _showTimezoneDialog() {
+    final TextEditingController searchCtrl = TextEditingController();
+    List<String> filtered = List.from(_allTimezones);
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          backgroundColor: backgroundColor,
+          contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          title: TextField(
+            controller: searchCtrl,
+            autofocus: true,
+            style: TextStyle(color: textColor),
+            decoration: InputDecoration(
+              hintText: Translations.get('preferences_page10', currentLang),
+              hintStyle: TextStyle(color: subtitleColor),
+              prefixIcon: Icon(Icons.search, color: iconColor),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: borderColor),
+              ),
+            ),
+            onChanged: (value) {
+              setStateDialog(() {
+                filtered = _allTimezones
+                    .where((tz) => tz.toLowerCase().contains(value.toLowerCase()))
+                    .toList();
+              });
+            },
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 350,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final tz = filtered[index];
+                      return ListTile(
+                        dense: true,
+                        title: Text(
+                          tz,
+                          style: TextStyle(color: textColor),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selectedTimezone = tz;
+                            _isLoading = true;
+                            _message = '';
+                          });
+                          _saveProfilEdit('timezone', tz);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
    @override
   Widget build(BuildContext context) {
 
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -138,18 +219,20 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
         title: Column(
           children:[
             Divider(color: dividerColor, thickness: 1),
-            Text (Translations.get('preferences_page1', currentLang),
-                  style: TextStyle(
-                      color: textColor, 
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                    ),
-                  ),
+            Text (
+              Translations.get('preferences_page1', currentLang),
+              style: TextStyle(
+                  color: textColor, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
+              ),
             Text(
               Translations.get('preferences_page2', currentLang),
-              style: TextStyle(fontSize: 13, color: subtitleColor),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
+              style: TextStyle(
+                fontSize: 13,
+                color: subtitleColor
+              ),
             ),
             Divider(color: dividerColor, thickness: 1),
           ],
@@ -207,7 +290,9 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
                     }),
                     onChanged: (bool value) async{
                       await _saveSetting('app_mode', value ? 'dark' : 'light');
-                      setState(() => _isDarkMode = value);
+                      setState(() {
+                        _isDarkMode = value;
+                      });
                       await reloadThemeSettings();      
                       widget.onPreferencesUpdated?.call();         
                     },
@@ -251,12 +336,14 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
               onSelected: (String? value) async {
                 if (value != null) {
                   await storage.write(key: 'app_lang', value: value);
-                  setState(() => _selectedLang = value);
+                  setState(() {
+                    _selectedLang = value;
+                  });
                   await reloadThemeSettings();  
                   widget.onPreferencesUpdated?.call();
                 }
               },
-              dropdownMenuEntries: langs.map((Map<String, String> lang) {
+              dropdownMenuEntries: _langs.map((Map<String, String> lang) {
                 return DropdownMenuEntry<String>(
                   value: lang['code']!, 
                   label: lang['name']!,
@@ -289,34 +376,30 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
               ),
             ),
             const SizedBox(height: 8),
-            DropdownMenu<String>(
-              width: MediaQuery.of(context).size.width - 48,
-              initialSelection: _selectedTimezone,
-              enableFilter: true, 
-              leadingIcon: Icon(Icons.public,color: iconColor),
-              textStyle: TextStyle(color: textColor),
-              menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(cardColor),
-                surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                side: WidgetStateProperty.all(
-                  BorderSide(color: borderColor, width: 1),
+            GestureDetector(
+              onTap: _showTimezoneDialog,
+              child: Container(
+                width: MediaQuery.of(context).size.width - 48,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: borderColor),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.public, color: iconColor),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _selectedTimezone ?? 'UTC',
+                        style: TextStyle(color: textColor),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(Icons.arrow_drop_down, color: iconColor),
+                  ],
                 ),
               ),
-              onSelected: (String? newValue) {
-                if (newValue != null) {
-                  setState(() => _selectedTimezone = newValue);
-                  _saveProfilEdit('timezone', newValue);
-                }
-              },
-              dropdownMenuEntries: _allTimezones.map((tz) =>
-                DropdownMenuEntry(
-                  value: tz,
-                  label: tz,
-                  style: MenuItemButton.styleFrom(
-                    foregroundColor: textColor,
-                    backgroundColor: backgroundColor
-                  ),
-                )).toList(),
             ),
             const SizedBox(height: 30),
             Align(
@@ -371,6 +454,10 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
                   height: 50,
                   child: ElevatedButton(
                     onPressed: (){
+                      setState(() {
+                        _isLoading = true;
+                        _message = '';
+                      });
                       _saveProfilEdit('githubUsername',_githubController.text);
                     },
                     style: ElevatedButton.styleFrom(
@@ -381,7 +468,10 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
                     ),
                     child: Text(
                       Translations.get('preferences_page13', currentLang),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold
+                      ),
                     ),
                   ),
                 ),
@@ -400,70 +490,38 @@ class _PreferencesPageState extends State<PreferencesPage> with Theme_Page{
             ),
             const SizedBox(height: 16),
             if (_message.isNotEmpty)
-              if(!_isSuccess)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.red.shade200,
-                        width: 1,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
+                      color: _isSuccess ? Colors.green : Colors.red, 
+                      size: 20
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _message,
+                        style: TextStyle(
+                          color: _isSuccess ? Colors.green : Colors.red,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _message,
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),      
+                  ],
+                ),
+              ),
           ]
         )
       )

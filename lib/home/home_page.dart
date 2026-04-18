@@ -19,11 +19,11 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with Theme_Page {
+class _HomePageState extends State<HomePage> with ThemePage {
   int _selectedIndex = 0;
-  final storage = FlutterSecureStorage();
-  Map<String, dynamic>? userData;
-  bool isLoading = true;
+  static const  _storage = FlutterSecureStorage();
+  Map<String, dynamic>? _userData;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -37,8 +37,8 @@ class _HomePageState extends State<HomePage> with Theme_Page {
     });
   }
 
-  Color hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
+  Color _hexToColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) return const Color(0xFF2D5AF0);
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
     buffer.write(hexString.replaceFirst('#', ''));
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> with Theme_Page {
 
   Future<void> _loadUserData() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     final url = Uri.parse('https://trackdev.org/api/auth/self');
     try {
@@ -56,9 +56,11 @@ class _HomePageState extends State<HomePage> with Theme_Page {
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          userData = jsonDecode(response.body); 
+          _userData = jsonDecode(response.body); 
         });
       }
     }
@@ -67,14 +69,14 @@ class _HomePageState extends State<HomePage> with Theme_Page {
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
 
   Future<void> _logout() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
 
     try {
       final url = Uri.parse('https://trackdev.org/api/auth/logout');
@@ -86,11 +88,12 @@ class _HomePageState extends State<HomePage> with Theme_Page {
           'Content-Type': 'application/json',
         },
       );
-    }catch (e) {
+    }
+    catch (e) {
       debugPrint("Error: $e");
     } 
     finally {
-      await storage.delete(key: 'auth_token');
+      await _storage.delete(key: 'auth_token');
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -104,19 +107,7 @@ class _HomePageState extends State<HomePage> with Theme_Page {
   @override
   Widget build(BuildContext context) {
 
-    List<Widget> pages = <Widget>[
-      Text('Index 0: Resum'),
-      CoursesPage(),
-      ProjectsPage(),
-      Text('Index 3: Analitiques'),
-      ActivityPage(),
-
-      ProfilePage(userData: userData, onProfileUpdated: _loadUserData,),
-      PreferencesPage(userData: userData, onPreferencesUpdated: loadThemeSettings,),
-      SecurityPage(),
-      Text('Index 8: Integracions')
-    ];
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -126,6 +117,20 @@ class _HomePageState extends State<HomePage> with Theme_Page {
         ),
       );
     }
+
+    List<Widget> pages = <Widget>[
+      Text('Index 0: Resum'),
+      CoursesPage(),
+      ProjectsPage(),
+      Text('Index 3: Analitiques'),
+      ActivityPage(),
+
+      ProfilePage(userData: _userData, onProfileUpdated: _loadUserData,),
+      PreferencesPage(userData: _userData, onPreferencesUpdated: loadThemeSettings,),
+      SecurityPage(),
+      Text('Index 8: Integracions')
+    ];
+
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -198,51 +203,54 @@ class _HomePageState extends State<HomePage> with Theme_Page {
                         children: [
                           CircleAvatar(
                             radius: 22,
-                            backgroundColor: hexToColor(userData!['color']),
+                            backgroundColor: _hexToColor(_userData!['color']),
                             child: Text(
-                              "${userData!['capitalLetters']}",
+                              _userData?['capitalLetters'] ?? '',
                               style: TextStyle(color: Colors.white)
                             ),
                           ),
                           const SizedBox(width: 10),
                           Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${userData!['fullName']}",
-                                  style: TextStyle(color: textColor),
-                                ),
-                                Text(
-                                  "${userData!['email']}",
-                                  style: TextStyle(color: textColor),
-                                ),
-                              ]
-                            )
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _userData?['fullName'] ?? '',
+                                style: TextStyle(color: textColor),
+                                overflow: TextOverflow.ellipsis
+                              ),
+                              Text(
+                                _userData?['email'] ?? '',
+                                style: TextStyle(color: textColor),
+                                overflow: TextOverflow.ellipsis
+                              ),
+                            ]
+                          )
                         ]
                       ),
                       const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8EFFF),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
-                            const SizedBox(width: 4),
-                            Text(
-                              userData!['roles'][0],
-                              style: const TextStyle(
-                                color: Color(0xFF2D5AF0),
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                      if(_userData?['roles'].isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8EFFF),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
+                              const SizedBox(width: 4),
+                              Text(
+                                _userData?['roles'][0],
+                                style: const TextStyle(
+                                  color: Color(0xFF2D5AF0),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
+                            ],
+                          ),
+                        )
                     ]
                   )
                 ],
@@ -279,7 +287,6 @@ class _HomePageState extends State<HomePage> with Theme_Page {
                 _onItemTapped(6);
                 Navigator.pop(context);
               },
-
             ),
             ListTile(
               title: Row(
@@ -314,7 +321,7 @@ class _HomePageState extends State<HomePage> with Theme_Page {
               },
             ),
             const Spacer(),
-            Divider(color: dividerColor),
+            Divider(color: dividerColor, thickness: 1),
             ListTile(
               title: Row(
                 children: [
@@ -327,20 +334,23 @@ class _HomePageState extends State<HomePage> with Theme_Page {
                 ],
               ),
               onTap: _logout,
-            )
+            ),
+            Divider(color: dividerColor, thickness: 1),
+            const SizedBox(height: 40,)
           ]
         ),
       ),
       bottomNavigationBar: NavigationBarTheme(
       data: NavigationBarThemeData(
         labelTextStyle: WidgetStateProperty.all(
-          TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w500),
+          TextStyle(
+            color: textColor,
+            fontSize: 12, fontWeight:
+            FontWeight.w500)
+          ,
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: iconNavigationBarColor);
-          }
-          return IconThemeData(color: textColor);
+          return IconThemeData(color: states.contains(WidgetState.selected) ? iconNavigationBarColor : textColor);
         }),
       ),
       child: NavigationBar(

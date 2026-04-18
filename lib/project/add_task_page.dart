@@ -15,7 +15,7 @@ class AddTaskPage extends StatefulWidget {
   State<AddTaskPage> createState() => _AddTaskPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
+class _AddTaskPageState extends State<AddTaskPage> with ThemePage {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -23,13 +23,13 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
   String? _selectedType = "USER_STORY";
   String? _selectedAssignenId = "";
 
-  final storage = const FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
-  Map<String, dynamic>? userData;
+  Map<String, dynamic>? _userData;
 
   String _message = '';
   bool _isSuccess = false;
-  bool isLoading = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -39,7 +39,9 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
 
   Future<void> _addTask() async {
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
+
+    if (!mounted) return;
 
     if (_nameController.text.isEmpty) {
       setState(() {
@@ -63,6 +65,8 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
         }),
       );
 
+      if (!mounted) return;
+
       setState((){
         if (response.statusCode == 200 || response.statusCode == 204) {
           _message = Translations.get('add_task_page2', currentLang);
@@ -74,15 +78,22 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
       });
     } 
     catch (e){
+      if (!mounted) return;
       setState((){
         _message = '${Translations.get('add_task_page4', currentLang)}: $e';
+      });
+    }
+    finally{
+      setState((){
+        _isLoading = false;
       });
     }
   }
 
   Future<void> _loadUserData() async{
 
-    String? token = await storage.read(key: 'auth_token');
+    String? token = await _storage.read(key: 'auth_token');
+    
 
     final url = Uri.parse('https://trackdev.org/api/auth/self');
     try {
@@ -91,9 +102,11 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         setState((){
-          userData = jsonDecode(response.body); 
+          _userData = jsonDecode(response.body); 
         });
       }
     }
@@ -102,7 +115,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
     }
     finally{
       setState((){
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -113,7 +126,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
   @override
   Widget build(BuildContext context) {
 
-    if(isLoading){
+    if(_isLoading){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -132,7 +145,7 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
 
     final List listAssignees = [
       {'id': "", 'fullName': Translations.get('add_task_page8', currentLang)},
-      {'id':userData!['id'],'fullName': userData!['fullName']},
+      {'id':_userData!['id'],'fullName': _userData!['fullName']},
     ];
 
     return Scaffold(
@@ -142,18 +155,42 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
         backgroundColor: backgroundColor,
         elevation: 0,
         toolbarHeight: 50,
-        title: Row(
+         title: Row(
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: iconColor, size: 20),
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                  Text(
+                    Translations.get('add_task_page9', currentLang),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ]
+              ),
             ),
+            const SizedBox(width: 15),
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
+            ),
+            const SizedBox(width: 8),
             Text(
-              Translations.get('add_task_page9', currentLang),
+              'TrackDev',
               style: TextStyle(
-                color: textColor,
+                color: textColor, 
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 20,
               ),
             ),
           ],
@@ -374,57 +411,65 @@ class _AddTaskPageState extends State<AddTaskPage> with Theme_Page {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                   child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         side: BorderSide(color: borderColor),
                       ),
                       child: Text(
-                        Translations.get('add_task_page17', currentLang), 
-                        style: TextStyle(
-                          color: textColor
-                          )
+                        Translations.get('add_task_page17', currentLang),
+                        style: TextStyle(color: textColor)
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _addTask,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2D5AF0),
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      child: Text(
-                        Translations.get('add_task_page10', currentLang), 
-                        style: const TextStyle(
-                          color: Colors.white
-                        )
+                  SizedBox(
+                    height: 50,
+                    child: Expanded(
+                      child: ElevatedButton(
+                        onPressed: (){
+                          setState((){
+                            _isLoading = false;
+                          });
+                          _addTask();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2D5AF0),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          Translations.get('add_task_page10', currentLang),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  )
                 ],
               )
             }
-            else...{
+            else
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     side: BorderSide(color: borderColor),
                   ),
                   child: Text(
-                    Translations.get('add_task_page18', currentLang), 
-                    style: TextStyle(
-                      color: textColor
-                    )
+                    Translations.get('add_task_page18', currentLang),
+                    style: TextStyle(color: textColor)
                   ),
                 ),
-              ),
-            }
+              )  
           ],
         ),
       ),
