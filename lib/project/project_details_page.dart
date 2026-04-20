@@ -406,6 +406,76 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                 )
               ]
             ),
+            const SizedBox(height: 5,),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2D5AF0),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(11),
+                        topRight: Radius.circular(11),
+                      ),
+                    ),
+                    child: Text(
+                      Translations.get('Qualificació', currentLang),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  if(!_isLoading())...{
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: backgroundColor,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Color(0xFFF59E0B), width: 1),
+                            ),
+                              child: Icon(
+                                Icons.assessment,
+                                color: const Color(0xFFF59E0B),
+                              size: 20
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.project['qualification'] == null ? "-":  Translations.get('Qualificació', currentLang),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ]
+                      )
+                    )
+                  }
+                ],
+              ),
+            ),
             const SizedBox(height: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,7 +719,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                                     Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF2B344B),
+                                        color: backgroundColor,
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: Color(0xFF4D97FF), width: 1),
                                       ),

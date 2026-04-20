@@ -33,6 +33,8 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
   Map<String, dynamic>? _sprintsProjectData;
   Map<String, dynamic>? _userData;
 
+  String _selectedColumn = 'BACKLOG';
+
   @override
   void initState(){
     super.initState();
@@ -195,7 +197,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     }
   }
 
-  Color _getIconColor(String type) {
+  Color _getSprintStatusColor(String type) {
     switch (type) {
       case "CLOSED":
         return const Color(0xFF5F6368);
@@ -208,7 +210,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     }
   }
 
-  Color _getIconBackgroundColor(String type) {
+  Color _getSprintStatusBgColor(String type) {
     switch (type) {
       case "CLOSED":
         return const Color(0xFFF1F3F4);
@@ -278,24 +280,17 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     }
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case "BACKLOG":
-        return const Color(0xFFEF4444);
-      case "TODO":
-        return const Color(0xFFFBBF24);
-      case "INPROGRESS":
-        return const Color(0xFF3B82F6);
-      case "VERIFY":
-        return const Color(0xFFA855F7);
-      case "DONE":
-        return const Color(0xFF22C55E);
-      default:
-        return const Color(0xFF64748B);
+  Color _getColumnColor(String col) {
+    switch (col) {
+      case 'BACKLOG':    return const Color(0xFFEF4444);
+      case 'TODO':       return const Color(0xFFF59E0B);
+      case 'INPROGRESS': return const Color(0xFF3B82F6);
+      case 'VERIFY':     return const Color(0xFF8B5CF6);
+      case 'DONE':       return const Color(0xFF22C55E);
+      default:           return const Color(0xFF64748B);
     }
   }
-
-
+ 
   String? _canEditStatusReason(String newStatus, Map<String,dynamic> task) {
 
     if(_userData!['id'] != task['assignee']?['id']){
@@ -516,6 +511,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 
+  Color _hexToColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
   @override
   Widget build(BuildContext context) {
     if(_isLoading()){
@@ -597,37 +600,35 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
             const Spacer(),
             SizedBox(
               height: 40,
-              child: Expanded(
-                child: ElevatedButton(
-                  onPressed: ()async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddTaskPage(project: _projectData),
-                      ),
-                    );
-                    setState((){
-                      _isLoadingTasks = true; 
-                    });
-                    _loadTasksData();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D5AF0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                    padding: EdgeInsets.only(right: 10,left: 10),
-                  ),
-                  child: Text(
-                    Translations.get('sprint_details_page23', currentLang),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold
+              child: ElevatedButton(
+                onPressed: ()async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddTaskPage(project: _projectData),
                     ),
+                  );
+                  setState((){
+                    _isLoadingTasks = true; 
+                  });
+                  _loadTasksData();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2D5AF0),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                  padding: EdgeInsets.only(right: 10,left: 10),
+                ),
+                child: Text(
+                  Translations.get('sprint_details_page23', currentLang),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
               ),
-            )
+            ),
           ]
         )
       ),
@@ -655,14 +656,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getIconBackgroundColor(_sprintData?['status']),
+                          color: _getSprintStatusBgColor(_sprintData?['status']),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _getIconColor(_sprintData?['status']), width: 1),
+                          border: Border.all(color: _getSprintStatusColor(_sprintData?['status']), width: 1),
                         ),
                         child: Text(
                           _sprintData?['status'],
                           style: TextStyle(
-                            color: _getIconColor(_sprintData?['status']),
+                            color: _getSprintStatusColor(_sprintData?['status']),
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -711,290 +712,121 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
               ]
             )
           ),
-          Expanded(
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 200,
-                    child: DragTarget<Map<String, dynamic>>(
-                      onWillAcceptWithDetails: (details){
-                        final activeSprints = details.data['activeSprints'] as List? ?? [];
-                        return activeSprints.isNotEmpty;
-                      },
-                      onAcceptWithDetails: (details) async{
-                        final task = details.data;
-                        final reason = _canEditSprintReason(task, -1);
-                        if (reason != null) {
-                          _showCannotEditSnackBar(reason);
-                        } 
-                        else {
-                          await _updateSprint(-1, task);
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          await _loadTasksData();
-                          setState(() {
-                            _isLoadingTasks = false;
-                          });                  
-                        }
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF2D5AF0),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(11),
-                                      topRight: Radius.circular(11),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        Translations.get('sprint_details_page24', currentLang),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ]
-                                  )
-                                )
-                              ),
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: backlogTasks.length,
-                                itemBuilder: (context, index) {
-                                  final task = backlogTasks[index];
-                                  return InkWell(
-                                    onTap: () async{
-                                      await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => TaskDetailsPage(task: task)
-                                        ),
-                                      );
-                                      setState((){
-                                        _isLoadingTasks = true;
-                                      });
-                                      _loadTasksData();
-                                    },
-                                    child: Column(
-                                      children: [
-                                        LongPressDraggable<Map<String, dynamic>>(
-                                          delay: const Duration(milliseconds: 300),
-                                          data: task,
-                                          feedback: _taskCardBacklog(task, true),
-                                          child: _taskCardBacklog(task, false),
-                                        ),
-                                      ]
-                                    )
-                                  );                              
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  SizedBox(width: 20,),
-
-
-                  SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 200,
-                                height: 35,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor("TODO"), 
-                                  borderRadius: BorderRadius.circular(8)
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    _translateStatus("TODO"), 
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 5,),
-                              Container(
-                                width: 200,
-                                height: 35,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor("INPROGRESS"), 
-                                  borderRadius: BorderRadius.circular(8)
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    _translateStatus("INPROGRESS"), 
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 5,),
-                              Container(
-                                width: 200,
-                                height: 35,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor("VERIFY"), 
-                                  borderRadius: BorderRadius.circular(8)
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    _translateStatus("VERIFY"), 
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 5,),
-                              Container(
-                                width: 200,
-                                height: 35,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor("DONE"), 
-                                  borderRadius: BorderRadius.circular(8)
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    _translateStatus("DONE"), 
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  ),
-                                ),
-                              ),
-                            ]
-                          )
-                        ),
-                        SizedBox(
-                          width: 840,
-                          child: DragTarget<Map<String, dynamic>>(
-                            onWillAcceptWithDetails: (details){
-                              final activeSprints = details.data['activeSprints'] as List? ?? [];
-                              return activeSprints.isEmpty;
-                            },
-                            onAcceptWithDetails: (details) async{
-                              final task = details.data;
-                              final reason = _canEditSprintReason(task, _sprintData!['id']);
-                              if (reason != null) {
-                                _showCannotEditSnackBar(reason);
-                              } 
-                              else {
-                                await _updateSprint(_sprintData!['id'], task);
-                                setState(() {
-                                  _isLoadingTasks = true;
-                                });
-                                await _loadTasksData();
-                                setState(() {
-                                  _isLoadingTasks = false;
-                                });
-                              }
-                            },
-                            builder: (context, candidateData, rejectedData) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      itemCount: userStories.length,
-                                      itemBuilder: (context, index) {
-                                        final task = userStories[index];
-                                        return InkWell(
-                                          onTap: () async{
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => TaskDetailsPage(task: task)
-                                              ),
-                                            );
-                                            setState((){
-                                              _isLoadingTasks = true;
-                                            });
-                                            _loadTasksData();
-                                          },
-                                          child: Column(
-                                            children: [
-                                              LongPressDraggable<Map<String, dynamic>>(
-                                                delay: const Duration(milliseconds: 300),
-                                                data: task,
-                                                feedback: _taskCardSprint(task, true,true),
-                                                child: _taskCardSprint(task, false,false),
-                                              ),
-                                            ]
-                                          )
-                                        );                               
-                                      },
-                                    ),
-                                    if (usersTasks.isNotEmpty)
-                                      _unassignedTasksRow(usersTasks),                                  
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 150),
-                      ]
-                    )
-                  )
+                  _statusButton('BACKLOG'),
+                  _statusButton('TODO'),
+                  _statusButton('INPROGRESS'),
+                  _statusButton('VERIFY'),
+                  _statusButton('DONE'),
                 ],
               ),
             ),
           ),
-        ],
-      ),  
+
+          if(_selectedColumn == 'BACKLOG')
+            Expanded(
+              child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: backlogTasks.length,
+                    itemBuilder: (context, index) {
+                      final task = backlogTasks[index];
+                      return InkWell(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TaskDetailsPage(task: task),
+                            ),
+                          );
+                          setState(() {
+                            _isLoadingTasks = true;
+                          });
+                          _loadTasksData();
+                        },
+                        child: LongPressDraggable<Map<String, dynamic>>(
+                          delay: const Duration(milliseconds: 300),
+                          data: task,
+                          feedback: Material(
+                            color: Colors.transparent,
+                            child: SizedBox(
+                              width: 300,
+                              child: _taskCard(task, true),
+                            ),
+                          ),
+                          child: _taskCard(task, false),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ],
+                )
+              )
+            )
+          else
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: userStories.length,
+                      itemBuilder: (context, index) {
+                        final task = userStories[index];
+                        return InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TaskDetailsPage(task: task),
+                              ),
+                            );
+                            setState(() {
+                              _isLoadingTasks = true;
+                            });
+                            _loadTasksData();
+                          },
+                          child: LongPressDraggable<Map<String, dynamic>>(
+                            delay: const Duration(milliseconds: 300),
+                            data: task,
+                            feedback: Material(
+                              color: Colors.transparent,
+                              child: SizedBox(
+                                width: 300,
+                                child: _taskCardUserStory(task, true),
+                              ),
+                            ),
+                            child: _taskCardUserStory(task, false),
+                          ),
+                        );
+                      },
+                    ),
+                    if (usersTasks.isNotEmpty)
+                      _unassignedTasksRow(usersTasks),
+                    const SizedBox(height: 150),
+                  ],
+                ),
+              )
+            )
+        ]
+      )
     );
   }
+    
+
+    
 
 
 
@@ -1010,7 +842,96 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
 
 
 
-
+  Widget _statusButton(String col) {
+    final isSelected = _selectedColumn == col;
+    return DragTarget<Map<String, dynamic>>(
+      onWillAcceptWithDetails: (details) {
+        final activeSprints = details.data['activeSprints'] as List? ?? [];
+        if (col == 'BACKLOG') return activeSprints.isNotEmpty;
+        return true;
+      },
+      onAcceptWithDetails: (details) async {
+        final task = details.data;
+        final activeSprints = task['activeSprints'] as List? ?? [];
+        final bool comesFromBacklog = activeSprints.isEmpty;
+        if (col == 'BACKLOG') {
+          final reason = _canEditSprintReason(task, -1);
+          if (reason != null) {
+            _showCannotEditSnackBar(reason);
+          } 
+          else {
+            await _updateSprint(-1, task);
+            setState((){
+               _isLoadingTasks = true;
+            });
+            await _loadTasksData();
+            setState((){
+              _isLoadingTasks = false;
+            });
+          }
+        }
+        else if(comesFromBacklog){
+          final sprintId = _sprintData?['id'] as int?;
+          final reason = _canEditSprintReason(task, sprintId);
+          if (reason != null) {
+            _showCannotEditSnackBar(reason);
+          }
+          else{
+            await _updateSprint(sprintId, task);
+            setState((){
+               _isLoadingTasks = true;
+            });
+            await _loadTasksData();
+            setState((){
+              _isLoadingTasks = false;
+            });
+          }
+        }
+        else {
+          final reason = _canEditStatusReason(col, task);
+          if (reason != null) {
+            _showCannotEditSnackBar(reason);
+          } 
+          else {
+            await _updateStatus(col, task);
+            setState((){
+               _isLoadingTasks = true;
+            });
+            await _loadTasksData();
+            setState((){
+              _isLoadingTasks = false;
+            });
+          }
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ElevatedButton(
+            onPressed: (){
+              setState((){
+                _selectedColumn = col;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSelected ? _getColumnColor(col) : cardColor,
+              foregroundColor: isSelected ? Colors.white : _getColumnColor(col),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: _getColumnColor(col), width: 2),
+              ),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: Text(
+              _translateStatus(col),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
 
 
@@ -1030,1054 +951,464 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
 
 
   Widget _unassignedTasksRow(List<Map<String, dynamic>> usersTasks) {
-    List<Map<String, dynamic>> toDoTasks = [];
-    List<Map<String, dynamic>> inProgressTasks = [];
-    List<Map<String, dynamic>> verifyTasks = [];
-    List<Map<String, dynamic>> doneTasks = [];
 
-    for(var c in usersTasks){
-      if(c['status'] == 'TODO' ){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            toDoTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'INPROGRESS'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            inProgressTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'VERIFY'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            verifyTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'DONE'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            doneTasks.add(c);
+    final List<Map<String, dynamic>> selectedTasks = [];
+
+    for (var c in usersTasks) {
+      if (c['status'] == _selectedColumn) {
+        for (var s in c['activeSprints']) {
+          if (s['id'] == _sprintData?['id']) {
+            selectedTasks.add(c);
+            break;
           }
         }
       }
     }
 
-    int maxTasks = 0;
-
-    if(toDoTasks.length > maxTasks){
-      maxTasks = toDoTasks.length;
-    }
-    if(inProgressTasks.length > maxTasks){
-      maxTasks = inProgressTasks.length;
-    }
-    if(verifyTasks.length > maxTasks){
-      maxTasks = verifyTasks.length;
-    }
-    if(doneTasks.length > maxTasks){
-      maxTasks = doneTasks.length;
-    }
-
-    double columnHeight = maxTasks > 0 ? (maxTasks * 75) : 100;
-
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 850,
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white10),
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text(      
-                  Translations.get('sprint_details_page26', currentLang), 
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Text(
+                Translations.get('sprint_details_page26', currentLang),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
-              ]
-            ),
-
-            Divider(color: dividerColor, thickness: 1),
-            const SizedBox(height: 5,),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 190,
-                  child: DragTarget<Map<String, dynamic>>(
-                    onWillAcceptWithDetails: (details){
-                      return details.data['parentTaskId'] == null && details.data['type'] != 'USER_STORY';
-                    },
-                    onAcceptWithDetails: (details) async{
-                      final task = details.data;
-                      final reason = _canEditStatusReason("TODO", task);
-                      if (reason != null) {
-                        _showCannotEditSnackBar(reason);
-                      } 
-                      else {
-                        setState(() {
-                          _isLoadingTasks = true;
-                        });
-                        await _updateStatus("TODO", task);
-                        await _loadTasksData();
-                        setState(() {
-                          _isLoadingTasks = false;
-                        });
-                      }
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        constraints: BoxConstraints(minHeight: columnHeight),
-                        decoration: BoxDecoration(
-                          color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                          ),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: toDoTasks.length,
-                          itemBuilder: (context, index) {
-                            final task = toDoTasks[index];
-                            return InkWell(
-                              onTap: () async{
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskDetailsPage(task: task)
-                                  ),
-                                );
-                                setState((){
-                                  _isLoadingTasks = true;
-                                });
-                                _loadTasksData();
-                              },
-                              child: Column(
-                                children: [
-                                  LongPressDraggable<Map<String, dynamic>>(
-                                    delay: const Duration(milliseconds: 300),
-                                    data: task,
-                                    feedback: _taskCardBacklog(task, true),
-                                    child: _taskCardBacklog(task, false),
-                                  ),
-                                ]
-                              )
-                            );                              
-                          },
-                        ),
-                      );
-                    }
-                  )
-                ),
-                const SizedBox(width: 15),
-                SizedBox(
-                  width: 190,
-                  child: DragTarget<Map<String, dynamic>>(
-                    onWillAcceptWithDetails: (details){
-                      return details.data['parentTaskId'] == null && details.data['type'] != 'USER_STORY';
-                    },
-                    onAcceptWithDetails: (details) async{
-                      final task = details.data;
-                      final reason = _canEditStatusReason("INPROGRESS", task);
-                      if (reason != null) {
-                        _showCannotEditSnackBar(reason);
-                      } 
-                      else {
-                        setState(() {
-                          _isLoadingTasks = true;
-                        });
-                        await _updateStatus("INPROGRESS", task);
-                        await _loadTasksData();
-                        setState(() {
-                          _isLoadingTasks = false;
-                        });
-                      }
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        constraints: BoxConstraints(minHeight: columnHeight),
-                        decoration: BoxDecoration(
-                          color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                          ),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: inProgressTasks.length,
-                          itemBuilder: (context, index) {
-                            final task = inProgressTasks[index];
-                            return InkWell(
-                              onTap: () async{
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskDetailsPage(task: task)
-                                  ),
-                                );
-                                setState((){
-                                  _isLoadingTasks = true;
-                                });
-                                _loadTasksData();
-                              },
-                              child: Column(
-                                children: [
-                                  LongPressDraggable<Map<String, dynamic>>(
-                                    delay: const Duration(milliseconds: 300),
-                                    data: task,
-                                    feedback: _taskCardBacklog(task, true),
-                                    child: _taskCardBacklog(task, false),
-                                  ),
-                                ]
-                              )
-                            );                         
-                          },
-                        ),
-                      );
-                    }
-                  )
-                ),
-                const SizedBox(width: 15),
-                SizedBox(
-                  width: 190,
-                  child: DragTarget<Map<String, dynamic>>(
-                    onWillAcceptWithDetails: (details){
-                      return details.data['parentTaskId'] == null && details.data['type'] != 'USER_STORY';
-                    },
-                    onAcceptWithDetails: (details) async{
-                      final task = details.data;
-                      final reason = _canEditStatusReason("VERIFY", task);
-                      if (reason != null) {
-                        _showCannotEditSnackBar(reason);
-                      } 
-                      else {
-                        setState(() {
-                          _isLoadingTasks = true;
-                        });
-                        await _updateStatus("VERIFY", task);
-                        await _loadTasksData();
-                        setState(() {
-                          _isLoadingTasks = false;
-                        });
-                      }
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        constraints: BoxConstraints(minHeight: columnHeight),
-                        decoration: BoxDecoration(
-                          color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                          ),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: verifyTasks.length,
-                          itemBuilder: (context, index) {
-                            final task = verifyTasks[index];
-                            return InkWell(
-                              onTap: () async{
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskDetailsPage(task: task)
-                                  ),
-                                );
-                                setState((){
-                                  _isLoadingTasks = true;
-                                });
-                                _loadTasksData();
-                              },
-                              child: Column(
-                                children: [
-                                  LongPressDraggable<Map<String, dynamic>>(
-                                    delay: const Duration(milliseconds: 300),
-                                    data: task,
-                                    feedback: _taskCardBacklog(task, true),
-                                    child: _taskCardBacklog(task, false),
-                                  ),
-                                ]
-                              )
-                            );                               
-                          },
-                        ),
-                      );
-                    }
-                  )
-                ),
-                const SizedBox(width: 15),
-                SizedBox(
-                  width: 190,
-                  child: DragTarget<Map<String, dynamic>>(
-                    onWillAcceptWithDetails: (details){
-                      return details.data['parentTaskId'] == null && details.data['type'] != 'USER_STORY';
-                    },
-                    onAcceptWithDetails: (details) async{
-                      final task = details.data;
-                      final reason = _canEditStatusReason("DONE", task);
-                      if (reason != null) {
-                        _showCannotEditSnackBar(reason);
-                      } 
-                      else {
-                        setState(() {
-                          _isLoadingTasks = true;
-                        });
-                        await _updateStatus("DONE", task);
-                        await _loadTasksData();
-                        setState(() {
-                          _isLoadingTasks = false;
-                        });
-                      }
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        constraints: BoxConstraints(minHeight: columnHeight),
-                        decoration: BoxDecoration(
-                          color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                          ),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: doneTasks.length,
-                          itemBuilder: (context, index) {
-                            final task = doneTasks[index];
-                            return InkWell(
-                              onTap: () async{
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskDetailsPage(task: task)
-                                  ),
-                                );
-                                setState((){
-                                  _isLoadingTasks = true;
-                                });
-                                _loadTasksData();
-                              },
-                              child: Column(
-                                children: [
-                                  LongPressDraggable<Map<String, dynamic>>(
-                                    delay: const Duration(milliseconds: 300),
-                                    data: task,
-                                    feedback: _taskCardBacklog(task, true),
-                                    child: _taskCardBacklog(task, false),
-                                  ),
-                                ]
-                              )
-                              );                                
-                          },
-                        ),
-                      );
-                    }
-                  )
-                ), 
-              ]
-            )       
-          ],
-        ),
-      )
-    );
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  Widget _taskCardSprint(Map<String, dynamic> task, bool isDragging, bool feedback) {
-
-    final List children = task['childTasks'] ?? [];
-
-    List<Map<String, dynamic>> toDoTasks = [];
-    List<Map<String, dynamic>> inProgressTasks = [];
-    List<Map<String, dynamic>> verifyTasks = [];
-    List<Map<String, dynamic>> doneTasks = [];
-
-    for(var c in children){
-      if(c['status'] == 'TODO' ){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            toDoTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'INPROGRESS'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            inProgressTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'VERIFY'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            verifyTasks.add(c);
-          }
-        }
-      }
-      if(c['status'] == 'DONE'){
-        for(var s in c['activeSprints']){
-          if(s['id']==_sprintData?['id']){
-            doneTasks.add(c);
-          }
-        }
-      }
-    }
-
-    int maxTasks = 0;
-
-    if(toDoTasks.length > maxTasks){
-      maxTasks = toDoTasks.length;
-    }
-    if(inProgressTasks.length > maxTasks){
-      maxTasks = inProgressTasks.length;
-    }
-    if(verifyTasks.length > maxTasks){
-      maxTasks = verifyTasks.length;
-    }
-    if(doneTasks.length > maxTasks){
-      maxTasks = doneTasks.length;
-    }
-
-    double columnHeight = maxTasks > 0 ? (maxTasks * 75) : 100;
-
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 850,
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white10),
-          boxShadow: isDragging ? [BoxShadow(color: Colors.black54, blurRadius: 10)] : [],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getTaskBackgroundColor(task['type']),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _getTaskColor(task['type']), width: 1),
-                    ),
-                    child: Text(
-                      _translateType(task['type']),
-                      style: TextStyle(
-                        color: _getTaskColor(task['type']),
-                        fontSize: 7,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  if(task['name']!= null)...{
-                    const SizedBox(width: 5),
-                    Text(
-                      task['name'],
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  },
-                  if(task['taskKey'] != null)...{
-                    const SizedBox(width: 5),
-                    Text(
-                      "  ${task['taskKey']}",
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 7,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  },
-                  if(task['assignee'] != null)...{
-                    Text(
-                      ' • ',
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      task['assignee']['fullName'],
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 7,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  },
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () async{
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddSubtaskPage(task: task),
-                        ),
-                      );
-                      setState((){
-                        _isLoadingTasks = true; 
-                      });
-                      _loadTasksData();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2D5AF0),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                      padding: EdgeInsets.only(right: 10,left: 10),
-                    ),
-                    child: Text(
-                      Translations.get('sprint_details_page25', currentLang),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold
-                      ),
-                    )
-                  ),
-                ]
               ),
-
-            if(!feedback)...{
-              Divider(color: dividerColor, thickness: 1),
-              const SizedBox(height: 5,),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 190,
-                    child: DragTarget<Map<String, dynamic>>(
-                      onWillAcceptWithDetails: (details){
-                        final parentTaskId = details.data['parentTaskId'] ?? [];
-                        return parentTaskId==task['id'];
-                      },
-                      onAcceptWithDetails: (details) async{
-                        final task = details.data;
-                        final reason = _canEditStatusReason("TODO", task);
-                        if (reason != null) {
-                          _showCannotEditSnackBar(reason);
-                        } 
-                        else {
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          await _updateStatus("TODO", task);
-                          await _loadTasksData();
-                          setState(() {
-                            _isLoadingTasks = false;
-                          });
-                        }
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          constraints: BoxConstraints(minHeight: columnHeight),
-                          decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                            ),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: toDoTasks.length,
-                            itemBuilder: (context, index) {
-                              final task = toDoTasks[index];
-                              return InkWell(
-                                onTap: () async{
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => TaskDetailsPage(task: task)
-                                    ),
-                                  );
-                                  setState((){
-                                    _isLoadingTasks = true;
-                                  });
-                                  _loadTasksData();
-                                },
-                                child: Column(
-                                  children: [
-                                    LongPressDraggable<Map<String, dynamic>>(
-                                      delay: const Duration(milliseconds: 300),
-                                      data: task,
-                                      feedback: _taskCardBacklog(task, true),
-                                      child: _taskCardBacklog(task, false),
-                                    ),
-                                  ]
-                                )
-                              );                              
-                            },
-                          ),
-                        );
-                      }
-                    )
-                  ),
-                  const SizedBox(width: 15),
-                  SizedBox(
-                    width: 190,
-                    child: DragTarget<Map<String, dynamic>>(
-                      onWillAcceptWithDetails: (details){
-                        final parentTaskId = details.data['parentTaskId'] ?? [];
-                        return parentTaskId==task['id'];
-                      },
-                      onAcceptWithDetails: (details) async{
-                        final task = details.data;
-                        final reason = _canEditStatusReason("INPROGRESS", task);
-                        if (reason != null) {
-                          _showCannotEditSnackBar(reason);
-                        } 
-                        else {
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          await _updateStatus("INPROGRESS", task);
-                          await _loadTasksData();
-                          setState(() {
-                            _isLoadingTasks = false;
-                          });
-                        }
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          constraints: BoxConstraints(minHeight: columnHeight),
-                          decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                            ),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: inProgressTasks.length,
-                            itemBuilder: (context, index) {
-                              final task = inProgressTasks[index];
-                              return InkWell(
-                                onTap: () async{
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => TaskDetailsPage(task: task)
-                                    ),
-                                  );
-                                  setState((){
-                                    _isLoadingTasks = true;
-                                  });
-                                  _loadTasksData();
-                                },
-                                child: Column(
-                                  children: [
-                                    LongPressDraggable<Map<String, dynamic>>(
-                                      delay: const Duration(milliseconds: 300),
-                                      data: task,
-                                      feedback: _taskCardBacklog(task, true),
-                                      child: _taskCardBacklog(task, false),
-                                    ),
-                                  ]
-                                )
-                              );                         
-                            },
-                          ),
-                        );
-                      }
-                    )
-                  ),
-                  const SizedBox(width: 15),
-                  SizedBox(
-                    width: 190,
-                    child: DragTarget<Map<String, dynamic>>(
-                      onWillAcceptWithDetails: (details){
-                        final parentTaskId = details.data['parentTaskId'] ?? [];
-                        return parentTaskId==task['id'];
-                      },
-                      onAcceptWithDetails: (details) async{
-                        final task = details.data;
-                        final reason = _canEditStatusReason("VERIFY", task);
-                        if (reason != null) {
-                          _showCannotEditSnackBar(reason);
-                        } 
-                        else {
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          await _updateStatus("VERIFY", task);
-                          await _loadTasksData();
-                          setState(() {
-                            _isLoadingTasks = false;
-                          });
-                        }
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          constraints: BoxConstraints(minHeight: columnHeight),
-                          decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                            ),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: verifyTasks.length,
-                            itemBuilder: (context, index) {
-                              final task = verifyTasks[index];
-                              return InkWell(
-                                onTap: () async{
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => TaskDetailsPage(task: task)
-                                    ),
-                                  );
-                                  setState((){
-                                    _isLoadingTasks = true;
-                                  });
-                                  _loadTasksData();
-                                },
-                                child: Column(
-                                  children: [
-                                    LongPressDraggable<Map<String, dynamic>>(
-                                      delay: const Duration(milliseconds: 300),
-                                      data: task,
-                                      feedback: _taskCardBacklog(task, true),
-                                      child: _taskCardBacklog(task, false),
-                                    ),
-                                  ]
-                                )
-                              );                               
-                            },
-                          ),
-                        );
-                      }
-                    )
-                  ),
-                  const SizedBox(width: 15),
-                  SizedBox(
-                    width: 190,
-                    child: DragTarget<Map<String, dynamic>>(
-                      onWillAcceptWithDetails: (details){
-                        final parentTaskId = details.data['parentTaskId'] ?? [];
-                        return parentTaskId==task['id'];
-                      },
-                      onAcceptWithDetails: (details) async{
-                        final task = details.data;
-                        final reason = _canEditStatusReason("DONE", task);
-                        if (reason != null) {
-                          _showCannotEditSnackBar(reason);
-                        } 
-                        else {
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          await _updateStatus("DONE", task);
-                          await _loadTasksData();
-                          setState(() {
-                            _isLoadingTasks = false;
-                          });
-                        }
-                      },
-                      builder: (context, candidateData, rejectedData) {
-                        return Container(
-                          constraints: BoxConstraints(minHeight: columnHeight),
-                          decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty ? Colors.blue : cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: candidateData.isNotEmpty ? Colors.blue.withAlpha(150): borderColor,
-                            ),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: doneTasks.length,
-                            itemBuilder: (context, index) {
-                              final task = doneTasks[index];
-                              return InkWell(
-                                onTap: () async{
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => TaskDetailsPage(task: task)
-                                    ),
-                                  );
-                                  setState((){
-                                    _isLoadingTasks = true;
-                                  });
-                                  _loadTasksData();
-                                },
-                                child: Column(
-                                  children: [
-                                    LongPressDraggable<Map<String, dynamic>>(
-                                      delay: const Duration(milliseconds: 300),
-                                      data: task,
-                                      feedback: _taskCardBacklog(task, true),
-                                      child: _taskCardBacklog(task, false),
-                                    ),
-                                  ]
-                                )
-                               );                                
-                            },
-                          ),
-                        );
-                      }
-                    )
+            ],
+          ),
+          if (selectedTasks.isNotEmpty) ...{
+            Divider(color: dividerColor, thickness: 1, height: 16),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: selectedTasks.length,
+              itemBuilder: (context, index) {
+                final task = selectedTasks[index];
+                return InkWell(
+                  onTap: () async{
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetailsPage(task: task)
+                      ),
+                    );
+                    setState((){
+                      _isLoadingTasks = true;
+                    });
+                    _loadTasksData();
+                  },
+                  child: LongPressDraggable<Map<String, dynamic>>(
+                    delay: const Duration(milliseconds: 300),
+                    data: task,
+                    feedback: Material(
+                      color: Colors.transparent,
+                      child: SizedBox(
+                        width: 300,
+                        child: _taskCard(task, true),
+                      ),
+                    ),
+                    child: _taskCard(task, false),
                   ), 
-                ]
-              )
-            }       
-          ],
-        ),
-      )
+                );
+              },
+            ),
+          }
+          else...{
+            Divider(color: dividerColor, thickness: 1, height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Text(
+                    Translations.get('Sense tasques en aquest estat', currentLang),
+                    style: TextStyle(
+                      color: subtitleColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ), 
+          },
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  Widget _taskCardBacklog(Map<String, dynamic> task, bool isDragging) {
+  Widget _taskCardUserStory(Map<String, dynamic> task, bool feedback) {
 
     final List children = task['childTasks'] ?? [];
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 150,
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white10),
-          boxShadow: isDragging ? [BoxShadow(color: Colors.black54, blurRadius: 10)] : [],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getTaskBackgroundColor(task['type']),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _getTaskColor(task['type']), width: 1),
-                  ),
-                  child: Text(
-                    _translateType(task['type']),
-                    style: TextStyle(
-                      color: _getTaskColor(task['type']),
-                      fontSize: 7,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 5),
-                if(task['name'] != null)
-                  Text(
-                    task['name'],
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                if(task['taskKey'] != null)
-                  Text(
-                    "  ${task['taskKey']} ",
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 7,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                if(task['assignee'] != null)...{
-                  Text(
-                      ' • ',
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                  ),
-                  Text(
-                    task['assignee']['fullName'],
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 7,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  )
-                }
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (children.isNotEmpty) ...{
-              Divider(color: dividerColor, thickness: 1),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: task['childTasks'].length,
-                itemBuilder: (context, index) {
-                  final child = task['childTasks'][index];
-                  return InkWell(
-                    onTap: () async{
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TaskDetailsPage(task: child)
-                        ),
-                      );
-                      setState((){
-                        _isLoadingTasks = true;
-                      });
-                      _loadTasksData();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.subdirectory_arrow_right, size: 12, color: subtitleColor),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getTaskBackgroundColor(child['type']),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: _getTaskColor(child['type']), width: 1),
+    final List<Map<String, dynamic>> visibleSubtasks = [];
+    if(!feedback) {
+      for(var c in children) {
+        if (_selectedColumn == 'BACKLOG') {
+          if((c['activeSprints'] as List).isEmpty){
+            visibleSubtasks.add(c);
+          }
+        } 
+        else{
+          if(c['status'] == _selectedColumn){
+            for(var s in (c['activeSprints'] as List)){
+              if(s['id'] == _sprintData?['id']){
+                visibleSubtasks.add(c);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getTaskBackgroundColor(task['type']),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _getTaskColor(task['type']), width: 1),
+                          ),
+                          child: Text(
+                            _translateType(task['type']),
+                            style: TextStyle(
+                              color: _getTaskColor(task['type']),
+                              fontSize: 7,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                        ),
+                        if (task['name'] != null) ...{
+                          const SizedBox(width: 5),
+                          Expanded(
                             child: Text(
-                              _translateType(child['type']),
+                              task['name'],
                               style: TextStyle(
-                                color: _getTaskColor(child['type']),
-                                fontSize: 7,
+                                color: textColor,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                        },
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        if (task['taskKey'] != null) ...{
                           Text(
-                            child['name'],
+                            task['taskKey'],
                             style: TextStyle(
                               color: subtitleColor,
-                              fontSize: 15,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        },
+                        if (task['assignee'] != null) ...{
+                          Text(
+                            ' • ',
+                            style: TextStyle(
+                              color: subtitleColor, 
+                              fontSize: 15, 
+                              fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            task['assignee']['fullName'],
+                            style: TextStyle(color: 
+                              subtitleColor, 
+                              fontSize: 12, 
+                              fontWeight: FontWeight.bold
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ],
+                        },
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (!feedback)
+                ElevatedButton(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddSubtaskPage(task: task)),
+                    );
+                    setState((){
+                       _isLoadingTasks = true;
+                    });
+                    _loadTasksData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5AF0),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  child: Text(
+                    Translations.get('sprint_details_page25', currentLang),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
+          ),
+          if (!feedback && _selectedColumn != 'BACKLOG') ...{
+            Divider(color: dividerColor, thickness: 1, height: 16),
+            if (visibleSubtasks.isEmpty)...{
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: Row(
+                  children: [
+                    Text(
+                      Translations.get('Sense subtasques en aquest estat', currentLang),
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 12,
                       ),
-                    )
-                  );
-                }
+                    ),
+                  ],
+                ),
+              ),
+            }
+            else...{
+              Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: visibleSubtasks.length,
+                    itemBuilder: (context, index) {
+                      final task = visibleSubtasks[index];
+                      return InkWell(
+                        onTap: () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TaskDetailsPage(task: task)
+                            ),
+                          );
+                          setState((){
+                            _isLoadingTasks = true;
+                          });
+                          _loadTasksData();
+                        },
+                        child: Column(
+                          children: [
+                            LongPressDraggable<Map<String, dynamic>>(
+                              delay: const Duration(milliseconds: 300),
+                              data: task,
+                              feedback: Material(
+                                color: Colors.transparent,
+                                child: SizedBox(
+                                  width: 300,
+                                  child: _taskCard(task, true),
+                                ),
+                              ),
+                              child: _taskCard(task, false),
+                            ),
+                          ]
+                        )
+                      );
+                    }
+                  )
+                ]
               )
             }
-          ]   
-        )
+          },
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _taskCard(Map<String, dynamic> task, bool isDragging) {
+
+    final List children = task['childTasks'] ?? [];
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white10),
+        boxShadow: isDragging ? [BoxShadow(color: Colors.black54, blurRadius: 10)] : [],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getTaskBackgroundColor(task['type']),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _getTaskColor(task['type']), width: 1),
+                          ),
+                          child: Text(
+                            _translateType(task['type']),
+                            style: TextStyle(
+                              color: _getTaskColor(task['type']),
+                              fontSize: 7,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        if (task['name'] != null)
+                          Expanded(
+                            child: Text(
+                              task['name'],
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (task['taskKey'] != null)
+                      Text(
+                        "  ${task['taskKey']}",
+                        style: TextStyle(
+                          color: subtitleColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (task['assignee'] != null) ...{
+                CircleAvatar(
+                  radius: 15,
+                  backgroundColor: _hexToColor(task['assignee']['color']),
+                  child: Text(
+                    task['assignee']['capitalLetters'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  task['assignee']['fullName'],
+                  style: TextStyle(
+                    color: subtitleColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 5),
+              },
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (children.isNotEmpty && !isDragging) ...{
+            Divider(color: dividerColor, thickness: 1),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: task['childTasks'].length,
+              itemBuilder: (context, index) {
+                final child = task['childTasks'][index];
+                return InkWell(
+                  onTap: () async{
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetailsPage(task: child)
+                      ),
+                    );
+                    setState((){
+                      _isLoadingTasks = true;
+                    });
+                    _loadTasksData();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 6.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.subdirectory_arrow_right, size: 12, color: subtitleColor),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getTaskBackgroundColor(child['type']),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _getTaskColor(child['type']), width: 1),
+                          ),
+                          child: Text(
+                            _translateType(child['type']),
+                            style: TextStyle(
+                              color: _getTaskColor(child['type']),
+                              fontSize: 7,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          child['name'],
+                          style: TextStyle(
+                            color: subtitleColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  )
+                );
+              }
+            )
+          }
+        ]   
       )
     );
   }
