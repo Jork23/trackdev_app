@@ -9,6 +9,7 @@ import '../configuration/security_page.dart';
 import 'courses_page.dart';
 import 'projects_page.dart';
 import 'activity_page.dart';
+import 'overview_page.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
 
@@ -119,7 +120,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
     }
 
     List<Widget> pages = <Widget>[
-      Text('Index 0: Resum'),
+      OverviewPage(),
       CoursesPage(),
       ProjectsPage(),
       Text('Index 3: Analitiques'),

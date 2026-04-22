@@ -4,34 +4,36 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
-import 'add_task_page.dart';
-import 'task_details_page.dart';
+import '../project/task_details_page.dart';
 
 
-class TaskProjectPage extends StatefulWidget {
-  final Map<String, dynamic> project;
+class TasksSearchPage extends StatefulWidget {
 
-  const TaskProjectPage({super.key, required this.project});
+  const TasksSearchPage({super.key});
 
   @override
-  State<TaskProjectPage> createState() => _TaskProjectPageState();
+  State<TasksSearchPage> createState() => _TasksSearchPageState();
 }
 
-class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
+class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
 
   static const _storage = FlutterSecureStorage();
   final TextEditingController _searchController = TextEditingController();
 
-  bool _isLoading = true;
+  bool _isLoadingTask = true;
+  bool _isLoadingProject = true;
 
+  List<dynamic> _projectsData = [];
   Map<String, dynamic> _taskData = {};
+
+  Map<String, dynamic>? _selectedProject;
 
   String? _selectedType = "";
   String? _selectedStatus = "";
   String? _selectedAssignenId = "";
-  int? _selectedSprintId;
   String? _selectedSortOrder = "desc";
   String _selectedSearch = "";
+  int? _selectedProjectId;
 
   int _page = 0;
   int _size = 10;
@@ -42,7 +44,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
   @override
   void initState() {
     super.initState();
-    _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+    _loadProjects();
+    _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
   }
 
   @override
@@ -51,19 +54,52 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
     super.dispose();
   }
 
+  bool _isLoading(){
+    return _isLoadingTask || _isLoadingProject;
+  }
+
+  Future<void> _loadProjects() async{
+
+    String? token = await _storage.read(key: 'auth_token');
+
+    final url = Uri.parse('https://trackdev.org/api/projects');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState((){
+          _projectsData = jsonDecode(response.body); 
+        });
+      }
+    }
+    catch (e){
+      debugPrint("Error: $e");
+    }
+    finally{
+      setState((){
+        _isLoadingProject = false;
+      });
+    }
+  }
+
   void _resetFilters() {
     setState(() {
       _selectedType = "";
       _selectedStatus = "";
       _selectedAssignenId = "";
-      _selectedSprintId = null;
+      _selectedProjectId = null;
       _selectedSortOrder = "desc";
       _selectedSearch = "";
       _searchController.clear();
       _page = 0;
-      _isLoading = true;
+      _isLoadingTask = true;
     });
-    _loadTask(widget.project['id'], null, "", "", "", "desc", "");
+    _loadTask( null, "", "", "", "desc", "");
   }
 
   Color _getTaskColor(String type) {
@@ -130,7 +166,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
-  Future<void> _loadTask(int? projectId, int? sprintId, String? assigneeId, String? status, String? type, String? sortOrder, String? search) async{
+  Future<void> _loadTask(int? projectId, String? assigneeId, String? status, String? type, String? sortOrder, String? search) async{
 
     String? token = await _storage.read(key: 'auth_token');
 
@@ -138,7 +174,6 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
       'page': _page.toString(),
       'size': _size.toString(),
       'projectId': '$projectId',
-      if(sprintId!=null) 'sprintId': '$sprintId',
       if(assigneeId !=null && assigneeId.isNotEmpty) 'assigneeId': assigneeId,
       if(status !=null && status.isNotEmpty) 'status': status,
       if(type !=null && type.isNotEmpty) 'type': type,
@@ -169,7 +204,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
     }
     finally{
       setState((){
-        _isLoading = false;
+        _isLoadingTask = false;
       });
     }
   }
@@ -178,8 +213,8 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
   @override
   Widget build(BuildContext context) {
 
-    final List sprintsAux = widget.project['sprints'] ?? [];
-    final List membersAux = widget.project['members'] ?? [];
+    final List membersAux = _selectedProject?['members'] ?? [];
+    final List projectsAux = _projectsData;
 
     final List listTypes = [
         {'type': "", 'name': Translations.get('task_proj_page8', currentLang)},
@@ -202,19 +237,19 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
       ...membersAux
     ];
     
-    final List listSprints = [
-      {'id': null, 'name': Translations.get('task_proj_page10', currentLang)},
-      ...sprintsAux
-    ];
-
     final List listSortOrder = [
       {'value': 'desc', 'name': Translations.get('task_proj_page12', currentLang)},
       {'value': 'asc', 'name': Translations.get('task_proj_page13', currentLang)},
     ];
 
+    final List listProjects = [
+      {'id': null, 'name': Translations.get('Tots els projectes', currentLang)},
+      ...projectsAux
+    ];
+
     final List<int> pageSizeOptions = [5, 10, 20, 50];
 
-    if(_isLoading){
+    if(_isLoading()){
       return Scaffold(
         backgroundColor: backgroundColor,
         body: Center(
@@ -281,42 +316,38 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Divider(color: dividerColor, thickness: 1),
-            Row(
-              children: [
-                Text(
-                  Translations.get('task_proj_page15', currentLang),
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                  ),
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () async{
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddTaskPage(project: widget.project,),
-                      ),
-                    );
-                    setState((){
-                      _isLoading = true; 
-                    });
-                    _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2D5AF0),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: Text(
-                    Translations.get('task_proj_page16', currentLang), 
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
+            Text(
+              Translations.get('task_proj_page15', currentLang),
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 25,
+              ),
             ),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
             Divider(color: dividerColor, thickness: 1),
             const SizedBox(height: 20),
             Container(
@@ -405,9 +436,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                             setState(() {
                               _selectedType = value;
                               _page = 0;
-                              _isLoading = true;
+                              _isLoadingTask = true;
                             });
-                            _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
                           dropdownMenuEntries: listTypes.map((type) {
                             return DropdownMenuEntry<String?>(
@@ -442,9 +473,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                             setState(() {
                               _selectedStatus = value;
                               _page = 0;
-                              _isLoading = true;
+                              _isLoadingTask = true;
                             });
-                            _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
                           dropdownMenuEntries: listStatus.map((stat) {
                             return DropdownMenuEntry<String?>(
@@ -459,7 +490,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                         ),
                         SizedBox(height: 8),
                         DropdownMenu<int?>(
-                          initialSelection: _selectedSprintId,
+                          initialSelection: _selectedProjectId,
                           width: MediaQuery.of(context).size.width - 72,
                           textStyle: TextStyle(color: textColor, fontSize: 14),
                           inputDecorationTheme: InputDecorationTheme(
@@ -477,13 +508,13 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                           ),
                           onSelected: (int? value) async {
                             setState(() {
-                              _selectedSprintId = value;
+                              _selectedProjectId = value;
                               _page = 0;
-                              _isLoading = true;
+                              _isLoadingTask = true;
                             });
-                            _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
-                          dropdownMenuEntries: listSprints.map((spri) {
+                          dropdownMenuEntries: listProjects.map((spri) {
                             return DropdownMenuEntry<int?>(
                               value: spri['id'], 
                               label: spri['name'],
@@ -516,9 +547,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                             setState(() {
                               _selectedAssignenId = value;
                               _page = 0;
-                              _isLoading = true;
+                              _isLoadingTask = true;
                             });
-                              _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                              _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
                           dropdownMenuEntries: listAssignees.map((memb) {
                             return DropdownMenuEntry<String?>(
@@ -553,9 +584,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                             setState(() {
                               _selectedSortOrder = value;
                               _page = 0;
-                              _isLoading = true;
+                              _isLoadingTask = true;
                             });
-                            _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
                           dropdownMenuEntries: listSortOrder.map((sort) {
                             return DropdownMenuEntry<String?>(
@@ -595,8 +626,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                             setState(() {
                               _selectedSearch = value;
                               _page = 0;
+                              _isLoadingTask = true;
                             });
-                            _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
                         ),
                       ],        
@@ -605,7 +637,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                 ]
               )
             ),
-            if(!_isLoading && tasks.isEmpty)
+            if(!_isLoading() && tasks.isEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(48.0),
@@ -653,7 +685,7 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                   ],
                 ),
               ),
-            if(!_isLoading && tasks.isNotEmpty)...{
+            if(!_isLoading() && tasks.isNotEmpty)...{
               Divider(color: dividerColor, thickness: 1),
               ListView.builder(
                 shrinkWrap: true,
@@ -671,9 +703,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                         ),
                       );
                       setState((){
-                        _isLoading = true; 
+                        _isLoadingTask = true; 
                       });
-                      _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                      _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -854,17 +886,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                           ? () {
                               setState(() {
                                 _page--;
-                                _isLoading = true;
+                                _isLoadingTask = true;
                               });
-                              _loadTask(
-                                widget.project['id'], 
-                                _selectedSprintId, 
-                                _selectedAssignenId, 
-                                _selectedStatus, 
-                                _selectedType, 
-                                _selectedSortOrder, 
-                                _selectedSearch
-                              );
+                              _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                             }
                           : null,
                           icon: Icon(Icons.chevron_left, size: 20),
@@ -901,18 +925,10 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                           onPressed: _page < (_totalPages - 1) 
                           ? () {
                               setState(() {
-                                _page++;
-                                _isLoading = true;
+                                _page--;
+                                _isLoadingTask = true;
                               });
-                              _loadTask(
-                                widget.project['id'], 
-                                _selectedSprintId, 
-                                _selectedAssignenId, 
-                                _selectedStatus, 
-                                _selectedType, 
-                                _selectedSortOrder, 
-                                _selectedSearch
-                              );
+                              _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                             }
                           : null,
                           icon: Icon(Icons.chevron_right, size: 20),
@@ -966,9 +982,9 @@ class _TaskProjectPageState extends State<TaskProjectPage> with ThemePage{
                                 setState(() {
                                   _size = newSize;
                                   _page = 0;
-                                  _isLoading = true;
+                                  _isLoadingTask = true;
                                 });
-                                _loadTask(widget.project['id'], _selectedSprintId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                                _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                               }
                             },
                           ),
