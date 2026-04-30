@@ -148,6 +148,59 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
     return null;
   }
 
+  
+  final Map<String, Map<String, String>> _localTranslations = {
+    'ca': {
+      'transitionFromBacklog': 'Des de Backlog només pots passar a Prioritzada.',
+      'transitionFromTodo': 'Des de Prioritzada només pots passar a En Progrés o Backlog.',
+      'transitionToVerifyNeedsPR': 'Per passar a En Verificació necessites tenir almenys una Pull Request vinculada.',
+      'transitionToDoneNeedsVerify': 'No pots passar directament a Finalitzada. Has de passar per En Verificació primer.',
+      'transitionFromInProgress': 'Des de En Progrés només pots passar a Prioritzada o En Verificació si té almenys una Pull Request vinculada.',
+      'transitionFromVerify': 'Des de En Verificació només pots passar a Finalitzada.',
+      'transitionFromDone': 'Una tasca Finalitzada només pot tornar a En Verificació.',
+      'transitionNotAllowed': 'Transició no permesa.',
+      'changeSprintUserStoryNeedsBacklog': 'Per canviar el sprint d\'una Història d\'Usuari, totes les subtasques han d\'estar al Backlog.',
+      'subtaskCannotGoBacklog': 'Una subtasca no pot tornar al Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'Una subtasca en un sprint actiu només pot moure\'s a un sprint futur.',
+      'subtaskFutureSprintCannotMove': 'Una subtasca en un sprint futur no es pot moure.',
+      'futureSprintOnlyBacklog': 'Una tasca en un sprint futur només pot tornar al Backlog.',
+    },
+    'es': {
+      'transitionFromBacklog': 'Desde Backlog solo puedes pasar a Priorizada.',
+      'transitionFromTodo': 'Desde Priorizada solo puedes pasar a En Progreso o Backlog.',
+      'transitionToVerifyNeedsPR': 'Para pasar a En Verificación necesitas tener al menos una Pull Request vinculada.',
+      'transitionToDoneNeedsVerify': 'No puedes pasar directamente a Finalizada. Debes pasar por En Verificación primero.',
+      'transitionFromInProgress': 'Desde En Progreso solo puedes pasar a Priorizada o En Verificación si tiene al menos una Pull Request vinculada.',
+      'transitionFromVerify': 'Desde En Verificación solo puedes pasar a Finalizada.',
+      'transitionFromDone': 'Una tarea Finalizada solo puede volver a En Verificación.',
+      'transitionNotAllowed': 'Transición no permitida.',
+      'changeSprintUserStoryNeedsBacklog': 'Para cambiar el sprint de una Historia de Usuario, todas las subtareas deben estar en el Backlog.',
+      'subtaskCannotGoBacklog': 'Una subtarea no puede volver al Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'Una subtarea en un sprint activo solo puede moverse a un sprint futuro.',
+      'subtaskFutureSprintCannotMove': 'Una subtarea en un sprint futuro no se puede mover.',
+      'futureSprintOnlyBacklog': 'Una tarea en un sprint futuro solo puede volver al Backlog.',
+    },
+    'en': {
+      'transitionFromBacklog': 'From Backlog you can only move to Prioritized.',
+      'transitionFromTodo': 'From Prioritized you can only move to In Progress or Backlog.',
+      'transitionToVerifyNeedsPR': 'To move to In Verification you need to have at least one linked Pull Request.',
+      'transitionToDoneNeedsVerify': 'You cannot move directly to Done. You must go through In Verification first.',
+      'transitionFromInProgress': 'From In Progress you can only move to Prioritized or In Verification if it has at least one linked Pull Request.',
+      'transitionFromVerify': 'From In Verification you can only move to Done.',
+      'transitionFromDone': 'A Done task can only return to In Verification.',
+      'transitionNotAllowed': 'Transition not allowed.',
+      'changeSprintUserStoryNeedsBacklog': 'To change a User Story\'s sprint, all subtasks must be in the Backlog.',
+      'subtaskCannotGoBacklog': 'A subtask cannot return to the Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'A subtask in an active sprint can only be moved to a future sprint.',
+      'subtaskFutureSprintCannotMove': 'A subtask in a future sprint cannot be moved.',
+      'futureSprintOnlyBacklog': 'A task in a future sprint can only return to the Backlog.',
+    }
+  };
+
+  String _getMsg(String key) {
+    return _localTranslations[currentLang]?[key] ?? key;
+  }
+
   String? _canEditStatusReason(String newStatus) {
     final current = _taskData!['status'];
     final hasPullRequests = _taskData!['pullRequests'] != null && _taskData!['pullRequests'].isNotEmpty;
@@ -157,35 +210,35 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
     switch (current) {
       case 'BACKLOG':
         if (newStatus == 'TODO') return null;
-        return Translations.get('task_details_page60', currentLang);
+        return _getMsg('transitionFromBacklog');
 
       case 'TODO':
         if (newStatus == 'INPROGRESS' || newStatus == 'BACKLOG') return null;
-        return Translations.get('task_details_page61', currentLang);
+        return _getMsg('transitionFromTodo');
 
       case 'INPROGRESS':
         if (newStatus == 'TODO') return null;
         if (newStatus == 'VERIFY') {
           if (!hasPullRequests) {
-            return Translations.get('task_details_page62', currentLang);
+            return _getMsg('transitionToVerifyNeedsPR');
           }
           return null;
         }
         if (newStatus == 'DONE') {
-          return Translations.get('task_details_page63', currentLang);
+          return _getMsg('transitionToDoneNeedsVerify');
         }
-        return Translations.get('task_details_page64', currentLang);
+        return _getMsg('transitionFromInProgress');
 
       case 'VERIFY':
         if (newStatus == 'DONE') return null;
-        return Translations.get('task_details_page65', currentLang);
+        return _getMsg('transitionFromVerify');
 
       case 'DONE':
         if (newStatus == 'VERIFY') return null;
-        return Translations.get('task_details_page66', currentLang);
+        return _getMsg('transitionFromDone');
 
       default:
-        return Translations.get('task_details_page67', currentLang);
+        return Translations.get('transitionNotAllowed', currentLang);
     }
   }
 
@@ -223,24 +276,24 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
 
     if( _taskData!['type'] == 'USER_STORY'){
       if(!_isAllSubstasksInBackLog()){
-        return Translations.get('task_details_page68', currentLang);
+        return _getMsg('changeSprintUserStoryNeedsBacklog');
       }
       return null;
     }
 
     if(_taskData!['parentTaskId'] != null){
       if(goingToBacklog){
-        return Translations.get('task_details_page69', currentLang);
+        return _getMsg('subtaskCannotGoBacklog');
       }
       if(currentlyInBacklog){
         return null;
       }
       if(currentIsActive){
         if (targetIsFuture) return null;
-        return Translations.get('task_details_page70', currentLang);
+        return _getMsg('subtaskActiveSprintOnlyFuture');
       }
       if(currentIsFuture){
-        return Translations.get('task_details_page71', currentLang);
+        return _getMsg('subtaskFutureSprintCannotMove');
       }
       return null;
     }
@@ -253,7 +306,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
     }
     if(currentIsFuture){
       if (goingToBacklog) return null;
-      return Translations.get('task_details_page72', currentLang);
+      return _getMsg('futureSprintOnlyBacklog');
     }
 
     return null;
@@ -886,11 +939,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
   String _translateType(String type) {
     switch (type) {
       case "BUG":
-        return Translations.get('task_details_page42', currentLang);
+        return Translations.get('tasks.typeBug', currentLang);
       case "TASK":
-        return Translations.get('task_details_page43', currentLang);
+        return Translations.get('tasks.typeTask', currentLang);
       case "USER_STORY":
-        return Translations.get('task_details_page44', currentLang);
+        return Translations.get('tasks.typeUserStory', currentLang);
       default:
         return type;
     }
@@ -899,15 +952,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
   String _translateStatus(String status) {
     switch (status) {
       case "BACKLOG":
-        return "Backlog";
+        return Translations.get('tasks.statusBacklog', currentLang);
       case "TODO":
-        return Translations.get('task_details_page45', currentLang);
+        return Translations.get('tasks.statusTodo', currentLang);
       case "INPROGRESS":
-        return Translations.get('task_details_page46', currentLang);
+        return Translations.get('tasks.statusInProgress', currentLang);
       case "VERIFY":
-        return Translations.get('task_details_page47', currentLang);
+        return Translations.get('tasks.statusVerify', currentLang);
       case "DONE":
-        return Translations.get('task_details_page48', currentLang);
+        return Translations.get('tasks.statusDone', currentLang);
       default:
         return status;
     }
@@ -1008,7 +1061,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('task_details_page32', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -1070,7 +1123,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Eliminar Tasca',
+                             Translations.get('tasks.deleteTask', currentLang),
                             style: TextStyle(
                               color: const Color(0xFFFF5252), 
                               fontWeight: FontWeight.bold,
@@ -1110,7 +1163,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             side: BorderSide(color: borderColor),
                           ),
                           child: Text(
-                            Translations.get('task_details_page28', currentLang),
+                            Translations.get('common.cancel', currentLang),
                             style: TextStyle(color: textColor),
                           ),
                         ),
@@ -1131,7 +1184,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
-                            Translations.get('task_details_page27', currentLang),
+                            Translations.get('common.edit', currentLang),
                             style: const TextStyle(
                               color: Colors.white, 
                             ),
@@ -1214,7 +1267,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 border: Border.all(color: const Color(0xFF34D399)),
                               ),
                               child: Text(
-                                '${_taskData?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                '${_taskData?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
                                 style: TextStyle(
                                   color: const Color(0xFF34D399),
                                   fontSize: 7,
@@ -1271,7 +1324,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               controller: _nameController,
                               style: TextStyle(color: textColor),
                               decoration: InputDecoration(
-                                hintText: Translations.get('task_details_page31', currentLang),
+                                hintText: Translations.get('tasks.taskNamePlaceholder', currentLang),
                                 hintStyle: TextStyle(color: hintColor),
                                 filled: true,
                                 fillColor: inputFillColor,
@@ -1304,7 +1357,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                       side: BorderSide(color: borderColor),
                                     ),
                                     child: Text(
-                                      Translations.get('task_details_page28', currentLang), 
+                                      Translations.get('common.cancel', currentLang), 
                                       style: TextStyle(color: textColor)
                                     ),
                                   ),
@@ -1323,7 +1376,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                       padding: const EdgeInsets.symmetric(vertical: 12),
                                     ),
                                     child: Text(
-                                      Translations.get('task_details_page27', currentLang), 
+                                      Translations.get('common.edit', currentLang), 
                                       style: const TextStyle(color: Colors.white)),
                                   ),
                                 ),
@@ -1348,7 +1401,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                     size: 15,
                   ),
                   Text(
-                    ' ${Translations.get('task_details_page34', currentLang)} ${_formatDate(_taskData?['createdAt'])}',
+                    ' ${Translations.get('tasks.createdAt', currentLang)} ${_formatDate(_taskData?['createdAt'])}',
                     style: TextStyle(
                       color: subtitleColor,
                       fontSize: 12,
@@ -1366,7 +1419,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                     size: 15,
                   ),
                   Text(
-                    ' ${Translations.get('task_details_page35', currentLang)} ${_taskData?['reporter']?['fullName']}',
+                    ' ${Translations.get('common.by', currentLang)} ${_taskData?['reporter']?['fullName']}',
                     style: TextStyle(
                       color: subtitleColor,
                       fontSize: 12,
@@ -1405,7 +1458,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          Translations.get('task_details_page14', currentLang),
+                          Translations.get('attributes.description', currentLang),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -1441,7 +1494,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 controller: _descriptionController,
                                 style: TextStyle(color: textColor),
                                 decoration: InputDecoration(
-                                  hintText: Translations.get('task_details_page30', currentLang),
+                                  hintText: Translations.get('tasks.addDescription', currentLang),
                                   hintStyle: TextStyle(color: hintColor),
                                   filled: true,
                                   fillColor: inputFillColor,
@@ -1474,7 +1527,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         side: BorderSide(color: borderColor),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page28', currentLang), 
+                                        Translations.get('common.cancel', currentLang), 
                                         style: TextStyle(color: textColor)
                                       ),
                                     ),
@@ -1493,7 +1546,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page27', currentLang), 
+                                        Translations.get('common.edit', currentLang), 
                                         style: const TextStyle(color: Colors.white)),
                                     ),
                                   ),
@@ -1503,7 +1556,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           )
                         else
                           Text(
-                            (_taskData?['description'] == null) ? Translations.get('task_details_page15', currentLang) : _taskData?['description'],
+                            (_taskData?['description'] == null) ? Translations.get('tasks.noDescriptionProvided', currentLang) : _taskData?['description'],
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -1542,7 +1595,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                       ),
                     ),
                     child: Text(
-                      Translations.get('task_details_page1', currentLang),
+                      Translations.get('tasks.details', currentLang),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -1556,7 +1609,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Translations.get('task_details_page2', currentLang),
+                          Translations.get('tasks.assignee', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -1592,7 +1645,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             }
                             else...{
                               Text(
-                                Translations.get('task_details_page3', currentLang),
+                                Translations.get('tasks.unassigned', currentLang),
                                 style: TextStyle(
                                   color: subtitleColor,
                                   fontSize: 16,
@@ -1626,7 +1679,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        Translations.get('task_details_page4', currentLang),
+                                        Translations.get('tasks.unassignFromMe', currentLang),
                                         style: TextStyle(
                                           color: const Color(0xFFFF5252), 
                                           fontWeight: FontWeight.bold,
@@ -1664,7 +1717,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      Translations.get('task_details_page5', currentLang),
+                                      Translations.get('tasks.assignToMe', currentLang),
                                       style: TextStyle(
                                         color: const Color(0xFF93C5FD), 
                                         fontWeight: FontWeight.bold,
@@ -1681,7 +1734,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Divider(color: dividerColor, thickness: 1),
                         SizedBox(height: 5),
                         Text(
-                          Translations.get('task_details_page6', currentLang),
+                          Translations.get('tasks.reporter', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -1718,7 +1771,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Divider(color: dividerColor, thickness: 1),
                         SizedBox(height: 5),
                         Text(
-                          Translations.get('task_details_page7', currentLang),
+                          Translations.get('tasks.estimation', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -1766,7 +1819,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         side: BorderSide(color: borderColor),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page28', currentLang),
+                                        Translations.get('common.cancel', currentLang),
                                         style: TextStyle(color: textColor),
                                       ),
                                     ),
@@ -1785,7 +1838,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page27', currentLang),
+                                        Translations.get('common.edit', currentLang),
                                         style: const TextStyle(color: Colors.white),
                                       ),
                                     ),
@@ -1806,7 +1859,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                     border: Border.all(color: const Color(0xFF34D399)),
                                   ),
                                   child: Text(
-                                    '${_taskData?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                    '${_taskData?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
                                     style: TextStyle(
                                       color: const Color(0xFF34D399),
                                       fontSize: 13,
@@ -1836,7 +1889,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Divider(color: dividerColor, thickness: 1),
                         SizedBox(height: 5),
                         Text(
-                          Translations.get('task_details_page9', currentLang),
+                          Translations.get('tasks.type', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -1922,7 +1975,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Divider(color: dividerColor, thickness: 1),
                         SizedBox(height: 5),
                         Text(
-                          Translations.get('task_details_page10', currentLang),
+                          Translations.get('tasks.status', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -2015,7 +2068,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Divider(color: dividerColor, thickness: 1),
                         SizedBox(height: 5),
                         Text(
-                          Translations.get('task_details_page11', currentLang),
+                          Translations.get('tasks.project', currentLang),
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
@@ -2052,7 +2105,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           Divider(color: dividerColor, thickness: 1),
                           SizedBox(height: 5),
                           Text(
-                            Translations.get('task_details_page12', currentLang),
+                            Translations.get('tasks.parentTask', currentLang),
                             style: TextStyle(
                               color: textColor,
                               fontSize: 20,
@@ -2091,7 +2144,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         Row(
                           children: [
                             Text(
-                              Translations.get('task_details_page13', currentLang),
+                              Translations.get('tasks.sprint', currentLang),
                               style: TextStyle(
                                 color: textColor,
                                 fontSize: 20,
@@ -2246,7 +2299,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          "${Translations.get('task_details_page16', currentLang)}(${_taskData?['childTasks'].length})",
+                          "${Translations.get('tasks.subtasks', currentLang)}(${_taskData?['childTasks'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -2275,7 +2328,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               child: Text(
-                                Translations.get('task_details_page18', currentLang), 
+                                Translations.get('tasks.addSubtask', currentLang), 
                                 style: TextStyle(color: textColor),
                               ),
                             ),
@@ -2290,7 +2343,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
                                 child: Text(
-                                  Translations.get('task_details_page19', currentLang), 
+                                  Translations.get('tasks.assignAllToMe', currentLang), 
                                   style: TextStyle(color: textColor),
                                 ),
                               ),
@@ -2376,7 +2429,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                               children: [
                                                 if(tas?['assignee'] == null)...{
                                                   Text(
-                                                    Translations.get('task_details_page3', currentLang),
+                                                    Translations.get('tasks.unassigned', currentLang),
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontSize: 10,
@@ -2403,7 +2456,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                     ),
                                                   ),
                                                   Text(
-                                                    '${tas?['estimationPoints']} ${Translations.get('task_details_page8', currentLang)}',
+                                                    '${tas?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontSize: 10,
@@ -2462,7 +2515,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         }
                         else...{
                           Text(
-                            Translations.get('task_details_page17', currentLang),
+                            Translations.get('tasks.noSubtasks', currentLang),
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -2502,7 +2555,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                       ),
                     ),
                     child: Text(
-                      Translations.get('task_details_page20', currentLang),
+                      Translations.get('tasks.pullRequests', currentLang),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -2589,7 +2642,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                           if(pr?['repoFullName'] != null && pr?['prNumber'] != null && pr?['author']?['fullName'] != null)
                                           const SizedBox(height: 6),
                                           Text(
-                                            '${pr?['repoFullName']} #${pr?['prNumber']} ${Translations.get('task_details_page53', currentLang)} ${pr?['author']?['fullName']}',
+                                            '${pr?['repoFullName']} #${pr?['prNumber']} ${Translations.get('common.by', currentLang)} ${pr?['author']?['fullName']}',
                                             style: TextStyle(
                                               color: subtitleColor,
                                               fontSize: 11,
@@ -2613,7 +2666,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                 Icon(Icons.history, color: subtitleColor, size: 14),
                                                 const SizedBox(width: 6),
                                                 Text(
-                                                  '${Translations.get('task_details_page54', currentLang)} (${sortedHistory.length})',
+                                                  '${Translations.get('tasks.deleteBlockedDoneStatus', currentLang)} (${sortedHistory.length})',
                                                   style: TextStyle(color: subtitleColor, fontSize: 12, fontWeight: FontWeight.w600),
                                                 ),
                                               ],
@@ -2676,7 +2729,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                                       overflow: TextOverflow.ellipsis,
                                                                     ),
                                                                   Text(
-                                                                    isMerged ? Translations.get('task_details_page51', currentLang) : Translations.get('va obrir ', currentLang),
+                                                                    isMerged ? Translations.get('tasks.prEventMerged', currentLang) : Translations.get('tasks.prEventOpened', currentLang),
                                                                     style: TextStyle(
                                                                       color: subtitleColor,
                                                                       fontWeight: FontWeight.bold,
@@ -2725,7 +2778,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         }
                         else...{
                           Text(
-                            Translations.get('task_details_page21', currentLang),
+                            Translations.get('tasks.noPullRequestsLinked', currentLang),
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -2733,7 +2786,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             ),
                           ),
                           Text(
-                            Translations.get('task_details_page22', currentLang),
+                            Translations.get('tasks.mentionTaskKey', currentLang),
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -2777,7 +2830,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          '${Translations.get('task_details_page23', currentLang)}(${commentsTask.length})',
+                          '${Translations.get('tasks.discussion', currentLang)}(${commentsTask.length})',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -2797,7 +2850,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           child: Text(
-                            Translations.get('task_details_page24', currentLang), 
+                            Translations.get('tasks.addComment', currentLang), 
                             style: TextStyle(color: textColor),
                           ),
                         ),
@@ -2816,7 +2869,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 controller: _newCommentController,
                                 style: TextStyle(color: textColor),
                                 decoration: InputDecoration(
-                                  hintText: Translations.get('task_details_page29', currentLang),
+                                  hintText: Translations.get('tasks.writeComment', currentLang),
                                   hintStyle: TextStyle(color: hintColor),
                                   filled: true,
                                   fillColor: inputFillColor,
@@ -2849,7 +2902,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         side: BorderSide(color: borderColor),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page28', currentLang), 
+                                        Translations.get('common.cancel', currentLang), 
                                         style: TextStyle(color: textColor)
                                       ),
                                     ),
@@ -2868,7 +2921,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
                                       child: Text(
-                                        Translations.get('task_details_page26', currentLang), 
+                                        Translations.get('tasks.postComment', currentLang), 
                                         style: const TextStyle(color: Colors.white)),
                                     ),
                                   ),
@@ -2982,7 +3035,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                               maxLines: 3,
                                               style: TextStyle(color: textColor),
                                               decoration: InputDecoration(
-                                                hintText: Translations.get('task_details_page29', currentLang),
+                                                hintText: Translations.get('tasks.writeComment', currentLang),
                                                 hintStyle: TextStyle(color: hintColor),
                                                 filled: true,
                                                 fillColor: inputFillColor,
@@ -3016,7 +3069,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                       side: BorderSide(color: borderColor),
                                                     ),
                                                     child: Text(
-                                                      Translations.get('task_details_page28', currentLang),
+                                                      Translations.get('common.cancel', currentLang),
                                                       style: TextStyle(color: textColor),
                                                     ),
                                                   ),
@@ -3036,7 +3089,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                       padding: const EdgeInsets.symmetric(vertical: 12),
                                                     ),
                                                     child: Text(
-                                                      Translations.get('task_details_page27', currentLang),
+                                                      Translations.get('common.edit', currentLang),
                                                       style: const TextStyle(color: Colors.white),
                                                     ),
                                                   ),
@@ -3053,7 +3106,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           )
                         else
                           Text(
-                            Translations.get('task_details_page25', currentLang),
+                            Translations.get('tasks.noCommentsYet', currentLang),
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,

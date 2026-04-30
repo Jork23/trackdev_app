@@ -131,11 +131,11 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
   String _translateType(String type) {
     switch (type) {
       case "BUG":
-        return Translations.get('task_proj_page29', currentLang);
+        return Translations.get('tasks.typeBug', currentLang);
       case "TASK":
-        return Translations.get('task_proj_page30', currentLang);
+        return Translations.get('tasks.typeTask', currentLang);
       case "USER_STORY":
-        return Translations.get('task_proj_page31', currentLang);
+        return Translations.get('tasks.typeUserStory', currentLang);
       default:
         return type;
     }
@@ -144,15 +144,15 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
   String _translateStatus(String status) {
     switch (status) {
       case "BACKLOG":
-        return "Backlog";
+        return Translations.get('tasks.statusBacklog', currentLang);
       case "TODO":
-        return Translations.get('task_proj_page32', currentLang);
+        return Translations.get('tasks.statusTodo', currentLang);
       case "INPROGRESS":
-        return Translations.get('task_proj_page33', currentLang);
+        return Translations.get('tasks.statusInProgress', currentLang);
       case "VERIFY":
-        return Translations.get('task_proj_page34', currentLang);
+        return Translations.get('tasks.statusVerify', currentLang);
       case "DONE":
-        return Translations.get('task_proj_page35', currentLang);
+        return Translations.get('tasks.statusDone', currentLang);
       default:
         return status;
     }
@@ -217,33 +217,33 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
     final List projectsAux = _projectsData;
 
     final List listTypes = [
-        {'type': "", 'name': Translations.get('task_proj_page8', currentLang)},
-        {'type': 'USER_STORY', 'name': Translations.get('task_proj_page31', currentLang)},
-        {'type': 'TASK', 'name': Translations.get('task_proj_page30', currentLang)},
-        {'type': 'BUG', 'name': Translations.get('task_proj_page29', currentLang)},
+        {'type': "", 'name': Translations.get('tasks.allTypes', currentLang)},
+        {'type': 'USER_STORY', 'name': Translations.get('tasks.typeUserStory', currentLang)},
+        {'type': 'TASK', 'name': Translations.get('tasks.typeTask', currentLang)},
+        {'type': 'BUG', 'name': Translations.get('tasks.typeBug', currentLang)},
     ];
 
     final List listStatus = [
-      {'status': "", 'name': Translations.get('task_proj_page9', currentLang)},
-      {'status': 'BACKLOG', 'name': 'Backlog'},
-      {'status': 'TODO', 'name': Translations.get('task_proj_page32', currentLang)},
-      {'status': 'INPROGRESS', 'name': Translations.get('En task_proj_page33', currentLang)},
-      {'status': 'VERIFY', 'name': Translations.get('task_proj_page34', currentLang)},
-      {'status': 'DONE', 'name': Translations.get('task_proj_page35', currentLang)},
+      {'status': "", 'name': Translations.get('tasks.allStatuses', currentLang)},
+      {'status': 'BACKLOG', 'name': Translations.get('tasks.statusBacklog', currentLang)},
+      {'status': 'TODO', 'name': Translations.get('tasks.statusTodo', currentLang)},
+      {'status': 'INPROGRESS', 'name': Translations.get('tasks.statusInProgress', currentLang)},
+      {'status': 'VERIFY', 'name': Translations.get('tasks.statusVerify', currentLang)},
+      {'status': 'DONE', 'name': Translations.get('tasks.statusDone', currentLang)},
     ];
 
     final List listAssignees = [
-      {'id': "", 'fullName': Translations.get('task_proj_page11', currentLang)},
+      {'id': "", 'fullName': Translations.get('tasks.allAssignees', currentLang)},
       ...membersAux
     ];
     
     final List listSortOrder = [
-      {'value': 'desc', 'name': Translations.get('task_proj_page12', currentLang)},
-      {'value': 'asc', 'name': Translations.get('task_proj_page13', currentLang)},
+      {'value': 'desc', 'name': Translations.get('tasks.sortNewestFirst ', currentLang)},
+      {'value': 'asc', 'name': Translations.get('tasks.sortOldestFirst', currentLang)},
     ];
 
     final List listProjects = [
-      {'id': null, 'name': Translations.get('Tots els projectes', currentLang)},
+      {'id': null, 'name': Translations.get('activity.allProjects', currentLang)},
       ...projectsAux
     ];
 
@@ -283,7 +283,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('sprint_details_page22', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -317,7 +317,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
           children: [
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('task_proj_page15', currentLang),
+              Translations.get('tasks.myTasks', currentLang),
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
@@ -380,7 +380,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          Translations.get('task_proj_page17', currentLang),
+                          Translations.get('tasks.filters', currentLang),
                           style: TextStyle(
                             color: subtitleColor, 
                             fontWeight: FontWeight.bold,
@@ -396,7 +396,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                             size: 18,
                           ),
                           label: Text(
-                            Translations.get('task_proj_page18', currentLang),
+                            Translations.get('tasks.clearFilters', currentLang),
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 14,
@@ -604,7 +604,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                           controller: _searchController,
                           style: TextStyle(color: textColor),
                           decoration: InputDecoration(
-                            hintText: Translations.get('task_proj_page19', currentLang),
+                            hintText: Translations.get('tasks.searchPlaceholder', currentLang),
                             hintStyle: TextStyle(color: hintColor),
                             filled: true,
                             fillColor: inputFillColor,
@@ -665,7 +665,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      Translations.get('task_proj_page20', currentLang),
+                      Translations.get('tasks.noMatchingTasks', currentLang),
                       style: TextStyle(
                         color: textColor, 
                         fontWeight: FontWeight.bold,
@@ -675,7 +675,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      Translations.get('task_proj_page21', currentLang),
+                      Translations.get('tasks.tryAdjustingFilters', currentLang),
                       style: TextStyle(
                         color: subtitleColor, 
                         fontSize: 14,
@@ -807,7 +807,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                                           border: Border.all(color: const Color(0xFF34D399)),
                                         ),
                                         child: Text(
-                                          '${task?['estimationPoints']} ${Translations.get('task_proj_page22', currentLang)}',
+                                          '${task?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
                                           style: TextStyle(
                                             color: const Color(0xFF34D399),
                                             fontSize: 7,
@@ -870,7 +870,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                 child: Column(
                   children: [
                     Text(
-                      '${Translations.get('task_proj_page23', currentLang)} ${_page * _size + 1} - ${(_page * _size + tasks.length)} ${Translations.get('task_proj_page24', currentLang)} $_totalElements ${Translations.get('task_proj_page25', currentLang)}',
+                      '${Translations.get('tasks.of', currentLang)} ${_page * _size + 1} - ${(_page * _size + tasks.length)} ${Translations.get('tasks.of', currentLang)} $_totalElements ${Translations.get('common.itemsPerPage', currentLang)}',
                       style: TextStyle(
                         color: textColor,
                         fontSize: 16,
@@ -893,7 +893,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                           : null,
                           icon: Icon(Icons.chevron_left, size: 20),
                           label: Text(
-                            Translations.get('task_proj_page26', currentLang),
+                            Translations.get('common.previous', currentLang),
                             style: TextStyle(fontSize: 16),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -933,7 +933,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                           : null,
                           icon: Icon(Icons.chevron_right, size: 20),
                           label: Text(
-                            Translations.get('task_proj_page27', currentLang),
+                            Translations.get('common.next', currentLang),
                             style: TextStyle(fontSize: 16),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -952,7 +952,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${Translations.get('task_proj_page28', currentLang)}: ',
+                          '${Translations.get('tasks.itemsPerPage', currentLang)}: ',
                           style: TextStyle(
                             color: textColor,
                             fontSize: 16,

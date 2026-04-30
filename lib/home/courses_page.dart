@@ -157,7 +157,7 @@ class _CoursesPageState extends State<CoursesPage> with ThemePage{
               ),
               const SizedBox(height: 24),
               Text(
-                Translations.get('courses_page4', currentLang),
+                Translations.get('courses.noCoursesStudent', currentLang),
                 style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -183,7 +183,7 @@ class _CoursesPageState extends State<CoursesPage> with ThemePage{
             children:[
               Divider(color: dividerColor, thickness: 1),
               Text(
-                Translations.get('courses_page1', currentLang),
+                Translations.get('courses.title', currentLang),
                 style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -191,7 +191,7 @@ class _CoursesPageState extends State<CoursesPage> with ThemePage{
                 ),
               ),
               Text(
-                Translations.get('courses_page2', currentLang),
+                Translations.get('courses.studentSubtitle', currentLang),
                 style: TextStyle(
                   fontSize: 13, 
                   color: subtitleColor
@@ -278,7 +278,7 @@ class _CoursesPageState extends State<CoursesPage> with ThemePage{
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            Translations.get('courses_page3', currentLang),
+                            Translations.get('projects.myProjects', currentLang),
                             style: TextStyle(
                               color: textColor,
                               fontWeight: FontWeight.bold,
@@ -328,7 +328,7 @@ class _CoursesPageState extends State<CoursesPage> with ThemePage{
                             )
                           else
                             Text(
-                              Translations.get('courses_page5', currentLang),
+                              Translations.get('courses.noCourses', currentLang),
                               style: const TextStyle(
                                 color: Color(0xFF2D5AF0),
                                 fontWeight: FontWeight.w500,

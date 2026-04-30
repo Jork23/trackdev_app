@@ -34,7 +34,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
 
     if (_emailController.text.isEmpty) {
       setState(() {
-        _errorMessage = Translations.get('resetpassword_page6', currentLang);
+        _errorMessage = Translations.get('common.error', currentLang);
       });
       return;
     }
@@ -55,14 +55,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
           _isSuccess = true;
         } 
         else {
-          _errorMessage = Translations.get('resetpassword_page7', currentLang);
+          _errorMessage = Translations.get('common.error', currentLang);
         }
         });
     } 
     catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = Translations.get('resetpassword_page8', currentLang);
+        _errorMessage = Translations.get('common.error', currentLang);
       });
       debugPrint("Error: $e");
     } 
@@ -115,7 +115,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('resetpassword_page1', currentLang),
+              Translations.get('auth.forgotPasswordTitle', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -126,7 +126,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
             Align(
               alignment: Alignment.center,
               child: Text(
-                Translations.get('resetpassword_page2', currentLang),
+                Translations.get('auth.forgotPasswordDescription', currentLang),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: textColor, 
@@ -138,7 +138,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('resetpassword_page3', currentLang),
+                Translations.get('auth.emailAddress', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -151,7 +151,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('resetpassword_page4', currentLang),
+                hintText: Translations.get('auth.email', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -220,7 +220,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('resetpassword_page5', currentLang),
+                  Translations.get('auth.sendResetLink', currentLang),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -238,7 +238,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
                     border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Text(
-                    Translations.get('resetpassword_page9', currentLang),
+                    Translations.get('auth.resetLinkSent', currentLang),
                     style: const TextStyle(
                       color: Color(0xFF2D5AF0), 
                       fontWeight: FontWeight.w500
@@ -258,7 +258,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
                   Navigator.pop(context);
                 }, 
                 child: Text(
-                  Translations.get('resetpassword_page10', currentLang), 
+                  Translations.get('auth.backToLogin', currentLang), 
                   style: const TextStyle(color: Color(0xFF2D5AF0))
                 ),
               ),

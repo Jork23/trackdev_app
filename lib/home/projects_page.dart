@@ -103,7 +103,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
               ),
               const SizedBox(height: 24),
               Text(
-                Translations.get('projects_page4', currentLang),
+                Translations.get('projects.noProjectsStudent', currentLang),
                 style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -129,7 +129,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
             children:[
               Divider(color: dividerColor, thickness: 1),
               Text(
-                Translations.get('projects_page1', currentLang),
+                Translations.get('projects.title', currentLang),
                 style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -137,7 +137,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
                 ),
               ),
               Text(
-                Translations.get('projects_page2', currentLang),
+                Translations.get('projects.studentSubtitle', currentLang),
                 style: TextStyle(
                   fontSize: 13, 
                   color: subtitleColor
@@ -171,7 +171,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
                     )
                   ),         
                   child: Text(
-                    "${Translations.get('projects_page3', currentLang)}(${projects.length})",
+                    "${Translations.get('projects.allProjects', currentLang)}(${projects.length})",
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

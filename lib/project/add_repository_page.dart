@@ -44,7 +44,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
 
     if (_nameController.text.isEmpty || _urlController.text.isEmpty || _tokenController.text.isEmpty) {
       setState(() {
-        _message = Translations.get('add_repository_page1', currentLang);
+        _message = Translations.get('common.error', currentLang);
       });
       return;
     }
@@ -67,18 +67,18 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
 
       setState((){
         if(response.statusCode == 200 || response.statusCode == 204){
-          _message = Translations.get('add_repository_page2', currentLang);
+          _message = Translations.get('common.success', currentLang);
           _isSuccess = true;
         } 
         else{
-          _message = '${Translations.get('add_repository_page3', currentLang)}: ${response.statusCode}';
+          _message = '${Translations.get('common.error', currentLang)}: ${response.statusCode}';
         }
       });
     } 
     catch (e){
       if (!mounted) return;
       setState((){
-        _message = '${Translations.get('add_repository_page4', currentLang)}: $e';
+        _message = '${Translations.get('common.error', currentLang)}: $e';
       });
     }
     finally{
@@ -123,7 +123,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('add_repository_page5', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -158,7 +158,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             const SizedBox(height: 10),
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('add_repository_page6', currentLang),
+              Translations.get('projects.addGithubRepository', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -170,7 +170,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('add_repository_page7', currentLang),
+                Translations.get('projects.displayName', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -182,7 +182,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
               controller: _nameController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('add_repository_page8', currentLang),
+                hintText: Translations.get('projects.addRepository', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -205,7 +205,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('add_repository_page9', currentLang),
+                Translations.get('projects.repositoryUrl', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -217,7 +217,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
               controller: _urlController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('https://github.com/owner/repo', currentLang),
+                hintText: 'https://github.com/owner/repo',
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -240,7 +240,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('add_repository_page10', currentLang),
+                Translations.get('projects.fullUrlToRepo', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontSize: 10,
@@ -251,7 +251,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('add_repository_page11', currentLang),
+                Translations.get('projects.accessToken', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -263,7 +263,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
               controller: _tokenController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('ghp_xxxxxxxxx', currentLang),
+                hintText: 'ghp_xxxxxxxxx',
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -286,7 +286,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('add_repository_page12', currentLang),
+                Translations.get('projects.accessTokenScopes', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontSize: 10,
@@ -342,7 +342,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
                         side: BorderSide(color: borderColor),
                       ),
                       child: Text(
-                        Translations.get('add_repository_page13', currentLang),
+                        Translations.get('common.cancel', currentLang),
                         style: TextStyle(color: textColor)
                       ),
                     ),
@@ -365,7 +365,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
                           elevation: 0,
                         ),
                         child: Text(
-                          Translations.get('add_repository_page14', currentLang),
+                          Translations.get('projects.addRepository', currentLang),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold
@@ -387,7 +387,7 @@ class _AddRepositoryPageState extends State<AddRepositoryPage> with ThemePage {
                     side: BorderSide(color: borderColor),
                   ),
                   child: Text(
-                    Translations.get('add_repository_page5', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(color: textColor)
                   ),
                 ),

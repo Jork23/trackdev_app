@@ -72,7 +72,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
           _isTokenValid = true;
         } 
         else {
-          _messageToken = Translations.get('newpassword_page13', currentLang);
+          _messageToken = Translations.get('auth.invalidOrExpiredLink', currentLang);
           _isTokenValid = false;
         }
       });
@@ -80,7 +80,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
     catch (e) {
       if (!mounted) return;
       setState(() {
-        _messageToken = Translations.get('newpassword_page15', currentLang);
+        _messageToken = Translations.get('common.error', currentLang);
         _isTokenValid = false;
       });
     }
@@ -121,14 +121,14 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
 
       setState(() {
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _messagePassword = Translations.get('newpassword_page12', currentLang);
+          _messagePassword = Translations.get('auth.passwordResetSuccess', currentLang);
           _isSuccess = true;
           
           _newPassword1.clear();
           _newPassword2.clear();
         }
         else {
-          _messagePassword = Translations.get('newpassword_page14', currentLang);
+          _messagePassword = Translations.get('common.error', currentLang);
           _isSuccess = false;
         }
       });
@@ -136,7 +136,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
     catch (e) {
       if (!mounted) return;
       setState(() {
-        _messagePassword = '${Translations.get('newpassword_page15', currentLang)}: $e';
+        _messagePassword = '${Translations.get('common.error', currentLang)}: $e';
         _isSuccess = false;
       });
     }
@@ -190,7 +190,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
           children:[
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('newpassword_page1', currentLang),
+              Translations.get('auth.resetPasswordTitle', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -198,7 +198,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
               ),
             ),
             Text(
-              Translations.get('newpassword_page2', currentLang),
+              Translations.get('auth.resetPasswordDescription', currentLang),
               style: TextStyle(
                 fontSize: 13,
                 color: subtitleColor
@@ -251,7 +251,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  Translations.get('newpassword_page3', currentLang),
+                  Translations.get('auth.newPassword', currentLang),
                   style: TextStyle(
                     color: textColor,
                     fontWeight: FontWeight.w500,
@@ -287,7 +287,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  Translations.get('newpassword_page4', currentLang),
+                  Translations.get('auth.confirmPassword', currentLang),
                   style: TextStyle(
                     color: textColor,
                     fontWeight: FontWeight.w500,
@@ -332,7 +332,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      Translations.get('newpassword_page5', currentLang),
+                      Translations.get('auth.passwordMustContain', currentLang),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: textColor,
@@ -340,11 +340,11 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildRequirement(Translations.get('newpassword_page6', currentLang), _hasMinLength),
-                    _buildRequirement(Translations.get('newpassword_page7', currentLang), _hasLowercase),
-                    _buildRequirement(Translations.get('newpassword_page8', currentLang), _hasUppercase),
-                    _buildRequirement(Translations.get('newpassword_page9', currentLang), _hasNumber),
-                    _buildRequirement(Translations.get('newpassword_page10', currentLang), _passwordsMatch),
+                    _buildRequirement(Translations.get('auth.atLeast8Characters', currentLang), _hasMinLength),
+                    _buildRequirement(Translations.get('auth.oneLowercaseLetter', currentLang), _hasLowercase),
+                    _buildRequirement(Translations.get('auth.oneUppercaseLetter', currentLang), _hasUppercase),
+                    _buildRequirement(Translations.get('auth.oneNumber', currentLang), _hasNumber),
+                    _buildRequirement(Translations.get('auth.passwordsMatch', currentLang), _passwordsMatch),
                   ],
                 ),
               ),
@@ -361,7 +361,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
                     elevation: 0,
                   ),
                   child: Text(
-                    _isPasswordValid() ? Translations.get('newpassword_page11', currentLang) : Translations.get('newpassword_page12', currentLang),
+                    _isPasswordValid() ? Translations.get('auth.resetPassword', currentLang) : Translations.get('auth.passwordResetSuccess', currentLang),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -409,7 +409,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
                     MaterialPageRoute(builder: (context) => const SignInPage()),
                   );
                 },
-                icon: Text(Translations.get('newpassword_page16', currentLang)),
+                icon: Text(Translations.get('auth.goToLogin', currentLang)),
                 label: const Icon(Icons.arrow_forward, size: 18),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D5AF0),

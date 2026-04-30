@@ -263,7 +263,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
                   Icon(Icons.person_outline, color: textColor),
                   const SizedBox(width: 15),
                   Text(
-                    Translations.get('home_page1', currentLang),
+                    Translations.get('settings.profile', currentLang),
                     style: TextStyle(color: textColor),
                   ),
                 ],
@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
                   Icon(Icons.language, color: textColor),
                   const SizedBox(width: 15),
                   Text(
-                    Translations.get('home_page2', currentLang),
+                    Translations.get('settings.preferences', currentLang),
                     style: TextStyle(color: textColor),
                   ),
                 ],
@@ -295,7 +295,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
                   Icon(Icons.key_outlined, color: textColor),
                   const SizedBox(width: 15),
                   Text(
-                    Translations.get('home_page3', currentLang),
+                    Translations.get('settings.security', currentLang),
                     style: TextStyle(color: textColor),
                   ),
                 ],
@@ -311,7 +311,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
                   Icon(Icons.link, color: textColor),
                   const SizedBox(width: 15),
                   Text(
-                    Translations.get('home_page4', currentLang),
+                    Translations.get('settings.integrations', currentLang),
                     style: TextStyle(color: textColor),
                   ),
                 ],
@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> with ThemePage {
                   Icon(Icons.logout, color: textColor),
                   const SizedBox(width: 15),
                   Text(
-                    Translations.get('home_page5', currentLang),
+                    Translations.get('auth.logout', currentLang),
                     style: TextStyle(color: textColor),
                   ),
                 ],
@@ -365,27 +365,27 @@ class _HomePageState extends State<HomePage> with ThemePage {
           NavigationDestination(
             selectedIcon: Icon(Icons.home, color: iconNavigationBarColor),
             icon: Icon(Icons.home_outlined, color: textColor),
-            label: Translations.get('home_page6', currentLang),
+            label: Translations.get('navigation.overview', currentLang),
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.school, color: iconNavigationBarColor),
             icon: Icon(Icons.school_outlined, color: textColor),
-            label: Translations.get('home_page7', currentLang),
+            label: Translations.get('navigation.courses', currentLang),
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.folder, color: iconNavigationBarColor),
             icon: Icon(Icons.folder_outlined, color: textColor),
-            label: Translations.get('home_page8', currentLang),
+            label: Translations.get('navigation.projects', currentLang),
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.analytics, color: iconNavigationBarColor),
             icon: Icon(Icons.analytics_outlined, color: textColor),
-            label: Translations.get('home_page9', currentLang),
+            label: Translations.get('navigation.analytics', currentLang),
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.history, color: iconNavigationBarColor),
             icon: Icon(Icons.history_outlined, color: textColor),
-            label: Translations.get('home_page10', currentLang),
+            label: Translations.get('navigation.activity', currentLang),
           ),
         ],
       ),

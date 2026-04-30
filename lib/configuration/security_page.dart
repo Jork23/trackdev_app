@@ -91,7 +91,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
 
       setState(() {
         if(response.statusCode == 200 || response.statusCode == 204){
-          _message = Translations.get('security_page13', currentLang);
+          _message = Translations.get('settings.passwordChangedSuccess', currentLang);
           _isSuccess = true;
           
           _oldPassword.clear();
@@ -99,7 +99,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
           _newPassword2.clear();
         } 
         else{
-          _message = Translations.get('security_page14', currentLang);
+          _message = Translations.get('settings.currentPasswordRequired', currentLang);
           _isSuccess = false;
         }
       });
@@ -107,7 +107,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
     catch (e){
       if (!mounted) return;
       setState((){
-        _message = '${Translations.get('security_page15', currentLang)}: $e';
+        _message = '${Translations.get('common.error', currentLang)}: $e';
         _isSuccess = false;
       });
     }
@@ -167,7 +167,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
           children:[
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('security_page1', currentLang),
+              Translations.get('settings.securitySettings', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -175,7 +175,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
               ),
             ),
             Text(
-              Translations.get('security_page2', currentLang),
+              Translations.get('settings.securitySettingsDescription', currentLang),
               style: TextStyle(
                 fontSize: 13,
                 color: subtitleColor),
@@ -226,7 +226,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('security_page3', currentLang),
+                Translations.get('settings.currentPassword', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -262,7 +262,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('security_page4', currentLang),
+                Translations.get('settings.newPassword', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -298,7 +298,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('security_page5', currentLang),
+                Translations.get('settings.confirmNewPassword', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -343,7 +343,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    Translations.get('security_page6', currentLang),
+                    Translations.get('settings.passwordMustContain', currentLang),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: textColor,
@@ -351,11 +351,11 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildRequirement(Translations.get('security_page7', currentLang), _hasMinLength),
-                  _buildRequirement(Translations.get('security_page8', currentLang), _hasLowercase),
-                  _buildRequirement(Translations.get('security_page9', currentLang), _hasUppercase),
-                  _buildRequirement(Translations.get('security_page10', currentLang), _hasNumber),
-                  _buildRequirement(Translations.get('security_page11', currentLang), _passwordsMatch),
+                  _buildRequirement(Translations.get('settings.atLeast8Characters', currentLang), _hasMinLength),
+                  _buildRequirement(Translations.get('settings.oneLowercaseLetter', currentLang), _hasLowercase),
+                  _buildRequirement(Translations.get('settings.oneUppercaseLetter', currentLang), _hasUppercase),
+                  _buildRequirement(Translations.get('settings.oneNumber', currentLang), _hasNumber),
+                  _buildRequirement(Translations.get('settings.passwordsMatch', currentLang), _passwordsMatch),
                 ],
               ),
             ),
@@ -380,7 +380,7 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('security_page12', currentLang),
+                  Translations.get('settings.updatePassword', currentLang),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold),

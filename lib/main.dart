@@ -6,6 +6,7 @@ import 'sign_in/index_page.dart';
 import 'home/home_page.dart';
 import 'sign_in/new_password_page.dart';
 import 'utils/theme.dart';
+import 'utils/translations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,9 @@ void main() async {
   String? token = await storage.read(key: 'auth_token');
   String? mode = await storage.read(key: 'app_mode');
   globalIsDarkMode = (mode == 'dark');
+
+    await Translations.init();
+
   bool isTokenValid = false;
 
   if (token != null) {

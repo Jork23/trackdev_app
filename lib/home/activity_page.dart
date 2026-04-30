@@ -70,7 +70,7 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
 
         projectList.insert(0,{
           'id':null,
-          'name': Translations.get('activity_page3', currentLang),
+          'name': Translations.get('activity.allProjects', currentLang),
         });
         if (!mounted) return;
 
@@ -163,26 +163,39 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
     }
   }
 
+  String _t(String key, Map<String, String> params) {
+    String text = Translations.get(key, currentLang);
+    params.forEach((k, v) {
+      text = text.replaceAll('{$k}', v);
+    });
+    return text;
+  }
+
   String _getText(Map<String, dynamic> activity) {
+    final actor = activity['actorFullName'] ?? '';
+    final taskKey = activity['taskKey'] ?? '';
+    final oldValue = activity['oldValue'] ?? '';
+    final newValue = activity['newValue'] ?? '';
+
     switch (activity['type']) {
       case 'TASK_STATUS_CHANGED':
-        return "${activity['actorFullName']}${Translations.get('activity_page8', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}";
+        return _t('activity.eventTaskStatusChanged', {'actor': actor, 'taskKey': taskKey, 'oldValue': oldValue, 'newValue': newValue});
       case 'TASK_ASSIGNED':
-        return "${activity['actorFullName']}${Translations.get('activity_page9', currentLang)}${activity['taskKey']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}";
+        return _t('activity.eventTaskAssigned', {'actor': actor, 'taskKey': taskKey, 'newValue': newValue});
       case 'TASK_UNASSIGNED':
-        return "${activity['actorFullName']}${Translations.get('activity_page21', currentLang)}${activity['oldValue']}${Translations.get('activity_page17', currentLang)}${activity['taskKey']}";
+        return _t('activity.eventTaskUnassigned', {'actor': actor, 'taskKey': taskKey, 'oldValue': oldValue});
       case 'TASK_CREATED':
-        return "${activity['actorFullName']}${Translations.get('activity_page10', currentLang)}${activity['taskKey']}";
+        return _t('activity.eventTaskCreated', {'actor': actor, 'taskKey': taskKey});
       case 'TASK_ADDED_TO_SPRINT':
-        return "${activity['actorFullName']}${Translations.get('activity_page11', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['newValue']}";
+        return _t('activity.eventTaskAddedToSprint', {'actor': actor, 'taskKey': taskKey, 'newValue': newValue});
       case 'TASK_REMOVED_FROM_SPRINT':
-        return "${activity['actorFullName']}${Translations.get('activity_page12', currentLang)} ${activity['taskKey']}${Translations.get('activity_page19', currentLang)}${activity['oldValue']}";
+        return _t('activity.eventTaskRemovedFromSprint', {'actor': actor, 'taskKey': taskKey, 'oldValue': oldValue});
       case 'TASK_UPDATED':
-        return "${activity['actorFullName']}${Translations.get('activity_page13', currentLang)}${activity['taskKey']}";
+        return _t('activity.eventTaskUpdated', {'actor': actor, 'taskKey': taskKey});
       case 'TASK_ESTIMATION_CHANGED':
-        return "${activity['actorFullName']}${Translations.get('activity_page14', currentLang)}${activity['taskKey']}${Translations.get('activity_page17', currentLang)}${activity['oldValue']}${Translations.get('activity_page16', currentLang)}${activity['newValue']}${Translations.get('activity_page18', currentLang)}";
+        return _t('activity.eventTaskEstimationChanged', {'actor': actor, 'taskKey': taskKey, 'oldValue': oldValue, 'newValue': newValue});
       case 'PR_LINKED':
-        return "${activity['actorFullName']}${Translations.get('activity_page15', currentLang)}${activity['taskKey']}";
+        return _t('activity.eventPrLinked', {'actor': actor, 'taskKey': taskKey});
       default:
         return '';
     }
@@ -215,12 +228,12 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
     final List membersAux = selectedProjectData?['members'] ?? [];
 
     final List sprints = [
-        {'id': null, 'name': Translations.get('activity_page4', currentLang)},
+        {'id': null, 'name': Translations.get('activity.allSprints', currentLang)},
         ...sprintsAux
     ];
 
     final List members = [
-        {'id': "", 'fullName': Translations.get('activity_page5', currentLang)},
+        {'id': "", 'fullName': Translations.get('activity.allUsers', currentLang)},
         ...membersAux
     ];
 
@@ -236,7 +249,7 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
         title: Column(
           children:[
             Divider(color: dividerColor, thickness: 1),
-            Text (Translations.get('activity_page1', currentLang),
+            Text (Translations.get('activity.title', currentLang),
               style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -274,7 +287,7 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
                       )
                     ),         
                     child: Text(
-                      Translations.get('activity_page2', currentLang),
+                      Translations.get('navigation.projects', currentLang),
                       style: TextStyle(
                         color: textColor, 
                         fontWeight: FontWeight.bold,
@@ -440,7 +453,7 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      Translations.get('activity_page6', currentLang),
+                      Translations.get('activity.noActivity', currentLang),
                       style: TextStyle(
                         color: textColor, 
                         fontWeight: FontWeight.bold,
@@ -556,7 +569,7 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
                     elevation: 0,
                   ),
                   child: Text(
-                    Translations.get('activity_page7', currentLang),
+                    Translations.get('activity.loadMore', currentLang),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold

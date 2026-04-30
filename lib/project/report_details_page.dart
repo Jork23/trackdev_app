@@ -77,11 +77,11 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
   String _translateRows(String type) {
     switch (type) {
       case "STUDENTS":
-        return Translations.get('report_details_page2', currentLang);
+        return Translations.get('reports.students', currentLang);
       case "SPRINTS":
-        return Translations.get('report_details_page3', currentLang);
+        return Translations.get('reports.sprints', currentLang);
       case "ESTIMATION_POINTS":
-        return Translations.get('report_details_page4', currentLang);
+        return Translations.get('reports.estimationPoints', currentLang);
       default:
         return type;
     }
@@ -126,7 +126,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('add_repository_page5', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -186,7 +186,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
               const SizedBox(height: 20),
             },
             Text(
-              Translations.get('report_details_page5', currentLang),
+              Translations.get('reports.filterByStatus', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -229,7 +229,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page6', currentLang), 
+                          Translations.get('report.allStatuses', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -259,7 +259,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page7', currentLang), 
+                          Translations.get('tasks.statusBacklog', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -289,7 +289,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page8', currentLang), 
+                          Translations.get('tasks.statusTodo', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -319,7 +319,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page9', currentLang), 
+                          Translations.get('tasks.statusInProgress', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -349,7 +349,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page10', currentLang), 
+                          Translations.get('tasks.statusVerify', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -379,7 +379,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text(
-                          Translations.get('report_details_page11', currentLang), 
+                          Translations.get('tasks.statusDone', currentLang), 
                           style: TextStyle(color: textColor),
                         ),
                       ),
@@ -418,7 +418,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                       )),
                       DataColumn(
                         label: Text(
-                          Translations.get('report_details_page12', currentLang),
+                          Translations.get('reports.total', currentLang),
                           style: TextStyle(
                             color: textColor, 
                             fontWeight: FontWeight.bold       
@@ -471,7 +471,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
                         cells: <DataCell>[
                           DataCell(
                             Text(
-                              Translations.get('report_details_page12', currentLang),
+                              Translations.get('reports.total', currentLang),
                               style: TextStyle(
                                 color: textColor, 
                                 fontWeight: FontWeight.bold       

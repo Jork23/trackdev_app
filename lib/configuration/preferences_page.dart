@@ -96,18 +96,18 @@ Future<void> _loadSettings() async {
 
       setState((){
         if (response.statusCode == 200 || response.statusCode == 204) {
-          _message = '$key ${Translations.get('preferences_page15', currentLang)}';
+          _message = '$key ${Translations.get('common.success', currentLang)}';
           _isSuccess = true;
         } 
         else {
-          _message = '${Translations.get('preferences_page16', currentLang)}: ${response.statusCode}';
+          _message = '${Translations.get('common.error', currentLang)}: ${response.statusCode}';
         }
       });
     } 
     catch (e) {
       if (!mounted) return;
       setState(() {
-        _message = '${Translations.get('preferences_page17', currentLang)}: $e';
+        _message = '${Translations.get('common.error', currentLang)}: $e';
       });
     }
     finally{
@@ -133,7 +133,7 @@ Future<void> _loadSettings() async {
             autofocus: true,
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-              hintText: Translations.get('preferences_page10', currentLang),
+              hintText: Translations.get('settings.timezoneDescription', currentLang),
               hintStyle: TextStyle(color: subtitleColor),
               prefixIcon: Icon(Icons.search, color: iconColor),
               border: OutlineInputBorder(
@@ -220,7 +220,7 @@ Future<void> _loadSettings() async {
           children:[
             Divider(color: dividerColor, thickness: 1),
             Text (
-              Translations.get('preferences_page1', currentLang),
+              Translations.get('settings.preferences', currentLang),
               style: TextStyle(
                   color: textColor, 
                   fontWeight: FontWeight.bold,
@@ -228,7 +228,7 @@ Future<void> _loadSettings() async {
                 ),
               ),
             Text(
-              Translations.get('preferences_page2', currentLang),
+              Translations.get('settings.preferencesSettingsDescription', currentLang),
               style: TextStyle(
                 fontSize: 13,
                 color: subtitleColor
@@ -246,7 +246,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page3', currentLang),
+                Translations.get('settings.theme', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -256,7 +256,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page4', currentLang),
+                Translations.get('settings.themeDescription', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,
@@ -273,7 +273,7 @@ Future<void> _loadSettings() async {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_isDarkMode ? Translations.get('preferences_page5', currentLang) : Translations.get('preferences_page6', currentLang),
+                  Text(_isDarkMode ? Translations.get('settings.themeDark', currentLang) : Translations.get('settings.themeLight', currentLang),
                     style: TextStyle(
                       color: textColor
                     )
@@ -304,7 +304,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page7', currentLang),
+                Translations.get('settings.language', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -314,7 +314,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page8', currentLang),
+                Translations.get('settings.languageDescription', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,
@@ -326,6 +326,23 @@ Future<void> _loadSettings() async {
               initialSelection: _selectedLang,
               width: MediaQuery.of(context).size.width - 48,
               textStyle: TextStyle(color: textColor),
+              requestFocusOnTap: false,
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: backgroundColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+              ),
               menuStyle: MenuStyle(
                 backgroundColor: WidgetStateProperty.all(cardColor),
                 surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
@@ -358,7 +375,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page9', currentLang),
+                Translations.get('settings.timezone', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -368,7 +385,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page10', currentLang),
+                Translations.get('settings.timezoneDescription', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,
@@ -405,7 +422,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page11', currentLang),
+                Translations.get('settings.githubUsername', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -415,7 +432,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page12', currentLang),
+                Translations.get('settings.githubUsernameDescription', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,
@@ -433,7 +450,10 @@ Future<void> _loadSettings() async {
                       filled: true,
                       fillColor: backgroundColor,
                       hintStyle: TextStyle(color: textColor),
-                      prefixIcon: FaIcon(FontAwesomeIcons.github, color: iconColor,size: 50),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 5),
+                        child: FaIcon(FontAwesomeIcons.github, color: iconColor, size: 50),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: borderColor),
@@ -467,7 +487,7 @@ Future<void> _loadSettings() async {
                       elevation: 0,
                     ),
                     child: Text(
-                      Translations.get('preferences_page13', currentLang),
+                      Translations.get('settings.save', currentLang),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold
@@ -481,7 +501,7 @@ Future<void> _loadSettings() async {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('preferences_page14', currentLang),
+                Translations.get('settings.githubUsernameHint', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,

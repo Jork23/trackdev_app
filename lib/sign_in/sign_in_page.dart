@@ -39,7 +39,7 @@ void dispose() {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() {
         isLoading = false;
-        _errorMessage = Translations.get('signin_page8', currentLang);
+        _errorMessage = Translations.get('common.error', currentLang);
       });
       return;
     }
@@ -75,14 +75,14 @@ void dispose() {
       else{
         if (!mounted) return;
         setState(() {
-          _errorMessage = Translations.get('signin_page9', currentLang);
+          _errorMessage = Translations.get('auth.invalidCredentials', currentLang);
         });
       }
     } 
     catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = '${Translations.get('signin_page10', currentLang)}: $e';
+        _errorMessage = '${Translations.get('common.error', currentLang)}: $e';
       });
       debugPrint("Error: $e");
     }
@@ -137,7 +137,7 @@ void dispose() {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('signin_page1', currentLang),
+              Translations.get('auth.signInTitle', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -148,7 +148,7 @@ void dispose() {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('signin_page2', currentLang),
+                Translations.get('auth.emailAddress', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -161,7 +161,7 @@ void dispose() {
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('signin_page3', currentLang),
+                hintText: Translations.get('auth.email', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -184,7 +184,7 @@ void dispose() {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('signin_page4', currentLang),
+                Translations.get('auth.password', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -197,7 +197,7 @@ void dispose() {
               obscureText: true,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                hintText: Translations.get('signin_page5', currentLang),
+                hintText: Translations.get('auth.password', currentLang),
                 hintStyle: TextStyle(color: hintColor),
                 filled: true,
                 fillColor: inputFillColor,
@@ -227,7 +227,7 @@ void dispose() {
                   );
                 }, 
                 child: Text(
-                  Translations.get('signin_page6', currentLang), 
+                  Translations.get('auth.forgotPassword', currentLang), 
                   style: const TextStyle(color: Color(0xFF2D5AF0))
                 ),
               ),
@@ -282,7 +282,7 @@ void dispose() {
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('signin_page7', currentLang),
+                  Translations.get('auth.login', currentLang),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold

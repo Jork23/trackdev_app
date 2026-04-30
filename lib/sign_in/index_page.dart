@@ -96,7 +96,7 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
               elevation: 0,
             ),
             child: Text(
-              Translations.get('index_page1', currentLang),
+              Translations.get('Sign in', currentLang),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold
@@ -113,7 +113,7 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
           children: [
             const SizedBox(height: 40),
             Text(
-              Translations.get('index_page2', currentLang),
+              Translations.get('Agile Project Management', currentLang),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 28, 
@@ -122,7 +122,7 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
               ),
             ),
             Text(
-              Translations.get('index_page3', currentLang),
+              Translations.get('for Education', currentLang),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 28, 
@@ -132,7 +132,7 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
             ),
             const SizedBox(height: 20),
             Text(
-              Translations.get('index_page4', currentLang),
+              Translations.get('TrackDev helps students learn agile methodologies by working together on real projects. Manage sprints, tasks, and track your team\'s progress.', currentLang),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16, 
@@ -157,7 +157,7 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('index_page1', currentLang),
+                  Translations.get('Sign in', currentLang),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold
@@ -168,20 +168,20 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
             const SizedBox(height: 50),           
             _buildFeatureCard(
               Icons.layers_outlined,
-              Translations.get('index_page5', currentLang),
-              Translations.get('index_page6', currentLang),
+              Translations.get('Sprint Management', currentLang),
+              Translations.get('Plan and track sprints with your team. Visualize progress with burn-down charts and sprint boards.', currentLang),
               const Color(0xFFE8F0FE),
             ),
             _buildFeatureCard(
               Icons.check_circle_outline,
-              Translations.get('index_page7', currentLang),
-              Translations.get('index_page8', currentLang),
+              Translations.get('Task Tracking', currentLang),
+              Translations.get('Create user stories and tasks. Track status, assign members, and estimate points for each item.', currentLang),
               const Color(0xFFE8F0FE),
             ),
             _buildFeatureCard(
               Icons.groups_outlined,
-              Translations.get('index_page9', currentLang),
-              Translations.get('index_page10', currentLang),
+              Translations.get('Team Collaboration', currentLang),
+              Translations.get('Work together with your team members. Comment on tasks, track history, and review contributions.', currentLang),
               const Color(0xFFE8F0FE),
             ),
             const SizedBox(height: 40),

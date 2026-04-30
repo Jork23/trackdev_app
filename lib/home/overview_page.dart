@@ -101,11 +101,11 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
   String _translateType(String type) {
     switch (type) {
       case "BUG":
-        return Translations.get('proj_details_page20', currentLang);
+        return Translations.get('tasks.typeBug', currentLang);
       case "TASK":
-        return Translations.get('proj_details_page21', currentLang);
+        return Translations.get('tasks.typeTask', currentLang);
       case "USER_STORY":
-        return Translations.get('proj_details_page22', currentLang);
+        return Translations.get('tasks.typeUserStory', currentLang);
       default:
         return type;
     }
@@ -114,15 +114,15 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
   String _translateStatus(String status) {
     switch (status) {
       case "BACKLOG":
-        return Translations.get('Backlog', currentLang);
+        return Translations.get('tasks.statusBacklog', currentLang);
       case "TODO":
-        return Translations.get('proj_details_page23', currentLang);
+        return Translations.get('tasks.statusTodo', currentLang);
       case "INPROGRESS":
-        return Translations.get('proj_details_page24', currentLang);
+        return Translations.get('tasks.statusInProgress', currentLang);
       case "VERIFY":
-        return Translations.get('proj_details_page25', currentLang);
+        return Translations.get('tasks.statusVerify', currentLang);
       case "DONE":
-        return Translations.get('proj_details_page26', currentLang);
+        return Translations.get('tasks.statusDone', currentLang);
       default:
         return status;
     }
@@ -276,7 +276,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
           children: [
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('Fes seguiment dels teus projectes i tasques', currentLang),
+              Translations.get('dashboard.studentSubtitle', currentLang),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: textColor, 
@@ -305,7 +305,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                       ),
                     ),
                     child: Text(
-                      Translations.get('Sprints Actius', currentLang),
+                      Translations.get('dashboard.activeSprints', currentLang),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                     ),
                   ),
                   if(_activeSprintsData.isEmpty)
-                    _buildEmptyState(icon: Icons.calendar_today_outlined, message: 'proj_details_page12'),
+                    _buildEmptyState(icon: Icons.calendar_today_outlined, message: Translations.get('projects.noSprintsCreated', currentLang)),
                   if(_activeSprintsData.isNotEmpty)...{
                     ListView.builder(
                       shrinkWrap: true,
@@ -420,7 +420,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                       ),
                     ),
                     child: Text(
-                      Translations.get('Els Teus Projectes', currentLang),
+                      Translations.get('dashboard.yourProjects', currentLang),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -429,7 +429,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                     ),
                   ),
                   if(_activeSprintsData.isEmpty)...{
-                    _buildEmptyState(icon: Icons.folder_open_outlined, message: 'projects_page4'),
+                    _buildEmptyState(icon: Icons.folder_open_outlined, message: Translations.get('projects.noProjectsStudent', currentLang)),
                   }
                   else...{
                     ListView.builder(
@@ -559,7 +559,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                     child: Row(
                       children: [
                         Text(
-                          "${Translations.get('proj_details_page15', currentLang)}(${tasks.length})",
+                          "${Translations.get('dashboard.recentTasks', currentLang)}(${tasks.length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -587,7 +587,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                             child: Text(
-                              Translations.get('proj_details_page11', currentLang), 
+                              Translations.get('common.viewAll', currentLang), 
                               style: TextStyle(color: textColor),
                             ),
                           ),
@@ -596,7 +596,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                     ),
                   ),
                   if(!_isLoading() && tasks.isEmpty)
-                    _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('proj_details_page16', currentLang)),                        
+                    _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('projects.noTasksCreated', currentLang)),                        
                   if(!_isLoading() && tasks.isNotEmpty)...{
                     ListView.builder(
                       shrinkWrap: true,
@@ -719,7 +719,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                                                 border: Border.all(color: const Color(0xFF34D399)),
                                               ),
                                               child: Text(
-                                                '${task?['estimationPoints']} ${Translations.get('proj_details_page17', currentLang)}',
+                                                '${task?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
                                                 style: TextStyle(
                                                   color: const Color(0xFF34D399),
                                                   fontSize: 7,
@@ -812,7 +812,7 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
           ),
           const SizedBox(height: 24),
           Text(
-            Translations.get(message, currentLang),
+            message,
             style: TextStyle(
               color: textColor,
               fontWeight: FontWeight.bold,

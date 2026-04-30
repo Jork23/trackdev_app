@@ -45,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
       builder: (context) => AlertDialog(
         backgroundColor: backgroundColor,
         title: Text(
-          Translations.get('profile_page7', currentLang),
+          Translations.get('common.actions', currentLang),
           style: TextStyle(color: textColor),
         ),
         content: SingleChildScrollView(
@@ -109,19 +109,19 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
 
       setState((){
         if(response.statusCode == 200 || response.statusCode == 204){
-          _message = Translations.get('profile_page10', currentLang);
+          _message = Translations.get('common.success', currentLang);
           _isSuccess = true;
           widget.onProfileUpdated?.call();
         } 
         else {
-          _message = '${Translations.get('profile_page11', currentLang)}: ${response.statusCode}';
+          _message = '${Translations.get('common.error', currentLang)}: ${response.statusCode}';
         }
       });
     } 
     catch(e){
       if (!mounted) return;
       setState(() {
-        _message = '${Translations.get('profile_page12', currentLang)}: $e';
+        _message = '${Translations.get('common.error', currentLang)}: $e';
       });
     }
     finally{
@@ -156,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
           children:[
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('profile_page1', currentLang),
+              Translations.get('settings.profileInfo', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -164,7 +164,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
               ),
             ),
             Text(
-              Translations.get('profile_page2', currentLang),
+              Translations.get('settings.profileInfoDescription', currentLang),
               style: TextStyle(
                 fontSize: 13,
                 color: subtitleColor
@@ -247,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('profile_page3', currentLang),
+                Translations.get('settings.username', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -282,7 +282,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('profile_page4', currentLang),
+                Translations.get('settings.fullName', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -316,7 +316,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('profile_page5', currentLang),
+                Translations.get('auth.email', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -351,7 +351,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('profile_page6', currentLang),
+                Translations.get('settings.avatarColor', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -416,7 +416,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                Translations.get('profile_page8', currentLang),
+                Translations.get('settings.avatarColorHint', currentLang),
                 style: TextStyle(
                   color: subtitleColor,
                   fontWeight: FontWeight.w300,
@@ -475,7 +475,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
                   elevation: 0,
                 ),
                 child: Text(
-                  Translations.get('profile_page9', currentLang),
+                  Translations.get('settings.saveChanges', currentLang),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold

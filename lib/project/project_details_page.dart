@@ -44,9 +44,9 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
     String _translateRows(String type) {
     switch (type) {
       case "STUDENTS":
-        return Translations.get('proj_details_page32', currentLang);
+        return Translations.get('activity.filterUser', currentLang);
       case "SPRINTS":
-        return Translations.get('proj_details_page33', currentLang);
+        return Translations.get('activity.filterSprint', currentLang);
       default:
         return type;
     }
@@ -215,7 +215,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('add_repository_page5', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -249,7 +249,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
           children: [
             Divider(color: dividerColor, thickness: 1),
             Text(
-              Translations.get('proj_details_page1', currentLang),
+              Translations.get('projects.title', currentLang),
               style: TextStyle(
                 color: textColor, 
                 fontWeight: FontWeight.bold,
@@ -336,7 +336,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                       ),
                     ),
                     child: Text(
-                      Translations.get('Qualificació', currentLang),
+                      Translations.get('projects.qualification', currentLang),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -368,7 +368,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.project['qualification'] == null ? "-":  Translations.get('Qualificació', currentLang),
+                                  widget.project['qualification'] == null ? "-":  Translations.get('projects.qualification', currentLang),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -411,7 +411,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                         child: Row(
                           children: [
                             Text(
-                              "${Translations.get('proj_details_page27', currentLang)}(${repositoris.length})",
+                              "${Translations.get('projects.githubRepos', currentLang)}(${repositoris.length})",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -438,7 +438,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               child: Text(
-                                Translations.get('proj_details_page29', currentLang), 
+                                Translations.get('projects.addRepository', currentLang), 
                                 style: TextStyle(color: textColor),
                               ),
                             ),
@@ -473,7 +473,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                Translations.get('proj_details_page12', currentLang),
+                                Translations.get('sprints.noSprints', currentLang),
                                 style: TextStyle(
                                   color: textColor, 
                                   fontWeight: FontWeight.bold,
@@ -548,7 +548,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                                           ),
                                         ),
                                         child: Text(
-                                          repository?['webhookActive'] ? Translations.get('proj_details_page13', currentLang) : Translations.get('proj_details_page14', currentLang),
+                                          repository?['webhookActive'] ? Translations.get('sprints.statusActive', currentLang) : Translations.get('sprints.statusDraft', currentLang),
                                           style: TextStyle(
                                             color: repository?['webhookActive'] ? const Color(0xFF1E8E3E) : const Color(0xFFD93025),
                                             fontSize: 10,
@@ -593,7 +593,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_details_page28', currentLang)}(${_reportsData.length})",
+                          "${Translations.get('navigation.reports', currentLang)}(${_reportsData.length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -654,7 +654,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                                           ),
                                           if(report?['rowType']!=null && report?['columnType']!=null)
                                             Text(
-                                              "${Translations.get('proj_details_page30', currentLang)}: ${_translateRows(report?['rowType'])} | ${Translations.get('proj_details_page31', currentLang)}: ${_translateRows(report?['columnType'])}" ,
+                                              "${Translations.get('reports.rows', currentLang)}: ${_translateRows(report?['rowType'])} | ${Translations.get('reports.columns', currentLang)}: ${_translateRows(report?['columnType'])}" ,
                                               style: TextStyle(color: subtitleColor, fontSize: 12),
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -692,7 +692,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_details_page10', currentLang)}(${widget.project['sprints'].length})",
+                          "${Translations.get('navigation.sprints', currentLang)}(${widget.project['sprints'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -807,7 +807,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('proj_details_page18', currentLang)}(${widget.project['members'].length})",
+                          "${Translations.get('projects.members', currentLang)}(${widget.project['members'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -816,7 +816,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                         ),
                       ),
                       if(!_isLoading() && widget.project['members'].isEmpty)
-                       _buildEmptyState(icon: Icons.group, message: Translations.get('proj_details_page19', currentLang)),                     
+                       _buildEmptyState(icon: Icons.group, message: Translations.get('projects.noTeamMembers', currentLang)),                     
                       if(!_isLoading() && widget.project['members'].isNotEmpty)...{
                         ListView.builder(
                           shrinkWrap: true,
@@ -904,7 +904,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
           ),
           const SizedBox(height: 24),
           Text(
-            Translations.get(message, currentLang),
+            message,
             style: TextStyle(
               color: textColor,
               fontWeight: FontWeight.bold,

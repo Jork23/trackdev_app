@@ -253,11 +253,11 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
   String _translateType(String type) {
     switch (type) {
       case "BUG":
-        return Translations.get('sprint_details_page1', currentLang);
+        return Translations.get('tasks.typeBug', currentLang);
       case "TASK":
-        return Translations.get('sprint_details_page2', currentLang);
+        return Translations.get('tasks.typeTask', currentLang);
       case "USER_STORY":
-        return Translations.get('sprint_details_page3', currentLang);
+        return Translations.get('tasks.typeUserStory', currentLang);
       default:
         return type;
     }
@@ -266,15 +266,15 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
   String _translateStatus(String status) {
     switch (status) {
       case "BACKLOG":
-        return "Backlog";
+        return Translations.get('tasks.statusBacklog', currentLang);
       case "TODO":
-        return Translations.get('sprint_details_page4', currentLang);
+        return Translations.get('tasks.statusTodo', currentLang);
       case "INPROGRESS":
-        return Translations.get('sprint_details_page5', currentLang);
+        return Translations.get('tasks.statusInProgress', currentLang);
       case "VERIFY":
-        return Translations.get('sprint_details_page6', currentLang);
+        return Translations.get('tasks.statusVerify', currentLang);
       case "DONE":
-        return Translations.get('sprint_details_page7', currentLang);
+        return Translations.get('tasks.statusDone', currentLang);
       default:
         return status;
     }
@@ -290,11 +290,64 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
       default:           return const Color(0xFF64748B);
     }
   }
+
+  final Map<String, Map<String, String>> _localTranslations = {
+    'ca': {
+      'transitionFromBacklog': 'Des de Backlog només pots passar a Prioritzada.',
+      'transitionFromTodo': 'Des de Prioritzada només pots passar a En Progrés o Backlog.',
+      'transitionToVerifyNeedsPR': 'Per passar a En Verificació necessites tenir almenys una Pull Request vinculada.',
+      'transitionToDoneNeedsVerify': 'No pots passar directament a Finalitzada. Has de passar per En Verificació primer.',
+      'transitionFromInProgress': 'Des de En Progrés només pots passar a Prioritzada o En Verificació si té almenys una Pull Request vinculada.',
+      'transitionFromVerify': 'Des de En Verificació només pots passar a Finalitzada.',
+      'transitionFromDone': 'Una tasca Finalitzada només pot tornar a En Verificació.',
+      'transitionNotAllowed': 'Transició no permesa.',
+      'changeSprintUserStoryNeedsBacklog': 'Per canviar el sprint d\'una Història d\'Usuari, totes les subtasques han d\'estar al Backlog.',
+      'subtaskCannotGoBacklog': 'Una subtasca no pot tornar al Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'Una subtasca en un sprint actiu només pot moure\'s a un sprint futur.',
+      'subtaskFutureSprintCannotMove': 'Una subtasca en un sprint futur no es pot moure.',
+      'futureSprintOnlyBacklog': 'Una tasca en un sprint futur només pot tornar al Backlog.',
+    },
+    'es': {
+      'transitionFromBacklog': 'Desde Backlog solo puedes pasar a Priorizada.',
+      'transitionFromTodo': 'Desde Priorizada solo puedes pasar a En Progreso o Backlog.',
+      'transitionToVerifyNeedsPR': 'Para pasar a En Verificación necesitas tener al menos una Pull Request vinculada.',
+      'transitionToDoneNeedsVerify': 'No puedes pasar directamente a Finalizada. Debes pasar por En Verificación primero.',
+      'transitionFromInProgress': 'Desde En Progreso solo puedes pasar a Priorizada o En Verificación si tiene al menos una Pull Request vinculada.',
+      'transitionFromVerify': 'Desde En Verificación solo puedes pasar a Finalizada.',
+      'transitionFromDone': 'Una tarea Finalizada solo puede volver a En Verificación.',
+      'transitionNotAllowed': 'Transición no permitida.',
+      'changeSprintUserStoryNeedsBacklog': 'Para cambiar el sprint de una Historia de Usuario, todas las subtareas deben estar en el Backlog.',
+      'subtaskCannotGoBacklog': 'Una subtarea no puede volver al Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'Una subtarea en un sprint activo solo puede moverse a un sprint futuro.',
+      'subtaskFutureSprintCannotMove': 'Una subtarea en un sprint futuro no se puede mover.',
+      'futureSprintOnlyBacklog': 'Una tarea en un sprint futuro solo puede volver al Backlog.',
+    },
+    'en': {
+      'transitionFromBacklog': 'From Backlog you can only move to Prioritized.',
+      'transitionFromTodo': 'From Prioritized you can only move to In Progress or Backlog.',
+      'transitionToVerifyNeedsPR': 'To move to In Verification you need to have at least one linked Pull Request.',
+      'transitionToDoneNeedsVerify': 'You cannot move directly to Done. You must go through In Verification first.',
+      'transitionFromInProgress': 'From In Progress you can only move to Prioritized or In Verification if it has at least one linked Pull Request.',
+      'transitionFromVerify': 'From In Verification you can only move to Done.',
+      'transitionFromDone': 'A Done task can only return to In Verification.',
+      'transitionNotAllowed': 'Transition not allowed.',
+      'changeSprintUserStoryNeedsBacklog': 'To change a User Story\'s sprint, all subtasks must be in the Backlog.',
+      'subtaskCannotGoBacklog': 'A subtask cannot return to the Backlog.',
+      'subtaskActiveSprintOnlyFuture': 'A subtask in an active sprint can only be moved to a future sprint.',
+      'subtaskFutureSprintCannotMove': 'A subtask in a future sprint cannot be moved.',
+      'futureSprintOnlyBacklog': 'A task in a future sprint can only return to the Backlog.',
+    }
+  };
+
+  String _getMsg(String key) {
+    return _localTranslations[currentLang]?[key] ?? key;
+  }
+
  
   String? _canEditStatusReason(String newStatus, Map<String,dynamic> task) {
 
     if(_userData!['id'] != task['assignee']?['id']){
-      return Translations.get('sprint_details_page8', currentLang);
+      return Translations.get('tasks.deleteBlockedNotAssignee', currentLang);
     }
 
     final current = task['status'];
@@ -305,35 +358,35 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     switch (current) {
       case 'BACKLOG':
         if (newStatus == 'TODO') return null;
-        return Translations.get('sprint_details_page9', currentLang);
+        return _getMsg('transitionFromBacklog');
 
       case 'TODO':
         if (newStatus == 'INPROGRESS' || newStatus == 'BACKLOG') return null;
-        return Translations.get('sprint_details_page10', currentLang);
+        return _getMsg('transitionFromTodo');
 
       case 'INPROGRESS':
         if (newStatus == 'TODO') return null;
         if (newStatus == 'VERIFY') {
           if (!hasPullRequests) {
-            return Translations.get('sprint_details_page11', currentLang);
+            return _getMsg('transitionToVerifyNeedsPR');
           }
           return null;
         }
         if (newStatus == 'DONE') {
-          return Translations.get('sprint_details_page12', currentLang);
+          return _getMsg('transitionToDoneNeedsVerify');
         }
-        return Translations.get('sprint_details_page13', currentLang);
+        return _getMsg('transitionFromInProgress');
 
       case 'VERIFY':
         if (newStatus == 'DONE') return null;
-        return Translations.get('sprint_details_page14', currentLang);
+        return _getMsg('transitionFromVerify');
 
       case 'DONE':
         if (newStatus == 'VERIFY') return null;
-        return Translations.get('sprint_details_page15', currentLang);
+        return _getMsg('transitionFromDone');
 
       default:
-        return Translations.get('sprint_details_page16', currentLang);
+        return Translations.get('transitionNotAllowed', currentLang);
     }
   }
 
@@ -357,7 +410,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
   String? _canEditSprintReason(Map<String,dynamic> task, int? newSprintId) {
 
     if(_userData!['id'] != task['assignee']?['id']){
-      return Translations.get('sprint_details_page8', currentLang);
+      return Translations.get('tasks.deleteBlockedNotAssignee', currentLang);
     }
 
     final bool goingToBacklog = newSprintId == -1;
@@ -392,24 +445,24 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
 
     if( task['type'] == 'USER_STORY'){
       if(!_isAllSubstasksInBackLog(task)){
-        return Translations.get('sprint_details_page17', currentLang);
+        return _getMsg('changeSprintUserStoryNeedsBacklog');
       }
       return null;
     }
 
     if(task['parentTaskId'] != null){
       if(goingToBacklog){
-        return Translations.get('sprint_details_page18', currentLang);
+        return _getMsg('subtaskCannotGoBacklog');
       }
       if(currentlyInBacklog){
         return null;
       }
       if(currentIsActive){
         if (targetIsFuture) return null;
-        return Translations.get('sprint_details_page19', currentLang);
+        return _getMsg('subtaskActiveSprintOnlyFuture');
       }
       if(currentIsFuture){
-        return Translations.get('sprint_details_page20', currentLang);
+        return _getMsg('subtaskFutureSprintCannotMove');
       }
       return null;
     }
@@ -422,7 +475,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     }
     if(currentIsFuture){
       if (goingToBacklog) return null;
-      return Translations.get('sprint_details_page21', currentLang);
+      return _getMsg('futureSprintOnlyBacklog');
     }
 
     return null;
@@ -573,7 +626,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                 children: [
                   Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
                   Text(
-                    Translations.get('sprint_details_page22', currentLang),
+                    Translations.get('common.back', currentLang),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -621,7 +674,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                   padding: EdgeInsets.only(right: 10,left: 10),
                 ),
                 child: Text(
-                  Translations.get('sprint_details_page23', currentLang),
+                  Translations.get('tasks.addTask', currentLang),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold
@@ -980,7 +1033,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
           Row(
             children: [
               Text(
-                Translations.get('sprint_details_page26', currentLang),
+                Translations.get('sprints.unassignedTasks', currentLang),
                 style: TextStyle(
                   color: textColor,
                   fontSize: 15,
@@ -1033,7 +1086,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
               child: Row(
                 children: [
                   Text(
-                    Translations.get('Sense tasques en aquest estat', currentLang),
+                    Translations.get('sprints.noTasksInSprint', currentLang),
                     style: TextStyle(
                       color: subtitleColor,
                       fontSize: 12,
@@ -1180,7 +1233,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                   ),
                   child: Text(
-                    Translations.get('sprint_details_page25', currentLang),
+                    Translations.get('sprints.addSubtask', currentLang),
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -1194,7 +1247,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                 child: Row(
                   children: [
                     Text(
-                      Translations.get('Sense subtasques en aquest estat', currentLang),
+                      Translations.get('sprints.unassignedTasks', currentLang),
                       style: TextStyle(
                         color: subtitleColor,
                         fontSize: 12,
