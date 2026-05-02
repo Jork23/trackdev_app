@@ -411,7 +411,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                         child: Row(
                           children: [
                             Text(
-                              "${Translations.get('projects.githubRepos', currentLang)}(${repositoris.length})",
+                              "${Translations.get('projects.githubRepos', currentLang)} (${repositoris.length})",
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -593,7 +593,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('navigation.reports', currentLang)}(${_reportsData.length})",
+                          "${Translations.get('navigation.reports', currentLang)} (${_reportsData.length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -692,7 +692,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('navigation.sprints', currentLang)}(${widget.project['sprints'].length})",
+                          "${Translations.get('navigation.sprints', currentLang)} (${widget.project['sprints'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -807,7 +807,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                           ),
                         ),
                         child: Text(
-                          "${Translations.get('projects.members', currentLang)}(${widget.project['members'].length})",
+                          "${Translations.get('projects.members', currentLang)} (${widget.project['members'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -840,22 +840,26 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
                                     ),
                                   ),
                                   const SizedBox(width: 10),
-                                  Column(
+                                  Expanded(  
+                                    child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           member?['fullName'] ?? '',
                                           style: TextStyle(color: textColor),
                                           overflow: TextOverflow.ellipsis,
-                                        ),
+                                          maxLines: 1,
+                                        ),                   
                                         if(member?['email'] != null)
                                           Text(
                                             "${member?['email']}",
                                             style: TextStyle(color: textColor),
                                             overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
                                           ),
                                       ]
                                     )
+                                  )
                                 ]
                               )
                             );

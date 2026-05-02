@@ -511,28 +511,34 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
                               const SizedBox(height: 2,),
                               Row(
                                 children: [
-                                  SizedBox(width: 5),
-                                  Text(
-                                    activity?['taskKey'] ?? '',
-                                    style: TextStyle(
-                                      color: const Color(0xFF2D5AF0), 
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    activity?['projectName'] ?? '',
-                                    style: TextStyle(
-                                      color: textColor, 
-                                      fontSize: 13,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  if(activity?['taskKey'] != null)...{
+                                    SizedBox(width: 5),
+                                    Text(
+                                      activity?['taskKey'] ?? '',
+                                      style: TextStyle(
+                                        color: const Color(0xFF2D5AF0), 
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    )
+                                  },
+                                  if(activity?['projectName'] != null)...{
+                                    SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        activity?['projectName'] ?? '',
+                                        style: TextStyle(
+                                          color: textColor, 
+                                          fontSize: 13,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                  },
                                   if(activity?['createdAt'] != null)...{
                                     SizedBox(width: 5),
-                                    Expanded(
+                                    Flexible(
                                       child: Text(
                                         _formatDate(activity?['createdAt']),
                                         style: TextStyle(

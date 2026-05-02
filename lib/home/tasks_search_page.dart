@@ -72,8 +72,9 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
       if (!mounted) return;
 
       if (response.statusCode == 200 || response.statusCode == 204) {
+        Map<String, dynamic> responseData = jsonDecode(response.body);
         setState((){
-          _projectsData = jsonDecode(response.body); 
+          _projectsData = responseData['projects'];
         });
       }
     }
@@ -173,7 +174,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
     final params ={
       'page': _page.toString(),
       'size': _size.toString(),
-      'projectId': '$projectId',
+      if(projectId != null) 'projectId': projectId.toString(), 
       if(assigneeId !=null && assigneeId.isNotEmpty) 'assigneeId': assigneeId,
       if(status !=null && status.isNotEmpty) 'status': status,
       if(type !=null && type.isNotEmpty) 'type': type,
@@ -238,7 +239,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
     ];
     
     final List listSortOrder = [
-      {'value': 'desc', 'name': Translations.get('tasks.sortNewestFirst ', currentLang)},
+      {'value': 'desc', 'name': Translations.get('tasks.sortNewestFirst', currentLang)},
       {'value': 'asc', 'name': Translations.get('tasks.sortOldestFirst', currentLang)},
     ];
 
@@ -268,53 +269,49 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
         automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
         elevation: 0,
-        toolbarHeight: 50,
-        title: Row(
+        toolbarHeight: 125,
+        title: Column(
           children: [
-           ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-                  Text(
-                    Translations.get('common.back', currentLang),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5AF0),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
                   ),
-                ]
-              ),
-            ),
-            const SizedBox(width: 15),
-            const Icon(
-              Icons.layers_outlined, 
-              color: Color(0xFF2D5AF0),
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TrackDev',
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+                  child: Row(
+                    children: [
+                      Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                      Text(
+                        Translations.get('common.back', currentLang),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ]
+                  ),
+                ),
+                const SizedBox(width: 15),
+                const Icon(
+                  Icons.layers_outlined, 
+                  color: Color(0xFF2D5AF0),
+                  size: 28,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'TrackDev',
+                  style: TextStyle(
+                    color: textColor, 
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),          
             Divider(color: dividerColor, thickness: 1),
             Text(
               Translations.get('tasks.myTasks', currentLang),
@@ -324,31 +321,15 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                 fontSize: 25,
               ),
             ),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
             Divider(color: dividerColor, thickness: 1),
+          ]
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             const SizedBox(height: 20),
             Container(
               width: double.infinity,
@@ -415,6 +396,52 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        DropdownMenu<int?>(
+                          initialSelection: _selectedProjectId,
+                          width: MediaQuery.of(context).size.width - 72,
+                          textStyle: TextStyle(color: textColor, fontSize: 14),
+                          inputDecorationTheme: InputDecorationTheme(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          menuStyle: MenuStyle(
+                            backgroundColor: WidgetStateProperty.all(cardColor),
+                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+                            side: WidgetStateProperty.all(
+                              BorderSide(color: borderColor, width: 1),
+                            ),
+                          ),
+                          onSelected: (int? value) async {
+                            setState(() {
+                              _selectedProjectId = value;                    
+                              for (var project in _projectsData) {
+                                if (project['id'] == value) {
+                                  _selectedProject = project;
+                                  break;
+                                }
+                                else{
+                                  _selectedProject = null;
+                                }
+                              }
+                              _page = 0;
+                              _isLoadingTask = true;
+                            });
+                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                          },
+                          dropdownMenuEntries: listProjects.map((spri) {
+                            return DropdownMenuEntry<int?>(
+                              value: spri['id'], 
+                              label: spri['name'],
+                              style: MenuItemButton.styleFrom(
+                                foregroundColor: textColor,
+                                backgroundColor: backgroundColor
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(height: 8),
                         DropdownMenu<String?>(
                           initialSelection: _selectedType,
                           width: MediaQuery.of(context).size.width - 72,
@@ -481,43 +508,6 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                             return DropdownMenuEntry<String?>(
                               value: stat['status'], 
                               label: stat['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        DropdownMenu<int?>(
-                          initialSelection: _selectedProjectId,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (int? value) async {
-                            setState(() {
-                              _selectedProjectId = value;
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listProjects.map((spri) {
-                            return DropdownMenuEntry<int?>(
-                              value: spri['id'], 
-                              label: spri['name'],
                               style: MenuItemButton.styleFrom(
                                 foregroundColor: textColor,
                                 backgroundColor: backgroundColor
@@ -626,7 +616,6 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                             setState(() {
                               _selectedSearch = value;
                               _page = 0;
-                              _isLoadingTask = true;
                             });
                             _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
                           },
@@ -925,7 +914,7 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
                           onPressed: _page < (_totalPages - 1) 
                           ? () {
                               setState(() {
-                                _page--;
+                                _page++;
                                 _isLoadingTask = true;
                               });
                               _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);

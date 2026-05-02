@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../project/task_details_page.dart';
 import '../project/sprint_details_page.dart';
 import '../project/project_details_page.dart';
+import 'tasks_search_page.dart';
 
 
 class OverviewPage extends StatefulWidget {
@@ -266,351 +267,327 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
     }
 
     final tasks = _recentTaskData['tasks'] ?? [];
-
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      appBar: PreferredSize(
+      preferredSize: const Size.fromHeight(120),
+      child: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        flexibleSpace: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('dashboard.studentSubtitle', currentLang),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                Translations.get('dashboard.studentSubtitle', currentLang),
+                textAlign: TextAlign.center,
+                maxLines: null,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
               ),
             ),
             Divider(color: dividerColor, thickness: 1),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(11),
-                        topRight: Radius.circular(11),
-                      ),
-                    ),
-                    child: Text(
-                      Translations.get('dashboard.activeSprints', currentLang),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+          ],
+        ),
+      ),
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2D5AF0),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(11),
+                      topRight: Radius.circular(11),
                     ),
                   ),
-                  if(_activeSprintsData.isEmpty)
-                    _buildEmptyState(icon: Icons.calendar_today_outlined, message: Translations.get('projects.noSprintsCreated', currentLang)),
-                  if(_activeSprintsData.isNotEmpty)...{
-                    ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _activeSprintsData.length,
-                      itemBuilder: (context, index) {
-                        final sprint = _activeSprintsData[index];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SprintDetailsPage(sprint: sprint),
+                  child: Text(
+                    Translations.get('dashboard.activeSprints', currentLang),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if(_activeSprintsData.isEmpty)
+                  _buildEmptyState(icon: Icons.calendar_today_outlined, message: Translations.get('projects.noSprintsCreated', currentLang)),
+                if(_activeSprintsData.isNotEmpty)...{
+                  ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _activeSprintsData.length,
+                    itemBuilder: (context, index) {
+                      final sprint = _activeSprintsData[index];
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SprintDetailsPage(sprint: sprint),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: _getIconBackgroundColor(sprint?['status']),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: _getIconColor(sprint?['status']), width: 1),
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today_outlined, 
+                                  color: _getIconColor(sprint?['status']), 
+                                  size: 20
+                                ),
                               ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if(sprint?['value']!=null)
+                                      Text(
+                                        sprint?['value'],
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    if(sprint?['startDate'] != null && sprint?['endDate'] != null)
+                                      Text(                                              
+                                        "${_formatDate(sprint?['startDate'])} - ${_formatDate(sprint?['endDate'])}",
+                                        style: TextStyle(color: subtitleColor, fontSize: 12),
+                                      ),
+                                  ],
+                                ),
+                              ),  
+                              if(sprint?['status'] != null)                                                        
                                 Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: _getIconBackgroundColor(sprint['status']),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: _getIconColor(sprint['status']), width: 1),
+                                    color: _getIconBackgroundColor(sprint?['status']),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: _getIconColor(sprint?['status']), width: 1),
                                   ),
-                                  child: Icon(
-                                    Icons.calendar_today_outlined, 
-                                    color: _getIconColor(sprint['status']), 
-                                    size: 20
+                                  child: Text(
+                                    sprint?['status'],
+                                    style: TextStyle(
+                                      color: _getIconColor(sprint['status']),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if(sprint?['value']!=null)
-                                        Text(
-                                          sprint?['value'],
-                                          style: TextStyle(
-                                            color: textColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                      if(sprint['startDate'] != null && sprint['endDate'] != null)
-                                        Text(                                              
-                                          "${_formatDate(sprint['startDate'])} - ${_formatDate(sprint['endDate'])}",
-                                          style: TextStyle(color: subtitleColor, fontSize: 12),
-                                        ),
-                                    ],
-                                  ),
-                                ),  
-                                if(sprint?['status'] != null)                                                        
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: _getIconBackgroundColor(sprint?['status']),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: _getIconColor(sprint?['status']), width: 1),
-                                    ),
-                                    child: Text(
-                                      sprint?['status'],
-                                      style: TextStyle(
-                                        color: _getIconColor(sprint['status']),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  }
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(11),
-                        topRight: Radius.circular(11),
-                      ),
-                    ),
-                    child: Text(
-                      Translations.get('dashboard.yourProjects', currentLang),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  if(_activeSprintsData.isEmpty)...{
-                    _buildEmptyState(icon: Icons.folder_open_outlined, message: Translations.get('projects.noProjectsStudent', currentLang)),
-                  }
-                  else...{
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _projectsData.length,
-                      itemBuilder: (context, index){
-                        final project = _projectsData[index] ?? [];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProjectDetailsPage(project: project),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: cardColor,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.all(3),
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(255,219,252,231),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color:Color.fromARGB(255,0,166,62)),
-                                    ),
-                                    child: const Icon(
-                                      Icons.folder_open_outlined,
-                                      color: Color.fromARGB(255,0,166,62),
-                                      size: 24
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          project?['name'] ?? '',
-                                          style: TextStyle(
-                                            color: textColor,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        if(project?['course']?['startYear'] != null)
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.calendar_today_outlined,
-                                                color: iconColor,
-                                                size: 12
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                              "${project?['course']?['startYear']} - ${project?['course']?['startYear'] + 1}",
-                                                style: TextStyle(
-                                                  color: subtitleColor,
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                            ]
-                                          ),
-                                          Row(
-                                            children: [                                  
-                                              Icon(
-                                                Icons.menu_book,
-                                                color: iconColor,
-                                                size: 12
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                project?['course']?['subject']?['name'] ?? '',
-                                                style: TextStyle(
-                                                  color: subtitleColor,
-                                                  fontSize: 13,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          )
-                                      ],
-                                    )
-                                  )
-                                ]
-                              )
-                            )
-                          )
-                        );
-                      }
-                    )
-                  }
-                ]
-              )
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(11),
-                        topRight: Radius.circular(11),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          "${Translations.get('dashboard.recentTasks', currentLang)}(${tasks.length})",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            ],
                           ),
                         ),
-                        if(tasks.length > 0)...{
-                          const Spacer(),
-                          ElevatedButton(
-                            onPressed: () async{
-                              /*await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TaskProjectPage(project: widget.project),
-                                ),
-                              );
-                              setState((){
-                                _isLoadingTask = true; 
-                              });
-                              _loadRecentTasks();*/
-                              },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: backgroundColor,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: Text(
-                              Translations.get('common.viewAll', currentLang), 
-                              style: TextStyle(color: textColor),
-                            ),
-                          ),
-                        }
-                      ]
+                      );
+                    },
+                  ),
+                }
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2D5AF0),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(11),
+                      topRight: Radius.circular(11),
                     ),
                   ),
-                  if(!_isLoading() && tasks.isEmpty)
-                    _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('projects.noTasksCreated', currentLang)),                        
-                  if(!_isLoading() && tasks.isNotEmpty)...{
-                    ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: tasks.length > 5 ? 5: tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = tasks[index];
-                        return InkWell(
-                          onTap: () async{
+                  child: Text(
+                    Translations.get('dashboard.yourProjects', currentLang),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if(_activeSprintsData.isEmpty)...{
+                  _buildEmptyState(icon: Icons.folder_open_outlined, message: Translations.get('projects.noProjectsStudent', currentLang)),
+                }
+                else...{
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _projectsData.length,
+                    itemBuilder: (context, index){
+                      final project = _projectsData[index] ?? [];
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProjectDetailsPage(project: project),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(3),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255,219,252,231),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color:Color.fromARGB(255,0,166,62)),
+                                ),
+                                child: const Icon(
+                                  Icons.folder_open_outlined,
+                                  color: Color.fromARGB(255,0,166,62),
+                                  size: 24
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      project?['name'] ?? '',
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if(project?['course']?['startYear'] != null)
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today_outlined,
+                                            color: iconColor,
+                                            size: 12
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                            "${project?['course']?['startYear']} - ${project?['course']?['startYear'] + 1}",
+                                              style: TextStyle(
+                                                color: subtitleColor,
+                                                fontSize: 13,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          )
+                                        ]
+                                      ),
+                                      Row(
+                                        children: [                                  
+                                          Icon(
+                                            Icons.menu_book,
+                                            color: iconColor,
+                                            size: 12
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              project?['course']?['subject']?['name'] ?? '',
+                                              style: TextStyle(
+                                                color: subtitleColor,
+                                                fontSize: 13,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                  ],
+                                )
+                              )
+                            ]
+                          )
+                        )
+                      );         
+                    }
+                  )
+                }
+              ]
+            )
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2D5AF0),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(11),
+                      topRight: Radius.circular(11),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        Translations.get('dashboard.recentTasks', currentLang),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if(tasks.length > 0)...{
+                        const Spacer(),
+                        ElevatedButton(
+                          onPressed: () async{
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TaskDetailsPage(task: task),
+                                builder: (context) => TasksSearchPage(),
                               ),
                             );
                             setState((){
@@ -618,149 +595,198 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                             });
                             _loadRecentTasks();
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: const Color(0xFF3B82F6)),
-                                  ),
-                                  child: Icon(
-                                    Icons.assignment_outlined,
-                                    color: const Color(0xFF3B82F6), 
-                                    size: 25
-                                  ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: backgroundColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 4),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            minimumSize: Size.zero,
+                          ),
+                          child: Text(
+                            Translations.get('common.viewAll', currentLang), 
+                            style: TextStyle(color: textColor),
+                          ),
+                        ),
+                      }
+                    ]
+                  ),
+                ),
+                if(!_isLoading() && tasks.isEmpty)
+                  _buildEmptyState(icon: Icons.assignment_outlined, message: Translations.get('projects.noTasksCreated', currentLang)),                        
+                if(!_isLoading() && tasks.isNotEmpty)...{
+                  ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: tasks.length > 5 ? 5: tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = tasks[index];
+                      return InkWell(
+                        onTap: () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TaskDetailsPage(task: task),
+                            ),
+                          );
+                          setState((){
+                            _isLoadingTask = true; 
+                          });
+                          _loadRecentTasks();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2563EB),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFF3B82F6)),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          if(task?['taskKey'] != null)
-                                            Text(
-                                              task?['taskKey'],
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          const SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              task?['name'] ?? '',
-                                              style: TextStyle(
-                                                color: textColor,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
+                                child: Icon(
+                                  Icons.assignment_outlined,
+                                  color: const Color(0xFF3B82F6), 
+                                  size: 25
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        if(task?['taskKey'] != null)
+                                          Text(
+                                            task?['taskKey'],
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
                                             ),
                                           ),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            task?['name'] ?? '',
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if(task?['type'] != null)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: _getTaskBackgroundColor(task?['type']),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: _getTaskColor(task?['type']), width: 1),
+                                            ),
+                                            child: Text(
+                                              _translateType(task?['type']),
+                                              style: TextStyle(
+                                                color: _getTaskColor(task?['type']),
+                                                fontSize: 7,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        if(task?['status'] != null)...{
+                                          Text(
+                                              ' • ',
+                                              style: TextStyle(
+                                                color: subtitleColor,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          Text(
+                                            _translateStatus(task?['status']),
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        },
+                                        if(task?['estimationPoints'] != null && task?['estimationPoints'] != 0)...{
+                                            Text(
+                                            ' • ',
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF064E3B),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: const Color(0xFF34D399)),
+                                            ),
+                                            child: Text(
+                                              '${task?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
+                                              style: TextStyle(
+                                                color: const Color(0xFF34D399),
+                                                fontSize: 7,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        },
+                                        if(task?['assignee'] != null && task?['assignee']?['color'] != null)...{
+                                          Text(
+                                            ' • ',
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 10,
+                                                  backgroundColor: _hexToColor(task?['assignee']?['color']),
+                                                  child: Text(
+                                                    "${task?['assignee']?['capitalLetters']}",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                      ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Flexible(
+                                                  child: Text(
+                                                    task['assignee']['fullName'] ?? '',
+                                                    style: TextStyle(color: textColor, fontSize: 10),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          },
                                         ],
                                       ),
-                                      Row(
-                                        children: [
-                                          if(task?['type'] != null)
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: _getTaskBackgroundColor(task?['type']),
-                                                borderRadius: BorderRadius.circular(12),
-                                                border: Border.all(color: _getTaskColor(task?['type']), width: 1),
-                                              ),
-                                              child: Text(
-                                                _translateType(task?['type']),
-                                                style: TextStyle(
-                                                  color: _getTaskColor(task?['type']),
-                                                  fontSize: 7,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          if(task?['status'] != null)...{
-                                            Text(
-                                                ' • ',
-                                                style: TextStyle(
-                                                  color: subtitleColor,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            Text(
-                                              _translateStatus(task?['status']),
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          },
-                                          if(task?['estimationPoints'] != null && task?['estimationPoints'] != 0)...{
-                                              Text(
-                                              ' • ',
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF064E3B),
-                                                borderRadius: BorderRadius.circular(12),
-                                                border: Border.all(color: const Color(0xFF34D399)),
-                                              ),
-                                              child: Text(
-                                                '${task?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
-                                                style: TextStyle(
-                                                  color: const Color(0xFF34D399),
-                                                  fontSize: 7,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          },
-                                          if(task?['assignee'] != null && task?['assignee']?['color'] != null)...{
-                                            Text(
-                                              ' • ',
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            CircleAvatar(
-                                              radius: 10,
-                                              backgroundColor: _hexToColor(task?['assignee']?['color']),
-                                              child: Text(
-                                                "${task?['assignee']?['capitalLetters']}",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 10,
-                                                  ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                                task['assignee']['fullName'] ?? '',
-                                                style: TextStyle(color: textColor, fontSize: 10),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                          }
-                                        ],
-                                      )
                                     ],
                                   ),
-                                ),                                                                                                
+                                ),
                               ],
                             ),
                           ),
@@ -768,19 +794,15 @@ class _OverviewPageState extends State<OverviewPage> with ThemePage{
                       },
                     ),
                   }
-                ],
+                ]
               ),
             ),
-
-            
-            const SizedBox(height: 10),
-
-
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
+
 
 
 

@@ -1046,6 +1046,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
             Divider(color: dividerColor, thickness: 1, height: 16),
             ListView.builder(
               shrinkWrap: true,
+              padding: EdgeInsets.zero,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: selectedTasks.length,
               itemBuilder: (context, index) {
@@ -1198,15 +1199,17 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                               fontSize: 15, 
                               fontWeight: FontWeight.bold),
                           ),
-                          Text(
-                            task['assignee']['fullName'],
-                            style: TextStyle(color: 
-                              subtitleColor, 
-                              fontSize: 12, 
-                              fontWeight: FontWeight.bold
+                          Expanded(
+                            child: Text(
+                              task['assignee']['fullName'],
+                              style: TextStyle(color: 
+                                subtitleColor, 
+                                fontSize: 12, 
+                                fontWeight: FontWeight.bold
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          )
                         },
                       ],
                     ),
@@ -1387,14 +1390,16 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                   ),
                 ),
                 const SizedBox(width: 7),
-                Text(
-                  task['assignee']['fullName'],
-                  style: TextStyle(
-                    color: subtitleColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    task['assignee']['fullName'],
+                    style: TextStyle(
+                      color: subtitleColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(width: 5),
               },

@@ -117,37 +117,6 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       ),
     );
   }
-
-  String? _canDeleteTaskReason() {
-
-    if (_taskData!['status'] == 'DONE') {
-      return Translations.get('task_details_page55', currentLang);
-    }
-
-    if (_taskData!['childTasks'].length != 0) {
-      return Translations.get('task_details_page56', currentLang);
-    }
-
-    return null;
-  }
-
-  String? _canEditPointsReason() {
-    if(_taskData!['status'] != 'VERIFY' && _taskData!['status'] != 'DONE') {
-      return Translations.get('task_details_page57', currentLang);
-    }
-    return null;
-  }
-
-  String? _canEditTypeReason() {
-    if (_taskData!['type'] == 'USER_STORY') {
-      return Translations.get('task_details_page58', currentLang);
-    }
-    if (_taskData!['type'] == 'BUG') {
-      return Translations.get('task_details_page59', currentLang);
-    }
-    return null;
-  }
-
   
   final Map<String, Map<String, String>> _localTranslations = {
     'ca': {
@@ -164,6 +133,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       'subtaskActiveSprintOnlyFuture': 'Una subtasca en un sprint actiu només pot moure\'s a un sprint futur.',
       'subtaskFutureSprintCannotMove': 'Una subtasca en un sprint futur no es pot moure.',
       'futureSprintOnlyBacklog': 'Una tasca en un sprint futur només pot tornar al Backlog.',
+      'deleteErrorFinishedTask': 'No es pot eliminar una tasca que ja està finalitzada.',
+      'deleteErrorHasSubtasks': 'No es pot eliminar una tasca que conté sub-tasques vinculades.',
+      'modifyPointsStatusError': 'Només pots modificar els punts quan la tasca és a VERIFY o DONE.',
+      'changeTypeUserStoryError': 'No es pot canviar el tipus d\'una Història d\'Usuari.',
+      'changeTypeBugError': 'No es pot canviar el tipus d\'un Error.',
     },
     'es': {
       'transitionFromBacklog': 'Desde Backlog solo puedes pasar a Priorizada.',
@@ -179,6 +153,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       'subtaskActiveSprintOnlyFuture': 'Una subtarea en un sprint activo solo puede moverse a un sprint futuro.',
       'subtaskFutureSprintCannotMove': 'Una subtarea en un sprint futuro no se puede mover.',
       'futureSprintOnlyBacklog': 'Una tarea en un sprint futuro solo puede volver al Backlog.',
+      'deleteErrorFinishedTask': 'No se puede eliminar una tarea que ya está finalizada.',
+      'deleteErrorHasSubtasks': 'No se puede eliminar una tarea que contiene sub-tareas vinculadas.',
+      'modifyPointsStatusError': 'Solo puedes modificar los puntos cuando la tarea está en VERIFY o DONE.',
+      'changeTypeUserStoryError': 'No se puede cambiar el tipo de una Historia de Usuario.',
+      'changeTypeBugError': 'No se puede cambiar el tipo de un Error.',
     },
     'en': {
       'transitionFromBacklog': 'From Backlog you can only move to Prioritized.',
@@ -194,8 +173,44 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       'subtaskActiveSprintOnlyFuture': 'A subtask in an active sprint can only be moved to a future sprint.',
       'subtaskFutureSprintCannotMove': 'A subtask in a future sprint cannot be moved.',
       'futureSprintOnlyBacklog': 'A task in a future sprint can only return to the Backlog.',
+      'deleteErrorFinishedTask': 'Cannot delete a task that is already finished.',
+      'deleteErrorHasSubtasks': 'Cannot delete a task that contains linked sub-tasks.',
+      'modifyPointsStatusError': 'You can only modify points when the task is in VERIFY or DONE.',
+      'changeTypeUserStoryError': 'Cannot change the type of a User Story.',
+      'changeTypeBugError': 'Cannot change the type of a Bug.',
     }
   };
+
+
+  String? _canDeleteTaskReason() {
+
+    if (_taskData!['status'] == 'DONE') {
+      return _getMsg('deleteErrorFinishedTask');
+    }
+
+    if (_taskData!['childTasks'].length != 0) {
+      return _getMsg('deleteErrorHasSubtasks');
+    }
+
+    return null;
+  }
+
+  String? _canEditPointsReason() {
+    if(_taskData!['status'] != 'VERIFY' && _taskData!['status'] != 'DONE') {
+      return _getMsg('modifyPointsStatusError');
+    }
+    return null;
+  }
+
+  String? _canEditTypeReason() {
+    if (_taskData!['type'] == 'USER_STORY') {
+      return _getMsg('changeTypeUserStoryError');
+    }
+    if (_taskData!['type'] == 'BUG') {
+      return _getMsg('changeTypeBugError');
+    }
+    return null;
+  }
 
   String _getMsg(String key) {
     return _localTranslations[currentLang]?[key] ?? key;
@@ -687,6 +702,11 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       } catch (e) {
         debugPrint("Error: $e");
       }
+      finally{
+        setState((){
+          _isLoadingSprint = false;
+        });
+      }
     } 
     else{
        try {
@@ -983,6 +1003,23 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
     }
   }
 
+  Color _getStatusTextColor(String status) {
+  switch (status) {
+    case "BACKLOG":
+      return const Color(0xFF450A0A);
+    case "TODO":
+      return const Color(0xFF78350F);
+    case "INPROGRESS":
+      return const Color(0xFF172554);
+    case "VERIFY":
+      return const Color(0xFF2E1065);
+    case "DONE":
+      return const Color(0xFF064E3B);
+    default:
+      return const Color.fromARGB(255, 219, 236, 254);
+  }
+}
+
   IconData _getStatusIcon(String status) {
     switch (status) {
       case "BACKLOG":
@@ -1000,7 +1037,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
     }
   }
 
-  Color hexToColor(String? hexString) {
+  Color _hexToColor(String? hexString) {
     if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
@@ -1245,12 +1282,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               decoration: BoxDecoration(
                                 color: _getStatusColor(_taskData?['status']),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: borderColor),
+                                border: Border.all(color: _getStatusTextColor(_taskData?['status'])),
                               ),
                               child: Text(
                                 _translateStatus(_taskData?['status']),
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: _getStatusTextColor(_taskData?['status']),
                                   fontSize: 7,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -1260,7 +1297,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           },
                           if(_taskData?['estimationPoints'] != null)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF064E3B),
                                 borderRadius: BorderRadius.circular(12),
@@ -1303,14 +1340,20 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             ),
                             if (!_isEditingName && _isTaskAssignen)...{
                               if(_userData?['id'] == _taskData?['assignee']?['id'] && _taskData?['name'] != null)...{
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: iconColor, size: 15),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isEditingName = true;
-                                      _nameController.text = _taskData?['name'];
-                                    });
-                                  },
+                                SizedBox(
+                                  width: 15, 
+                                  height: 15,
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(Icons.edit, color: iconColor, size: 15),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isEditingName = true;
+                                        _nameController.text = _taskData?['name'];
+                                      });
+                                    },
+                                  )
                                 )
                               }
                             }
@@ -1410,6 +1453,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                 }
               ]
             ),
+
             Row(
               children: [
                 if(_taskData?['reporter']?['fullName'] != null)...{
@@ -1418,13 +1462,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                     color: iconColor,
                     size: 15,
                   ),
-                  Text(
-                    ' ${Translations.get('common.by', currentLang)} ${_taskData?['reporter']?['fullName']}',
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 12,
+                  Expanded(
+                    child: Text(
+                      ' ${Translations.get('common.by', currentLang)} ${_taskData?['reporter']?['fullName']}',
+                      style: TextStyle(
+                        color: subtitleColor,
+                        fontSize: 12,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                  )
                 }
               ],
             ),
@@ -1468,14 +1515,20 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Spacer(),
                         if (!_isEditingDescription && _isTaskAssignen)...{
                           if(_userData?['id'] == _taskData?['assignee']?['id'])...{
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white, size: 20),
-                              onPressed: () {
-                                setState(() {
-                                  _isEditingDescription = true;
-                                  _descriptionController.text = _taskData?['description'] ?? '';
-                                });
-                              },
+                            SizedBox(
+                              width: 20, 
+                              height: 20,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    _isEditingDescription = true;
+                                    _descriptionController.text = _taskData?['description'] ?? '';
+                                  });
+                                },
+                              )
                             )
                           }
                         }
@@ -1625,7 +1678,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             if(_isTaskAssignen && _taskData?['assignee']?['color'] != null && _taskData?['assignee']?['fullName'] != null)...{
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: hexToColor(_taskData?['assignee']?['color']),
+                                backgroundColor: _hexToColor(_taskData?['assignee']?['color']),
                                 child: Text(
                                   _taskData?['assignee']?['capitalLetters'],
                                   style: TextStyle(
@@ -1635,26 +1688,30 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                _taskData?['assignee']?['fullName'],
-                                style: TextStyle(
-                                  color: subtitleColor,
-                                  fontSize: 16,
+                              Expanded(
+                                child: Text(
+                                  _taskData?['assignee']?['fullName'],
+                                  style: TextStyle(
+                                    color: subtitleColor,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis
                                 ),
-                              ),
+                              )
                             }
                             else...{
-                              Text(
-                                Translations.get('tasks.unassigned', currentLang),
-                                style: TextStyle(
-                                  color: subtitleColor,
-                                  fontSize: 16,
+                              Expanded(
+                                child: Text(
+                                  Translations.get('tasks.unassigned', currentLang),
+                                  style: TextStyle(
+                                    color: subtitleColor,
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
+                              )
                             },
                             if(_isTaskAssignen)...{
                               if(_userData?['id'] == _taskData?['assignee']?['id'])...{
-                                const Spacer(),
                                 TextButton(
                                   onPressed: () {
                                     _unassignTask();
@@ -1746,7 +1803,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             if(_taskData?['reporter']?['color'] != null && _taskData?['reporter']?['capitalLetters'] != null)
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: hexToColor(_taskData?['reporter']?['color']),
+                                backgroundColor: _hexToColor(_taskData?['reporter']?['color']),
                                 child: Text(
                                   _taskData?['reporter']?['capitalLetters'],
                                   style: TextStyle(
@@ -1757,13 +1814,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               ),
                             if(_taskData?['reporter']?['fullName'] != null)...{
                               const SizedBox(width: 8),
-                              Text(
-                                _taskData?['reporter']?['fullName'],
-                                style: TextStyle(
-                                  color: subtitleColor,
-                                  fontSize: 16,
-                                ),                             
-                              ),
+                              Expanded(
+                                child: Text(
+                                  _taskData?['reporter']?['fullName'],
+                                  style: TextStyle(
+                                    color: subtitleColor,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis
+                                ),
+                               )
                             }
                           ]
                         ),
@@ -1850,39 +1910,44 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         else
                           Row(
                             children: [
-                              if(_taskData?['estimationPoints'] != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF064E3B),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFF34D399)),
-                                  ),
-                                  child: Text(
-                                    '${_taskData?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
-                                    style: TextStyle(
-                                      color: const Color(0xFF34D399),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF064E3B),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: const Color(0xFF34D399)),
+                                ),
+                                child: Text(
+                                  _taskData?['estimationPoints'] != null ? '${_taskData?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}' : '0 ${Translations.get('tasks.points', currentLang)}',
+                                  style: TextStyle(
+                                    color: const Color(0xFF34D399),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                              ),
                               const Spacer(),
                               if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'])
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: iconColor, size: 15),
-                                  onPressed: () {
-                                    final reason = _canEditPointsReason();
-                                    if (reason != null) {
-                                      _showCannotEditSnackBar(reason);
-                                      return;
-                                    }
-                                    setState(() {
-                                      _isEditingPoints = true;
-                                      _pointsController.text = _taskData?['estimationPoints'].toString() ?? "0";
-                                    });
-                                  },
-                                ),
+                                SizedBox(
+                                  width: 15, 
+                                  height: 15,
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(Icons.edit, color: iconColor, size: 15),
+                                    onPressed: () {
+                                      final reason = _canEditPointsReason();
+                                      if (reason != null) {
+                                        _showCannotEditSnackBar(reason);
+                                        return;
+                                      }
+                                      setState(() {
+                                        _isEditingPoints = true;
+                                        _pointsController.text = _taskData?['estimationPoints'].toString() ?? "0";
+                                      });
+                                    },
+                                  )
+                                )
                             ]
                           ),
                         SizedBox(height: 5),
@@ -1918,26 +1983,32 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 ),
                               const Spacer(),
                               if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'])
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: iconColor, size: 16),
-                                  onPressed: () {
-                                    final reason = _canEditTypeReason();
-                                    if (reason != null) {
-                                      _showCannotEditSnackBar(reason);
-                                      return;
-                                    }
-                                    setState(() {
-                                      _isEditingType = true;
-                                    });
-                                  },
-                                ),
+                                SizedBox(
+                                  width: 16, 
+                                  height: 16,
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(Icons.edit, color: iconColor, size: 16),
+                                    onPressed: () {
+                                      final reason = _canEditTypeReason();
+                                      if (reason != null) {
+                                        _showCannotEditSnackBar(reason);
+                                        return;
+                                      }
+                                      setState(() {
+                                        _isEditingType = true;
+                                      });
+                                    },
+                                  ),
+                                )
                             ]
                           ),
                         }
                         else...{
                           DropdownMenu<String>(
                             initialSelection: _taskData?['type'],
-                            width: MediaQuery.of(context).size.width,
+                            width: MediaQuery.of(context).size.width - 72,
                             textStyle: TextStyle(color: textColor, fontSize: 14),
                             inputDecorationTheme: InputDecorationTheme(
                               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -1991,12 +2062,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                   decoration: BoxDecoration(
                                     color: _getStatusColor(_taskData?['status']),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: borderColor),
+                                    border: Border.all(color: _getStatusTextColor(_taskData?['status'])),
                                   ),
                                   child: Text(
                                     _translateStatus(_taskData?['status']),
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: _getStatusTextColor(_taskData?['status']),
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -2004,22 +2075,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                 ),
                               const Spacer(),
                               if (_isTaskAssignen && _userData?['id'] == _taskData?['assignee']?['id'] && _taskData!['type'] != 'USER_STORY')
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: iconColor, size: 16),
-                                  onPressed: (){
+                                SizedBox(
+                                  width: 16, 
+                                  height: 16,
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(Icons.edit, color: iconColor, size: 16),
+                                    onPressed: (){
                                     setState(() {
                                       _isEditingStatus = true;
                                     });
                                   }
-                                ),
+                                  ),
+                                )
                             ]
                           ),
                         }
                         else...{
                           DropdownMenu<String>(
                             initialSelection: _taskData?['status'],
-                            width: MediaQuery.of(context).size.width,
-                            textStyle: TextStyle(color: Colors.white, fontSize: 14),
+                            width: MediaQuery.of(context).size.width - 72,
+                            textStyle: TextStyle(color: textColor, fontSize: 14),
                             inputDecorationTheme: InputDecorationTheme(
                               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                               border: OutlineInputBorder(
@@ -2055,13 +2132,48 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               });
                               await _updateStatus(value);
                             },
-                            dropdownMenuEntries: const [
-                              DropdownMenuEntry(value: 'BACKLOG',    label: 'Backlog'),
-                              DropdownMenuEntry(value: 'TODO',       label: 'Prioritzada'),
-                              DropdownMenuEntry(value: 'INPROGRESS', label: 'En Progrés'),
-                              DropdownMenuEntry(value: 'VERIFY',     label: 'En Verificació'),
-                              DropdownMenuEntry(value: 'DONE',       label: 'Finalitzada'),
-                            ],
+                            dropdownMenuEntries: [
+                              DropdownMenuEntry(
+                                value: 'BACKLOG',
+                                label: _translateStatus('BACKLOG'),
+                                style: MenuItemButton.styleFrom(
+                                  textStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                              DropdownMenuEntry(
+                                value: 'TODO',
+                                label: _translateStatus('TODO'),
+                                style: MenuItemButton.styleFrom(
+                                  textStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                              DropdownMenuEntry(
+                                value: 'INPROGRESS',
+                                label: _translateStatus('INPROGRESS'),
+                                style: MenuItemButton.styleFrom(
+                                  textStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                              DropdownMenuEntry(
+                                value: 'VERIFY',
+                                label: _translateStatus('VERIFY'),
+                                style: MenuItemButton.styleFrom(
+                                  textStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                              DropdownMenuEntry(
+                                value: 'DONE',
+                                label: _translateStatus('DONE'),
+                                style: MenuItemButton.styleFrom(
+                                  textStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ]
                           ),
                         },
                         SizedBox(height: 5),
@@ -2152,21 +2264,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             ),
                             const Spacer(),
                             if (_isTaskAssignen && _userData!['id'] == _taskData?['assignee']['id'])...{
-                              IconButton(
-                                icon: Icon(Icons.edit, color: iconColor, size: 16),
-                                onPressed: () {
-                                  setState(() {
-                                    _isEditingSprint = true;
-                                  });
-                                },
-                              )
+                                SizedBox(
+                                  width: 16, 
+                                  height: 16,
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: Icon(Icons.edit, color: iconColor, size: 16),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isEditingSprint = true;
+                                      });
+                                    },
+                                  ),
+                                )
                             }
                           ],
                         ),
+                        SizedBox(height: 5),
                         if(_isEditingSprint)
                           DropdownMenu<int>(
                             initialSelection: _selectedSprintId,
-                            width: MediaQuery.of(context).size.width,
+                            width: MediaQuery.of(context).size.width - 72,
                             textStyle: TextStyle(color: textColor, fontSize: 14),
                             inputDecorationTheme: InputDecorationTheme(
                               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -2217,7 +2336,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               );
                             }).toList(),
                           ),
-                        if(_taskData?['activeSprints'].isEmpty)...{
+                        if(_taskData?['activeSprints'].isEmpty && !_isEditingSprint)...{
                           Text(
                             'Backlog',
                             style: TextStyle(
@@ -2226,7 +2345,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                             ),
                           ),
                         }
-                        else...{
+                        else if (!_isEditingSprint)...{
                           ListView.builder(
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
@@ -2299,7 +2418,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          "${Translations.get('tasks.subtasks', currentLang)}(${_taskData?['childTasks'].length})",
+                          "${Translations.get('tasks.subtasks', currentLang)} (${_taskData?['childTasks'].length})",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -2324,8 +2443,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: backgroundColor,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 4),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                minimumSize: Size.zero,
                               ),
                               child: Text(
                                 Translations.get('tasks.addSubtask', currentLang), 
@@ -2353,7 +2474,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -2397,56 +2518,100 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                             size: 14,
                                           ),
                                         ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
-                                                if(tas?['taskKey'] != null)...{
+                                                if(tas?['taskKey'] != null)
                                                   Text(
                                                     tas?['taskKey'],
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontWeight: FontWeight.bold,
-                                                      fontSize: 10,
+                                                      fontSize: 15,
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 8),
-                                                },
-                                                if(tas?['name'] != null)
-                                                  Text(
-                                                    tas?['name'],
+                                                const SizedBox(width: 5),
+                                                Expanded(
+                                                  child: Text(
+                                                    tas?['name'] ?? '',
                                                     style: TextStyle(
                                                       color: textColor,
-                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 15,
                                                     ),
-                                                  ),                                              
-                                              ]
-                                            ),                                        
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                             Row(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                if(tas?['assignee'] == null)...{
-                                                  Text(
-                                                    Translations.get('tasks.unassigned', currentLang),
-                                                    style: TextStyle(
-                                                      color: subtitleColor,
-                                                      fontSize: 10,
+                                                if(tas?['type'] != null)
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: _getTaskBackgroundColor(tas?['type']),
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(color: _getTaskColor(tas?['type']), width: 1),
+                                                    ),
+                                                    child: Text(
+                                                      _translateType(tas?['type']),
+                                                      style: TextStyle(
+                                                        color: _getTaskColor(tas?['type']),
+                                                        fontSize: 7,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
-                                                }
-                                                else...{
-                                                  if(tas?['assignee']?['fullName'] != null)
+                                                if(tas?['status'] != null)...{
                                                   Text(
-                                                    tas?['assignee']?['fullName'],
+                                                      ' • ',
+                                                      style: TextStyle(
+                                                        color: subtitleColor,
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  Text(
+                                                    _translateStatus(tas?['status']),
                                                     style: TextStyle(
                                                       color: subtitleColor,
                                                       fontSize: 10,
                                                     ),
                                                   ),
                                                 },
-                                                if(tas?['estimationPoints'] != 0 && tas?['estimationPoints'] != null)...{
+                                                if(tas?['estimationPoints'] != null && tas?['estimationPoints'] != 0)...{
+                                                    Text(
+                                                    ' • ',
+                                                    style: TextStyle(
+                                                      color: subtitleColor,
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xFF064E3B),
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(color: const Color(0xFF34D399)),
+                                                    ),
+                                                    child: Text(
+                                                      '${tas?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
+                                                      style: TextStyle(
+                                                        color: const Color(0xFF34D399),
+                                                        fontSize: 7,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                },
+                                                if(tas?['assignee'] != null && tas?['assignee']?['color'] != null)...{
                                                   Text(
                                                     ' • ',
                                                     style: TextStyle(
@@ -2455,57 +2620,39 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                       fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
-                                                  Text(
-                                                    '${tas?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
-                                                    style: TextStyle(
-                                                      color: subtitleColor,
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.bold,
+                                                  Flexible(
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        CircleAvatar(
+                                                          radius: 10,
+                                                          backgroundColor: _hexToColor(tas?['assignee']?['color']),
+                                                          child: Text(
+                                                            "${tas?['assignee']?['capitalLetters']}",
+                                                            style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 10,
+                                                              ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 2),
+                                                        Flexible(
+                                                          child: Text(
+                                                            tas['assignee']['fullName'] ?? '',
+                                                            style: TextStyle(color: textColor, fontSize: 10),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                }                                        
+                                                  },
                                               ],
                                             ),
                                           ],
                                         ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: _getStatusColor(tas!['status']),
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(color: borderColor),
-                                            ),
-                                            child: Text(
-                                              _translateStatus(tas!['status']),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 7,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          if(tas?['type'] != null)
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                              decoration: BoxDecoration(
-                                                color: _getTaskBackgroundColor(tas?['type']),
-                                                borderRadius: BorderRadius.circular(12),
-                                                border: Border.all(color: _getTaskColor(tas?['type'])),
-                                              ),
-                                              child: Text(
-                                                _translateType(tas?['type']),
-                                                style: TextStyle(
-                                                  color: _getTaskColor(tas?['type']),
-                                                  fontSize: 7,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                        ]
-                                      )                                                                                                                        
+                                      ),                                                                                                                       
                                     ],
                                   ),
                                 ),
@@ -2571,6 +2718,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         if (_taskData!['pullRequests'].length > 0)...{
                           ListView.builder(
                             shrinkWrap: true,
+                            padding: EdgeInsets.zero,
                             physics: NeverScrollableScrollPhysics(),
                             itemCount: _taskData?['pullRequests'].length,
                             itemBuilder: (context, index) {
@@ -2582,7 +2730,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
 
                               return Container(
                                 width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 16),
+                                margin: const EdgeInsets.only(bottom: 2),
                                 decoration: BoxDecoration(
                                   color: cardColor,
                                   borderRadius: BorderRadius.circular(12),
@@ -2628,7 +2776,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                     ),
                                                   ),
                                                   child: Text(
-                                                    pr?['merged'] ? 'task_details_page49' : 'task_details_page50',
+                                                    pr?['merged'] ? Translations.get('analytics.merged', currentLang) : Translations.get('analytics.open', currentLang),
                                                     style: TextStyle(
                                                       color: pr?['merged'] ? Colors.purpleAccent : Colors.green,
                                                       fontSize: 11,
@@ -2657,7 +2805,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
 
                                     if (sortedHistory.isNotEmpty)
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                                        padding: const EdgeInsets.fromLTRB(24.0, 5, 24.0, 0),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -2666,7 +2814,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                 Icon(Icons.history, color: subtitleColor, size: 14),
                                                 const SizedBox(width: 6),
                                                 Text(
-                                                  '${Translations.get('tasks.deleteBlockedDoneStatus', currentLang)} (${sortedHistory.length})',
+                                                  '${Translations.get('tasks.activityTimeline', currentLang)} (${sortedHistory.length})',
                                                   style: TextStyle(color: subtitleColor, fontSize: 12, fontWeight: FontWeight.w600),
                                                 ),
                                               ],
@@ -2719,14 +2867,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                                               Row(
                                                                 children: [
                                                                   if(item?['authorFullName'] != null)
-                                                                    Text(
-                                                                      '${item?['authorFullName']} ',
-                                                                      style: TextStyle(
-                                                                        color: textColor,
-                                                                        fontWeight: FontWeight.bold,
-                                                                        fontSize: 10,
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        '${item?['authorFullName']} ',
+                                                                        style: TextStyle(
+                                                                          color: textColor,
+                                                                          fontWeight: FontWeight.bold,
+                                                                          fontSize: 10,
+                                                                        ),
+                                                                        overflow: TextOverflow.ellipsis,
                                                                       ),
-                                                                      overflow: TextOverflow.ellipsis,
                                                                     ),
                                                                   Text(
                                                                     isMerged ? Translations.get('tasks.prEventMerged', currentLang) : Translations.get('tasks.prEventOpened', currentLang),
@@ -2796,7 +2946,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         }
                       ],
                     ),
-                  ),
+                  )        
                 ],
               ),
             ),
@@ -2830,7 +2980,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                         const Icon(Icons.description, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          '${Translations.get('tasks.discussion', currentLang)}(${commentsTask.length})',
+                          '${Translations.get('tasks.discussion', currentLang)} (${commentsTask.length})',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -2846,8 +2996,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: backgroundColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 4),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            minimumSize: Size.zero,
                           ),
                           child: Text(
                             Translations.get('tasks.addComment', currentLang), 
@@ -2961,7 +3113,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                           if(comment?['author']?['color'] != null && comment?['author']?['capitalLetters'] != null)
                                             CircleAvatar(
                                               radius: 12,
-                                              backgroundColor: hexToColor(comment?['author']?['color']),
+                                              backgroundColor: _hexToColor(comment?['author']?['color']),
                                               child: Text(
                                                 comment?['author']?['capitalLetters'],
                                                 style: TextStyle(
@@ -2972,29 +3124,31 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                                             ),
                                           if(comment?['author']?['fullName'] != null && comment?['createdAt'] != null)...{
                                             const SizedBox(width: 8),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  comment?['author']?['fullName'],
-                                                  style: TextStyle(
-                                                    color: textColor,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
+                                              Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [                                                
+                                                    Text(
+                                                      comment?['author']?['fullName'],
+                                                      style: TextStyle(
+                                                        color: textColor,
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    _formatDate(comment?['createdAt']),
+                                                    style: TextStyle(
+                                                      color: subtitleColor,
+                                                      fontSize: 12,
+                                                    ),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  _formatDate(comment?['createdAt']),
-                                                  style: TextStyle(
-                                                    color: subtitleColor,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           },
-                                          const Spacer(),
                                           if (comment?['author']?['id'] == _userData?['id'] && !isEditing)
                                             IconButton(
                                               icon: Icon(Icons.edit, color: iconColor, size: 16),

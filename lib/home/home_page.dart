@@ -211,20 +211,22 @@ class _HomePageState extends State<HomePage> with ThemePage {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _userData?['fullName'] ?? '',
-                                style: TextStyle(color: textColor),
-                                overflow: TextOverflow.ellipsis
-                              ),
-                              Text(
-                                _userData?['email'] ?? '',
-                                style: TextStyle(color: textColor),
-                                overflow: TextOverflow.ellipsis
-                              ),
-                            ]
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _userData?['fullName'] ?? '',
+                                  style: TextStyle(color: textColor),
+                                  overflow: TextOverflow.ellipsis
+                                ),
+                                Text(
+                                  _userData?['email'] ?? '',
+                                  style: TextStyle(color: textColor),
+                                  overflow: TextOverflow.ellipsis
+                                ),
+                              ]
+                            ),
                           )
                         ]
                       ),

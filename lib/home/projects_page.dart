@@ -148,7 +148,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
           ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 16),
@@ -171,7 +171,7 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
                     )
                   ),         
                   child: Text(
-                    "${Translations.get('projects.allProjects', currentLang)}(${projects.length})",
+                    "${Translations.get('projects.allProjects', currentLang)} (${projects.length})",
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -179,108 +179,102 @@ class _ProjectsPageState extends State<ProjectsPage> with ThemePage{
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: projects.length,
-                    itemBuilder: (context, index){
-                      final project = projects[index] ?? [];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProjectDetailsPage(project: project),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: projects.length,
+                  itemBuilder: (context, index){
+                    final project = projects[index] ?? [];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetailsPage(project: project),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255,219,252,231),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color:Color.fromARGB(255,0,166,62)),
                               ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: cardColor,
-                              borderRadius: BorderRadius.circular(12),
+                              child: const Icon(
+                                Icons.folder_open_outlined,
+                                color: Color.fromARGB(255,0,166,62),
+                                size: 24
+                              ),
                             ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.all(3),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(255,219,252,231),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color:Color.fromARGB(255,0,166,62)),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    project?['name'] ?? '',
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  child: const Icon(
-                                    Icons.folder_open_outlined,
-                                    color: Color.fromARGB(255,0,166,62),
-                                    size: 24
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        project?['name'] ?? '',
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                  if(project?['course']?['startYear'] != null)
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today_outlined,
+                                          color: iconColor,
+                                          size: 12
                                         ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      if(project?['course']?['startYear'] != null)
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.calendar_today_outlined,
-                                              color: iconColor,
-                                              size: 12
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                          "${project?['course']?['startYear']} - ${project?['course']?['startYear'] + 1}",
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 13,
                                             ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                            "${project?['course']?['startYear']} - ${project?['course']?['startYear'] + 1}",
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ]
-                                        ),
-                                        Row(
-                                          children: [                                  
-                                            Icon(
-                                              Icons.menu_book,
-                                              color: iconColor,
-                                              size: 12
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              project?['course']?['subject']?['name'] ?? '',
-                                              style: TextStyle(
-                                                color: subtitleColor,
-                                                fontSize: 13,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         )
-                                    ],
-                                  )
-                                )
-                              ]
+                                      ]
+                                    ),
+                                    Row(
+                                      children: [                                  
+                                        Icon(
+                                          Icons.menu_book,
+                                          color: iconColor,
+                                          size: 12
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            project?['course']?['subject']?['name'] ?? '',
+                                            style: TextStyle(
+                                              color: subtitleColor,
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                ],
+                              )
                             )
-                          )
+                          ]
                         )
-                      );
-                    }
-                  )
+                      )
+                    );         
+                  }
                 )
               ]
             )                       
