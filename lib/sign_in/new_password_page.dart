@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'sign_in_page.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class NewPasswordPage extends StatefulWidget {
@@ -142,29 +143,6 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
     }
   }
 
-  Widget _buildRequirement(String text, bool isMet) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(
-            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: isMet ? Colors.green : Colors.grey,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              color: isMet ? Colors.green : Colors.grey,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -186,27 +164,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
         backgroundColor: backgroundColor,
         toolbarHeight: 100,
         centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('auth.resetPasswordTitle', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
-              ),
-            ),
-            Text(
-              Translations.get('auth.resetPasswordDescription', currentLang),
-              style: TextStyle(
-                fontSize: 13,
-                color: subtitleColor
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
+        title: UIHelpers.costumAppBar(
+          dividerColor: dividerColor,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          title: Translations.get('auth.resetPasswordTitle', currentLang),
+          subtitile: Translations.get('auth.resetPasswordDescription', currentLang),
         ),
       ),
       body: SingleChildScrollView(
@@ -214,214 +177,145 @@ class _NewPasswordPageState extends State<NewPasswordPage> with ThemePage{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [     
-            const SizedBox(height: 16),
             if (!_isTokenValid)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.red.shade200,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _messageToken,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+              _buildPasswordTokenNoValid()
             else...{
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  Translations.get('auth.newPassword', currentLang),
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
+              UIHelpers.costumPassword(
+                inputFillColor: inputFillColor,
+                borderColor: borderColor,
+                hintColor: hintColor,
+                textColor: textColor,
+                iconColor: iconColor,
+                text: Translations.get('auth.newPassword', currentLang),
                 controller: _newPassword1,
-                obscureText: true,
-                style: TextStyle(color: textColor),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: inputFillColor,
-                  hintText: '••••••••',
-                  hintStyle: TextStyle(color: hintColor),
-                  prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  Translations.get('auth.confirmPassword', currentLang),
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: _newPassword2,
-                obscureText: true,
-                style: TextStyle(color: textColor),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: inputFillColor,
-                  hintText: '••••••••',
-                  hintStyle: TextStyle(color: hintColor),
-                  prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                ),
               ),
               const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: inputFillColor,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      Translations.get('auth.passwordMustContain', currentLang),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildRequirement(Translations.get('auth.atLeast8Characters', currentLang), _hasMinLength),
-                    _buildRequirement(Translations.get('auth.oneLowercaseLetter', currentLang), _hasLowercase),
-                    _buildRequirement(Translations.get('auth.oneUppercaseLetter', currentLang), _hasUppercase),
-                    _buildRequirement(Translations.get('auth.oneNumber', currentLang), _hasNumber),
-                    _buildRequirement(Translations.get('auth.passwordsMatch', currentLang), _passwordsMatch),
-                  ],
-                ),
+              UIHelpers.costumPassword(
+                inputFillColor: inputFillColor,
+                borderColor: borderColor,
+                hintColor: hintColor,
+                textColor: textColor,
+                iconColor: iconColor,
+                text: Translations.get('auth.confirmPassword', currentLang),
+                controller: _newPassword2,
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isPasswordValid() ? _changePasswordEdit : () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isPasswordValid() ? const Color(0xFF2D5AF0) : const Color.fromARGB(255, 127, 150, 226),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    _isPasswordValid() ? Translations.get('auth.resetPassword', currentLang) : Translations.get('auth.passwordResetSuccess', currentLang),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              SizedBox(height: 24),
+              SizedBox(height: 20),
+              _buildPasswordContainerRequirement(),
+              SizedBox(height: 20),
+              _buildPasswordBottom(),
+              SizedBox(height: 20),
               if (_messagePassword.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color:  _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color:  _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _isSuccess ? Icons.check_circle_outline : Icons.error_outline,
-                          color: _isSuccess ? Colors.green : Colors.red,
-                          size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _messagePassword,
-                            style: TextStyle(
-                              color: _isSuccess ?Colors.green :Colors.red,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),                
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SignInPage()),
-                  );
-                },
-                icon: Text(Translations.get('auth.goToLogin', currentLang)),
-                label: const Icon(Icons.arrow_forward, size: 18),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              )
+                UIHelpers.costumMessage(_isSuccess, _messagePassword),
+              _buildPasswordLoginButtom()
             }  
           ]
         ),
       )
     );
   }
+
+  Widget _buildPasswordTokenNoValid(){
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.red.shade200,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _messageToken,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordBottom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: _isPasswordValid() ? _changePasswordEdit : () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _isPasswordValid() ? const Color(0xFF2D5AF0) : const Color.fromARGB(255, 127, 150, 226),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('auth.resetPassword', currentLang),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordContainerRequirement(){
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: inputFillColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            Translations.get('settings.passwordMustContain', currentLang),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: textColor,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          UIHelpers.costumRequirement(Translations.get('settings.atLeast8Characters', currentLang), _hasMinLength),
+          UIHelpers.costumRequirement(Translations.get('settings.oneLowercaseLetter', currentLang), _hasLowercase),
+          UIHelpers.costumRequirement(Translations.get('settings.oneUppercaseLetter', currentLang), _hasUppercase),
+          UIHelpers.costumRequirement(Translations.get('settings.oneNumber', currentLang), _hasNumber),
+          UIHelpers.costumRequirement(Translations.get('settings.passwordsMatch', currentLang), _passwordsMatch),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordLoginButtom(){
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInPage()),
+        );
+      },
+      icon: Text(Translations.get('auth.goToLogin', currentLang)),
+      label: const Icon(Icons.arrow_forward, size: 18),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF2D5AF0),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
 }

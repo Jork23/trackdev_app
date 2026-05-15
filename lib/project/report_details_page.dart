@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class ReportDetailsPage extends StatefulWidget {
@@ -105,53 +106,19 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
       );
     }
 
+    String? projectSubtitle;
+    if(_reportData?['projectName'] != null && _reportData?['rowType'] != null && _reportData?['columnType'] != null && _reportData?['magnitude'] != null){   
+      projectSubtitle = "${_reportData?['projectName']} • ${_translateRows(_reportData?['rowType'])} x ${_translateRows(_reportData?['columnType'])} • ${_translateRows(_reportData?['magnitude'])}";
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
         elevation: 0,
-        toolbarHeight: 60,
-        title: Row(
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-                  Text(
-                    Translations.get('common.back', currentLang),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ]
-              ),
-            ),
-            const SizedBox(width: 15),
-            const Icon(
-              Icons.layers_outlined, 
-              color: Color(0xFF2D5AF0),
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TrackDev',
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
+        toolbarHeight: 50,
+        title: UIHelpers.costumBackPopAppBar(context: context,text: Translations.get('common.back', currentLang), textColor: textColor)
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -160,32 +127,13 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 5,),
-                Divider(color: dividerColor, thickness: 1),
-                Text(
-                  _reportData?['reportName'] ?? '',
-                  style: TextStyle(
-                    color: textColor, 
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              if(_reportData?['projectName'] != null && _reportData?['rowType'] != null && _reportData?['columnType'] != null && _reportData?['magnitude'] != null)...{
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "${_reportData?['projectName']} • ${_translateRows(_reportData?['rowType'])} x ${_translateRows(_reportData?['columnType'])} • ${_translateRows(_reportData?['magnitude'])}",
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Divider(color: dividerColor, thickness: 1),
-                const SizedBox(height: 20),
-              },
+              UIHelpers.costumAppBar(
+                dividerColor: dividerColor,
+                textColor: textColor,
+                subtitleColor: subtitleColor,
+                title: Translations.get('projects.title', currentLang),
+                subtitile: projectSubtitle
+              ),
               Text(
                 Translations.get('reports.filterByStatus', currentLang),
                 style: TextStyle(
@@ -199,313 +147,9 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
               scrollDirection: Axis.horizontal,
                 child:Column(
                   children: [
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if(_taskStatuseAll){
-                                _taskStatuseAll = false;
-                                _taskStatuseBacklog = false;
-                                _taskStatuseToDo = false;
-                                _taskStatuseInProgress = false;
-                                _taskStatuseVerify = false;
-                                _taskStatuseDone = false;
-                              }
-                              else{
-                                _taskStatuseAll = true;
-                                _taskStatuseBacklog = true;
-                                _taskStatuseToDo = true;
-                                _taskStatuseInProgress = true;
-                                _taskStatuseVerify = true;
-                                _taskStatuseDone = true;
-                              }
-                              _isLoading = true;
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseAll ? const Color(0xFF2D5AF0) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('reports.allStatuses', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if(_taskStatuseBacklog){
-                                _taskStatuseBacklog = false;
-                                if(_taskStatuseAll){
-                                  _taskStatuseAll=false; 
-                                }
-                              }
-                              else{
-                                _taskStatuseBacklog = true;
-                                if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
-                                  _taskStatuseAll=true;
-                                }
-                              }
-                              _isLoading = true;
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseBacklog ? const Color(0xFFEF4444) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('tasks.statusBacklog', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if(_taskStatuseToDo){
-                                _taskStatuseToDo = false;
-                                if(_taskStatuseAll){
-                                  _taskStatuseAll=false; 
-                                }
-                              }
-                              else{
-                                _taskStatuseToDo = true;
-                                if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
-                                  _taskStatuseAll=true;
-                                }
-                              }
-                              _isLoading = true;
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseToDo ? const Color(0xFFFBBF24) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('tasks.statusTodo', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if(_taskStatuseInProgress){
-                                _taskStatuseInProgress = false;
-                                if(_taskStatuseAll){
-                                  _taskStatuseAll=false; 
-                                }
-                              }
-                              else{
-                                _taskStatuseInProgress = true;
-                                if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
-                                  _taskStatuseAll=true;
-                                }
-                              }
-                              _isLoading = true;                        
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseInProgress ? const Color(0xFF3B82F6) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('tasks.statusInProgress', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                            if(_taskStatuseVerify){
-                                _taskStatuseVerify = false;
-                                if(_taskStatuseAll){
-                                  _taskStatuseAll=false; 
-                                }
-                              }
-                              else{
-                                _taskStatuseVerify = true;
-                                if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
-                                  _taskStatuseAll=true;
-                                }
-                              }          
-                              _isLoading = true;                  
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseVerify ? const Color(0xFFA855F7) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('tasks.statusVerify', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              if(_taskStatuseDone){
-                                _taskStatuseDone = false;
-                                if(_taskStatuseAll){
-                                  _taskStatuseAll=false; 
-                                }
-                              }
-                              else{
-                                _taskStatuseDone = true;
-                                if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
-                                  _taskStatuseAll=true;
-                                }
-                              }           
-                              _isLoading = true;                 
-                            });
-                            _loadReport();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _taskStatuseDone ? const Color(0xFF22C55E) : const Color(0xFF64748B),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            Translations.get('tasks.statusDone', currentLang), 
-                            style: TextStyle(color: textColor),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildReportButtomSelect(),
                     const SizedBox(height: 20),
-                    DataTable(
-                      border: TableBorder(
-                        verticalInside: BorderSide(width: 1, color: borderColor),
-                        horizontalInside: BorderSide(width: 1, color: borderColor),
-                        bottom: BorderSide(width: 1, color: borderColor),
-                        top: BorderSide(width: 1, color: borderColor),
-                        right: BorderSide(width: 1, color: borderColor),
-                        left: BorderSide(width: 1, color: borderColor),
-                      ),
-                      columnSpacing: 25,
-                      columns: [
-                        DataColumn(
-                          label: Text(
-                            "${_translateRows(_reportData?['rowType'])}/${_translateRows(_reportData?['columnType'])}", 
-                            style: TextStyle(
-                              color: textColor, 
-                              fontWeight: FontWeight.bold       
-                            )                     
-                          ),
-                        ),
-                        ..._reportData?['columnHeaders'].map((sprint) => DataColumn(
-                          label: Text(
-                            sprint['name'].toString(), 
-                            style: TextStyle(
-                              color: textColor, 
-                              fontWeight: FontWeight.bold       
-                            ),
-                          ),
-                          numeric: false,
-                        )),
-                        DataColumn(
-                          label: Text(
-                            Translations.get('reports.total', currentLang),
-                            style: TextStyle(
-                              color: textColor, 
-                              fontWeight: FontWeight.bold       
-                            ),
-                          ),
-                          numeric: true,
-                        ),
-                      ],
-                      rows: [            
-                        ..._reportData?['rowHeaders'].map((student){
-                          return DataRow(
-                            cells: <DataCell>[
-                              DataCell(
-                                Text(
-                                  student['name'].toString(),
-                                  style: TextStyle(
-                                    color: textColor, 
-                                    fontWeight: FontWeight.bold       
-                                  ),
-                                )
-                              ),
-                              ..._reportData!['columnHeaders'].map((sprint){
-                                final key = "${student['id']}:${sprint['id']}";
-                                return DataCell(
-                                  Center(
-                                    child: Text(
-                                      _anyFilterActive() ? ((_reportData?['data']?[key]) != null ? (_reportData?['data']?[key]).toString() : "0") : "0",
-                                      style: TextStyle(
-                                        color: subtitleColor
-                                      )
-                                    )
-                                  )
-                                );
-                              }),
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    _anyFilterActive() ? ((_reportData?['rowTotals']?[student['id']]) != null ? (_reportData?['rowTotals']?[student['id']]).toString() : "0") : "0",
-                                    style: TextStyle(
-                                        color: textColor, 
-                                        fontWeight: FontWeight.bold       
-                                    ),
-                                  )
-                                )
-                              ),
-                            ],
-                          );
-                        }),
-                        DataRow(
-                          cells: <DataCell>[
-                            DataCell(
-                              Text(
-                                Translations.get('reports.total', currentLang),
-                                style: TextStyle(
-                                  color: textColor, 
-                                  fontWeight: FontWeight.bold       
-                                ),
-                              )
-                            ),
-                            ..._reportData!['columnHeaders'].map((sprint) {
-                              return DataCell(
-                                Center(
-                                  child: Text(
-                                    _anyFilterActive() ? ((_reportData?['columnTotals']?[sprint['id']]) != null ? (_reportData?['columnTotals']?[sprint['id']]).toString() : "0") : "0",
-                                    style: TextStyle(
-                                      color: subtitleColor
-                                    )
-                                  )
-                                )
-                              );
-                            }),
-                            DataCell(
-                              Center(
-                                child: Text(
-                                  _anyFilterActive() ? (_reportData?['grandTotal'] != null ? (_reportData?['grandTotal']).toString() : "0") : "0",
-                                  style: TextStyle(
-                                      color: textColor, 
-                                      fontWeight: FontWeight.bold       
-                                  ),
-                                )
-                              )
-                            ),
-                          ],
-                        )
-                      ]
-                    )
+                    _buildReportDataTable()
                   ]
                 )
               )
@@ -513,6 +157,342 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> with ThemePage {
           )
         )
       )
+    );
+  }
+
+  Widget _buildReportButtomSelect(){
+    return Row(
+      children: [
+        _buildReportButtomSelectAll(),
+        const SizedBox(width: 5),
+        _buildReportButtomSelectBacklog(),
+        const SizedBox(width: 5),
+        _buildReportButtomSelectToDo(),
+        const SizedBox(width: 5),
+        _buildReportButtomSelectInProgress(),
+        const SizedBox(width: 5),
+        _buildReportButtomSelectVerify(),
+        const SizedBox(width: 5),
+        _buildReportButtomSelectDone(),
+      ],
+    );
+  }
+
+  Widget _buildReportButtomSelectAll(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if(_taskStatuseAll){
+            _taskStatuseAll = false;
+            _taskStatuseBacklog = false;
+            _taskStatuseToDo = false;
+            _taskStatuseInProgress = false;
+            _taskStatuseVerify = false;
+            _taskStatuseDone = false;
+          }
+          else{
+            _taskStatuseAll = true;
+            _taskStatuseBacklog = true;
+            _taskStatuseToDo = true;
+            _taskStatuseInProgress = true;
+            _taskStatuseVerify = true;
+            _taskStatuseDone = true;
+          }
+          _isLoading = true;
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseAll ? const Color(0xFF2D5AF0) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('reports.allStatuses', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportButtomSelectBacklog(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if(_taskStatuseBacklog){
+            _taskStatuseBacklog = false;
+            if(_taskStatuseAll){
+              _taskStatuseAll=false; 
+            }
+          }
+          else{
+            _taskStatuseBacklog = true;
+            if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
+              _taskStatuseAll=true;
+            }
+          }
+          _isLoading = true;
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseBacklog ? const Color(0xFFEF4444) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('tasks.statusBacklog', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportButtomSelectToDo(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if(_taskStatuseToDo){
+            _taskStatuseToDo = false;
+            if(_taskStatuseAll){
+              _taskStatuseAll=false; 
+            }
+          }
+          else{
+            _taskStatuseToDo = true;
+            if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
+              _taskStatuseAll=true;
+            }
+          }
+          _isLoading = true;
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseToDo ? const Color(0xFFFBBF24) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('tasks.statusTodo', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportButtomSelectInProgress(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if(_taskStatuseInProgress){
+            _taskStatuseInProgress = false;
+            if(_taskStatuseAll){
+              _taskStatuseAll=false; 
+            }
+          }
+          else{
+            _taskStatuseInProgress = true;
+            if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
+              _taskStatuseAll=true;
+            }
+          }
+          _isLoading = true;                        
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseInProgress ? const Color(0xFF3B82F6) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('tasks.statusInProgress', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportButtomSelectVerify(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+        if(_taskStatuseVerify){
+            _taskStatuseVerify = false;
+            if(_taskStatuseAll){
+              _taskStatuseAll=false; 
+            }
+          }
+          else{
+            _taskStatuseVerify = true;
+            if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
+              _taskStatuseAll=true;
+            }
+          }          
+          _isLoading = true;                  
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseVerify ? const Color(0xFFA855F7) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('tasks.statusVerify', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportButtomSelectDone(){
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if(_taskStatuseDone){
+            _taskStatuseDone = false;
+            if(_taskStatuseAll){
+              _taskStatuseAll=false; 
+            }
+          }
+          else{
+            _taskStatuseDone = true;
+            if(_taskStatuseBacklog && _taskStatuseToDo && _taskStatuseInProgress && _taskStatuseVerify && _taskStatuseDone){
+              _taskStatuseAll=true;
+            }
+          }           
+          _isLoading = true;                 
+        });
+        _loadReport();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _taskStatuseDone ? const Color(0xFF22C55E) : const Color(0xFF64748B),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(
+        Translations.get('tasks.statusDone', currentLang), 
+        style: TextStyle(color: textColor),
+      ),
+    );
+  }
+
+  Widget _buildReportDataTable(){
+    return DataTable(
+      border: TableBorder(
+        verticalInside: BorderSide(width: 1, color: borderColor),
+        horizontalInside: BorderSide(width: 1, color: borderColor),
+        bottom: BorderSide(width: 1, color: borderColor),
+        top: BorderSide(width: 1, color: borderColor),
+        right: BorderSide(width: 1, color: borderColor),
+        left: BorderSide(width: 1, color: borderColor),
+      ),
+      columnSpacing: 25,
+      columns: [
+        DataColumn(
+          label: Text(
+            "${_translateRows(_reportData?['rowType'])}/${_translateRows(_reportData?['columnType'])}", 
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold       
+            )                     
+          ),
+        ),
+        ..._reportData?['columnHeaders'].map((sprint) => DataColumn(
+          label: Text(
+            sprint['name'].toString(), 
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold       
+            ),
+          ),
+          numeric: false,
+        )),
+        DataColumn(
+          label: Text(
+            Translations.get('reports.total', currentLang),
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold       
+            ),
+          ),
+          numeric: true,
+        ),
+      ],
+      rows: [            
+        ..._reportData?['rowHeaders'].map((student){
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(
+                  student['name'].toString(),
+                  style: TextStyle(
+                    color: textColor, 
+                    fontWeight: FontWeight.bold       
+                  ),
+                )
+              ),
+              ..._reportData!['columnHeaders'].map((sprint){
+                final key = "${student['id']}:${sprint['id']}";
+                return DataCell(
+                  Center(
+                    child: Text(
+                      _anyFilterActive() ? ((_reportData?['data']?[key]) != null ? (_reportData?['data']?[key]).toString() : "0") : "0",
+                      style: TextStyle(
+                        color: subtitleColor
+                      )
+                    )
+                  )
+                );
+              }),
+              DataCell(
+                Center(
+                  child: Text(
+                    _anyFilterActive() ? ((_reportData?['rowTotals']?[student['id']]) != null ? (_reportData?['rowTotals']?[student['id']]).toString() : "0") : "0",
+                    style: TextStyle(
+                        color: textColor, 
+                        fontWeight: FontWeight.bold       
+                    ),
+                  )
+                )
+              ),
+            ],
+          );
+        }),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(
+              Text(
+                Translations.get('reports.total', currentLang),
+                style: TextStyle(
+                  color: textColor, 
+                  fontWeight: FontWeight.bold       
+                ),
+              )
+            ),
+            ..._reportData!['columnHeaders'].map((sprint) {
+              return DataCell(
+                Center(
+                  child: Text(
+                    _anyFilterActive() ? ((_reportData?['columnTotals']?[sprint['id']]) != null ? (_reportData?['columnTotals']?[sprint['id']]).toString() : "0") : "0",
+                    style: TextStyle(
+                      color: subtitleColor
+                    )
+                  )
+                )
+              );
+            }),
+            DataCell(
+              Center(
+                child: Text(
+                  _anyFilterActive() ? (_reportData?['grandTotal'] != null ? (_reportData?['grandTotal']).toString() : "0") : "0",
+                  style: TextStyle(
+                      color: textColor, 
+                      fontWeight: FontWeight.bold       
+                  ),
+                )
+              )
+            ),
+          ],
+        )
+      ]
     );
   }
 }

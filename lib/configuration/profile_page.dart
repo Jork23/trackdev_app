@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -31,14 +32,6 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
 
   bool _isLoading = false;
 
-  Color _hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return const Color(0xFF2D5AF0);
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-
   void _showColorPickerDialog() {
     showDialog(
       context: context,
@@ -50,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
         ),
         content: SingleChildScrollView(
           child: ColorPicker(
-            pickerColor: _hexToColor(_colorAvatarController.text),
+            pickerColor: UIHelpers.hexToColor(_colorAvatarController.text),
             onColorChanged: (Color color) {
               String hexString = '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';                     
               _colorAvatarController.text = hexString;
@@ -152,26 +145,12 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
         backgroundColor: backgroundColor,
         toolbarHeight: 100,
         centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('settings.profileInfo', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
-              ),
-            ),
-            Text(
-              Translations.get('settings.profileInfoDescription', currentLang),
-              style: TextStyle(
-                fontSize: 13,
-                color: subtitleColor
-              ),
-            ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
+        title: UIHelpers.costumAppBar(
+          dividerColor: dividerColor,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          title: Translations.get('settings.profileInfo', currentLang),
+          subtitile: Translations.get('settings.profileInfoDescription', currentLang),
         ),
       ),
       body: SingleChildScrollView(
@@ -179,313 +158,235 @@ class _ProfilePageState extends State<ProfilePage> with ThemePage{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                if(widget.userData?['capitalLetters'] != null)
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: _hexToColor(widget.userData?['color']),
-                    child: Text(
-                      "${widget.userData?['capitalLetters']}",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28
-                      )
-                    ),
-                  ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if(widget.userData?['fullName'] != null)
-                        Text(
-                          "${widget.userData?['fullName']}",
-                          style: TextStyle(
-                            color: textColor,                            
-                          ),
-                          overflow: TextOverflow.ellipsis
-                        ),
-                      if(widget.userData?['email'] != null)
-                        Text(
-                          "${widget.userData?['email']}",
-                          style: TextStyle(
-                            color: textColor,
-                          ),
-                          overflow: TextOverflow.ellipsis
-                        ),
-                      const SizedBox(height: 5),
-                      if((widget.userData?['roles'] ?? []).isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE8EFFF),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
-                              const SizedBox(width: 4),
-                              Text(
-                                widget.userData?['roles'][0],
-                                style: const TextStyle(
-                                  color: Color(0xFF2D5AF0),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),                               
-                              ),
-                            ],
-                          ),
-                        ),
-                    ]
-                  )
-                )
-              ]
-            ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.username', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _userNameController,
-              readOnly: true,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.person_outline, color: iconColor), 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
+            _buildProfileUserInfo(),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.fullName', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _fullNameController,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.person_outline, color: iconColor), 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
+            _buildProfileUserName(),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('auth.email', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
+            _buildProfileFullName(),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.avatarColor', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: _showColorPickerDialog,
-                  child: Container(
-                    width: 45,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      color: _hexToColor(_colorAvatarController.text),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: borderColor),
-                    ),
-                    child: const Icon(Icons.colorize, color: Colors.white, size: 20),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _colorAvatarController,
-                    style: TextStyle(color: textColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputFillColor,
-                      hintStyle: TextStyle(color: hintColor),
-                      prefixIcon: Icon(Icons.palette_outlined, color: iconColor), 
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                    ),
-                  ),
-                ),
-                if(widget.userData?['capitalLetters'] != null)...{
-                  const SizedBox(width: 10),
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: _hexToColor(_colorAvatarController.text),
-                    child: Text(
-                      "${widget.userData?['capitalLetters']}",
-                      style: TextStyle(color: Colors.white)
-                    ),
-                  ),
-                }
-              ]
-            ),
+            _buildProfileEmail(),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.avatarColorHint', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (_message.isNotEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
-                      color: _isSuccess ? Colors.green : Colors.red, 
-                      size: 20
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _message,
-                        style: TextStyle(
-                          color: _isSuccess ? Colors.green : Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 7,),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: (){
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  _saveProfilEdit();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  Translations.get('settings.saveChanges', currentLang),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-              ),
-            ),       
+            _buildProfileAvatarColor(),
+            const SizedBox(height: 20),
+            if (_message.isNotEmpty)...{
+              UIHelpers.costumMessage(_isSuccess, _message),
+              const SizedBox(height: 20),
+            },
+            _buildProfileBottom()
           ]
         ),
       )
     );
   }
+
+  Widget _buildProfileUserInfo(){
+    return Row(
+      children: [
+        if(widget.userData?['capitalLetters'] != null)
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: UIHelpers.hexToColor(widget.userData?['color']),
+            child: Text(
+              "${widget.userData?['capitalLetters']}",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28
+              )
+            ),
+          ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if(widget.userData?['fullName'] != null)
+                Text(
+                  "${widget.userData?['fullName']}",
+                  style: TextStyle(
+                    color: textColor,                            
+                  ),
+                  overflow: TextOverflow.ellipsis
+                ),
+              if(widget.userData?['email'] != null)
+                Text(
+                  "${widget.userData?['email']}",
+                  style: TextStyle(
+                    color: textColor,
+                  ),
+                  overflow: TextOverflow.ellipsis
+                ),
+              const SizedBox(height: 5),
+              if((widget.userData?['roles'] ?? []).isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8EFFF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
+                      const SizedBox(width: 4),
+                      Text(
+                        widget.userData?['roles'][0],
+                        style: const TextStyle(
+                          color: Color(0xFF2D5AF0),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),                               
+                      ),
+                    ],
+                  ),
+                ),
+            ]
+          )
+        )
+      ]
+    );
+  }
+
+  Widget _buildProfileUserName(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [   
+        UIHelpers.costumTitle(Translations.get('settings.username', currentLang), textColor),
+        const SizedBox(height: 5),
+        TextField(
+          controller: _userNameController,
+          readOnly: true,
+          style: TextStyle(color: textColor),
+          decoration: UIHelpers.customInputDecorationTextField(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+            prefixIcon: Icon(Icons.person_outline, color: iconColor),
+          ),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildProfileFullName(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('settings.fullName', currentLang), textColor),
+        const SizedBox(height: 5),
+        TextField(
+          controller: _fullNameController,
+          style: TextStyle(color: textColor),
+          decoration: UIHelpers.customInputDecorationTextField(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+            prefixIcon: Icon(Icons.person_outline, color: iconColor),
+          ),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildProfileEmail(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('auth.email', currentLang), textColor),
+        const SizedBox(height: 5),
+        TextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          style: TextStyle(color: textColor),
+          decoration: UIHelpers.customInputDecorationTextField(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+            prefixIcon: Icon(Icons.email_outlined, color: iconColor),
+          ),    
+        ),
+      ]
+    );
+  }
+
+  Widget _buildProfileAvatarColor(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('settings.avatarColor', currentLang), textColor),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: _showColorPickerDialog,
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: UIHelpers.hexToColor(_colorAvatarController.text),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: borderColor),
+                ),
+                child: const Icon(Icons.colorize, color: Colors.white, size: 20),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _colorAvatarController,
+                style: TextStyle(color: textColor),
+                decoration: UIHelpers.customInputDecorationTextField(
+                  inputFillColor: inputFillColor,
+                  borderColor: borderColor,
+                  hintColor: hintColor,
+                  prefixIcon: Icon(Icons.palette_outlined, color: iconColor),
+                ),
+              ),
+            ),
+            if(widget.userData?['capitalLetters'] != null)...{
+              const SizedBox(width: 6),
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: UIHelpers.hexToColor(_colorAvatarController.text),
+                child: Text(
+                  "${widget.userData?['capitalLetters']}",
+                  style: TextStyle(color: Colors.white)
+                ),
+              ),
+            },
+          ]
+        ),
+        const SizedBox(height: 6),
+        UIHelpers.costumSubtitle(Translations.get('settings.avatarColorHint', currentLang), textColor),
+      ]
+    );
+  }
+
+  Widget _buildProfileBottom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: (){
+          setState(() {
+            _isLoading = true;
+          });
+          _saveProfilEdit();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2D5AF0),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('settings.saveChanges', currentLang),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+    );       
+  }
+
 }

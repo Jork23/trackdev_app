@@ -2,14 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
+import 'package:trackdev_app/firebase_options.dart';
+import 'package:trackdev_app/utils/notification_service.dart';
 import 'sign_in/index_page.dart';
 import 'home/home_page.dart';
 import 'sign_in/new_password_page.dart';
 import 'utils/theme.dart';
 import 'utils/translations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'project/task_details_page.dart';
 
-void main() async {
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  final notificationService = NotificationService();
+  await notificationService.initFCM();
+
+  FirebaseMessaging.onBackgroundMessage(handleBackgoundMessage);
 
   const storage = FlutterSecureStorage();
   
@@ -17,7 +33,7 @@ void main() async {
   String? mode = await storage.read(key: 'app_mode');
   globalIsDarkMode = (mode == 'dark');
 
-    await Translations.init();
+  await Translations.init();
 
   bool isTokenValid = false;
 
@@ -73,6 +89,7 @@ class MyApp extends StatelessWidget {
 
 GoRouter _router(bool isTokenValid) {
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: isTokenValid ? '/home' : '/',
     
     routes: [
@@ -93,6 +110,17 @@ GoRouter _router(bool isTokenValid) {
           return NewPasswordPage(token: token);
         },
       ),
+      GoRoute(
+        path: '/task-from-notification',
+        builder: (context, state) {
+          final taskMap = state.extra as Map<String, dynamic>;
+          return TaskDetailsPage(task: taskMap); //
+        }
+      ),
     ],
   );
+}
+
+Future<void> handleBackgoundMessage(RemoteMessage message) async{
+  print('Message: ${message.notification?.title}');
 }

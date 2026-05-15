@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class PreferencesPage extends StatefulWidget {
@@ -56,22 +57,22 @@ class _PreferencesPageState extends State<PreferencesPage> with ThemePage{
 
   }
 
-Future<void> _loadSettings() async {
-  final lang = await storage.read(key: 'app_lang');
-  final mode = await storage.read(key: 'app_mode');
-  
-  tz_data.initializeTimeZones();
-  final locations = tz.timeZoneDatabase.locations.keys.toList()..sort();
+  Future<void> _loadSettings() async {
+    final lang = await storage.read(key: 'app_lang');
+    final mode = await storage.read(key: 'app_mode');
+    
+    tz_data.initializeTimeZones();
+    final locations = tz.timeZoneDatabase.locations.keys.toList()..sort();
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  setState(() {
-    _allTimezones = locations;
-    if (lang != null) _selectedLang = lang;
-    if (mode != null) _isDarkMode = mode == 'dark';
-    _isLoading = false;
-  });
-}
+    setState(() {
+      _allTimezones = locations;
+      if (lang != null) _selectedLang = lang;
+      if (mode != null) _isDarkMode = mode == 'dark';
+      _isLoading = false;
+    });
+  }
 
   Future<void> _saveSetting(String key, String value) async {
     await _storage.write(key: key, value: value);
@@ -117,6 +118,252 @@ Future<void> _loadSettings() async {
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+
+    if(_isLoading){
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: const Color(0xFF2D5AF0),
+          )
+        ),
+      );
+    }
+    
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: backgroundColor,
+        toolbarHeight: 100,
+        centerTitle: true,
+        title: UIHelpers.costumAppBar(
+          dividerColor: dividerColor,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          title: Translations.get('settings.preferences', currentLang),
+          subtitile: Translations.get('settings.preferencesSettingsDescription', currentLang),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            _buildPreferencesTheme(),
+            const SizedBox(height: 20),
+            _buildPreferencesLang(),
+            const SizedBox(height: 20),
+            _buildPreferencesTimeZone(),
+            const SizedBox(height: 20),
+            _buildPreferencesGitHub(),
+            const SizedBox(height: 20),
+            if (_message.isNotEmpty)
+              UIHelpers.costumMessage(_isSuccess, _message)
+          ]
+        )
+      )
+    );
+  }
+
+  Widget _buildPreferencesTheme(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('settings.theme', currentLang), textColor),
+        UIHelpers.costumSubtitle(Translations.get('settings.themeDescription', currentLang), textColor), 
+        const SizedBox(height: 5),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: inputFillColor,
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_isDarkMode ? Translations.get('settings.themeDark', currentLang) : Translations.get('settings.themeLight', currentLang),
+                style: TextStyle(
+                  color: textColor
+                )
+              ),
+              Switch(
+                value: _isDarkMode,
+                activeThumbColor: const Color(0xFF2D5AF0),
+                activeTrackColor: const Color(0xFF2D5AF0),
+                thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return const Icon(Icons.dark_mode, color: Colors.white);
+                  }
+                  return const Icon(Icons.light_mode, color: Colors.orange);
+                }),
+                onChanged: (bool value) async{
+                  await _saveSetting('app_mode', value ? 'dark' : 'light');
+                  setState(() {
+                    _isDarkMode = value;
+                  });
+                  await reloadThemeSettings();      
+                  widget.onPreferencesUpdated?.call();         
+                },
+              ),
+            ],
+          ),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildPreferencesLang(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('settings.language', currentLang), textColor),
+        UIHelpers.costumSubtitle(Translations.get('settings.languageDescription', currentLang), textColor), 
+        const SizedBox(height: 5),
+        DropdownMenu<String>(
+          initialSelection: _selectedLang,
+          width: MediaQuery.of(context).size.width - 48,
+          textStyle: TextStyle(color: textColor),
+          requestFocusOnTap: false,
+          inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+          ),
+          menuStyle: UIHelpers.customMenuStyle(
+            cardColor: cardColor,
+            borderColor: borderColor,
+          ),
+          onSelected: (String? value) async {
+            if (value != null) {
+              await storage.write(key: 'app_lang', value: value);
+              setState(() {
+                _selectedLang = value;
+              });
+              await reloadThemeSettings();  
+              widget.onPreferencesUpdated?.call();
+            }
+          },
+          dropdownMenuEntries: _langs.map((Map<String, String> lang) {
+            return DropdownMenuEntry<String>(
+              value: lang['code']!, 
+              label: lang['name']!,
+              style: MenuItemButton.styleFrom(
+                foregroundColor: textColor,
+                backgroundColor: backgroundColor
+              ),
+            );
+          }).toList(),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildPreferencesTimeZone(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [ 
+        UIHelpers.costumTitle(Translations.get('settings.timezone', currentLang), textColor),
+        UIHelpers.costumSubtitle(Translations.get('settings.timezoneDescription', currentLang), textColor), 
+        const SizedBox(height: 5),
+        GestureDetector(
+          onTap: _showTimezoneDialog,
+          child: Container(
+            width: MediaQuery.of(context).size.width - 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: inputFillColor,
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.public, color: iconColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedTimezone ?? 'UTC',
+                    style: TextStyle(color: textColor),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(Icons.arrow_drop_down, color: iconColor),
+              ],
+            ),
+          ),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildPreferencesGitHub(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('settings.githubUsername', currentLang), textColor),
+        UIHelpers.costumSubtitle(Translations.get('settings.githubUsernameDescription', currentLang), textColor), 
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _githubController,
+                style: TextStyle(color: textColor),
+                decoration: UIHelpers.customInputDecorationTextField(
+                  inputFillColor: inputFillColor,
+                  borderColor: borderColor,
+                  hintColor: hintColor,
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: FaIcon(FontAwesomeIcons.github, color: iconColor, size: 50),
+                  ),
+                ),
+              )
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: (){
+                  setState(() {
+                    _isLoading = true;
+                    _message = '';
+                  });
+                  _saveProfilEdit('githubUsername',_githubController.text);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2D5AF0),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  Translations.get('settings.save', currentLang),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+            ),
+          ]
+        ),
+        const SizedBox(height: 5),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            Translations.get('settings.githubUsernameHint', currentLang),
+            style: TextStyle(
+              color: subtitleColor,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
+        ),
+      ]
+    );
+  }
 
   void _showTimezoneDialog() {
     final TextEditingController searchCtrl = TextEditingController();
@@ -132,22 +379,12 @@ Future<void> _loadSettings() async {
             controller: searchCtrl,
             autofocus: true,
             style: TextStyle(color: textColor),
-            decoration: InputDecoration(
+            decoration: UIHelpers.customInputDecorationTextField(
+              inputFillColor: inputFillColor,
+              borderColor: borderColor,
+              hintColor: hintColor,
               hintText: Translations.get('settings.timezoneDescription', currentLang),
-              hintStyle: TextStyle(color: subtitleColor),
               prefixIcon: Icon(Icons.search, color: iconColor),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: borderColor),
-              ),
             ),
             onChanged: (value) {
               setStateDialog(() {
@@ -192,359 +429,6 @@ Future<void> _loadSettings() async {
           ),
         ),
       ),
-    );
-  }
-
-   @override
-  Widget build(BuildContext context) {
-
-    if(_isLoading){
-      return Scaffold(
-        backgroundColor: backgroundColor,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: const Color(0xFF2D5AF0),
-          )
-        ),
-      );
-    }
-    
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: backgroundColor,
-        toolbarHeight: 100,
-        centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text (
-              Translations.get('settings.preferences', currentLang),
-              style: TextStyle(
-                  color: textColor, 
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
-              ),
-            Text(
-              Translations.get('settings.preferencesSettingsDescription', currentLang),
-              style: TextStyle(
-                fontSize: 13,
-                color: subtitleColor
-              ),
-            ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [   
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.theme', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.themeDescription', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: borderColor),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(_isDarkMode ? Translations.get('settings.themeDark', currentLang) : Translations.get('settings.themeLight', currentLang),
-                    style: TextStyle(
-                      color: textColor
-                    )
-                  ),
-                  Switch(
-                    value: _isDarkMode,
-                    activeThumbColor: const Color(0xFF2D5AF0),
-                    activeTrackColor: const Color(0xFF2D5AF0),
-                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return const Icon(Icons.dark_mode, color: Colors.white);
-                      }
-                      return const Icon(Icons.light_mode, color: Colors.orange);
-                    }),
-                    onChanged: (bool value) async{
-                      await _saveSetting('app_mode', value ? 'dark' : 'light');
-                      setState(() {
-                        _isDarkMode = value;
-                      });
-                      await reloadThemeSettings();      
-                      widget.onPreferencesUpdated?.call();         
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 30),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.language', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.languageDescription', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownMenu<String>(
-              initialSelection: _selectedLang,
-              width: MediaQuery.of(context).size.width - 48,
-              textStyle: TextStyle(color: textColor),
-              requestFocusOnTap: false,
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: backgroundColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-              menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(cardColor),
-                surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                side: WidgetStateProperty.all(
-                  BorderSide(color: borderColor, width: 1),
-                ),
-              ),
-              onSelected: (String? value) async {
-                if (value != null) {
-                  await storage.write(key: 'app_lang', value: value);
-                  setState(() {
-                    _selectedLang = value;
-                  });
-                  await reloadThemeSettings();  
-                  widget.onPreferencesUpdated?.call();
-                }
-              },
-              dropdownMenuEntries: _langs.map((Map<String, String> lang) {
-                return DropdownMenuEntry<String>(
-                  value: lang['code']!, 
-                  label: lang['name']!,
-                  style: MenuItemButton.styleFrom(
-                    foregroundColor: textColor,
-                    backgroundColor: backgroundColor
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 30),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.timezone', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.timezoneDescription', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _showTimezoneDialog,
-              child: Container(
-                width: MediaQuery.of(context).size.width - 48,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                decoration: BoxDecoration(
-                  border: Border.all(color: borderColor),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.public, color: iconColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _selectedTimezone ?? 'UTC',
-                        style: TextStyle(color: textColor),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Icon(Icons.arrow_drop_down, color: iconColor),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.githubUsername', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.githubUsernameDescription', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _githubController,
-                    style: TextStyle(color: textColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: backgroundColor,
-                      hintStyle: TextStyle(color: textColor),
-                      prefixIcon: Padding(
-                        padding: const EdgeInsets.only(left: 5),
-                        child: FaIcon(FontAwesomeIcons.github, color: iconColor, size: 50),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                    ),
-                  )
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: (){
-                      setState(() {
-                        _isLoading = true;
-                        _message = '';
-                      });
-                      _saveProfilEdit('githubUsername',_githubController.text);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2D5AF0),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      Translations.get('settings.save', currentLang),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
-                  ),
-                ),
-              ]
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.githubUsernameHint', currentLang),
-                style: TextStyle(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_message.isNotEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
-                      color: _isSuccess ? Colors.green : Colors.red, 
-                      size: 20
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _message,
-                        style: TextStyle(
-                          color: _isSuccess ? Colors.green : Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ]
-        )
-      )
     );
   }
 }

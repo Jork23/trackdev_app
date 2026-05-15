@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class SecurityPage extends StatefulWidget {
@@ -118,29 +119,6 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
     }
   }
 
-  Widget _buildRequirement(String text, bool isMet) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(
-            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: isMet ? Colors.green : Colors.grey,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              color: isMet ? Colors.green : Colors.grey,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     
@@ -163,25 +141,12 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
         elevation: 0,
         toolbarHeight: 100,
         centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('settings.securitySettings', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
-              ),
-            ),
-            Text(
-              Translations.get('settings.securitySettingsDescription', currentLang),
-              style: TextStyle(
-                fontSize: 13,
-                color: subtitleColor),
-            ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
+        title: UIHelpers.costumAppBar(
+          dividerColor: dividerColor,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          title: Translations.get('settings.securitySettings', currentLang),
+          subtitile: Translations.get('settings.securitySettingsDescription', currentLang),
         ),
       ),
       body: SingleChildScrollView(
@@ -189,208 +154,109 @@ class _SecurityPageState extends State<SecurityPage> with ThemePage{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [     
-            const SizedBox(height: 16),
-            if (_message.isNotEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
-                      color: _isSuccess ? Colors.green : Colors.red, 
-                      size: 20
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _message,
-                        style: TextStyle(
-                          color: _isSuccess ? Colors.green : Colors.red,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.currentPassword', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
+            if (_message.isNotEmpty)...{
+              UIHelpers.costumMessage(_isSuccess, _message),           
+              const SizedBox(height: 20),
+            },
+            UIHelpers.costumPassword(
+              inputFillColor: inputFillColor,
+              borderColor: borderColor,
+              hintColor: hintColor,
+              textColor: textColor,
+              iconColor: iconColor,
+              text: Translations.get('settings.currentPassword', currentLang),
               controller: _oldPassword,
-              obscureText: true,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintText: '••••••••',
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.newPassword', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _newPassword1,
-              obscureText: true,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintText: '••••••••',
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('settings.confirmNewPassword', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _newPassword2,
-              obscureText: true,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: inputFillColor,
-                hintText: '••••••••',
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
             ),
             const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: inputFillColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: borderColor),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    Translations.get('settings.passwordMustContain', currentLang),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildRequirement(Translations.get('settings.atLeast8Characters', currentLang), _hasMinLength),
-                  _buildRequirement(Translations.get('settings.oneLowercaseLetter', currentLang), _hasLowercase),
-                  _buildRequirement(Translations.get('settings.oneUppercaseLetter', currentLang), _hasUppercase),
-                  _buildRequirement(Translations.get('settings.oneNumber', currentLang), _hasNumber),
-                  _buildRequirement(Translations.get('settings.passwordsMatch', currentLang), _passwordsMatch),
-                ],
-              ),
+            UIHelpers.costumPassword(
+              inputFillColor: inputFillColor,
+              borderColor: borderColor,
+              hintColor: hintColor,
+              textColor: textColor,
+              iconColor: iconColor,
+              text: Translations.get('settings.newPassword', currentLang),
+              controller: _newPassword1,
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isPasswordValid() ?
-                  (){   
-                    setState(() {
-                      _isLoading = true;
-                    }); 
-                    _changePasswordEdit(); 
-                  }
-                  : 
-                  (){},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isPasswordValid() ? Color(0xFF2D5AF0) : Color.fromARGB(255, 127, 150, 226),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  Translations.get('settings.updatePassword', currentLang),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-                ),
-              ),
+            const SizedBox(height: 20),
+            UIHelpers.costumPassword(
+              inputFillColor: inputFillColor,
+              borderColor: borderColor,
+              hintColor: hintColor,
+              textColor: textColor,
+              iconColor: iconColor,
+              text: Translations.get('settings.newPassword', currentLang),
+              controller: _newPassword2,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+            _buildPasswordContainerRequirement(),
+            const SizedBox(height: 20),
+            _buildPasswordBottom(),
+            const SizedBox(height: 20),
           ]
         ),
       )
     );
   }
+
+  Widget _buildPasswordBottom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: _isPasswordValid() ?
+          (){   
+            setState(() {
+              _isLoading = true;
+            }); 
+            _changePasswordEdit(); 
+          }
+          : 
+          (){},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _isPasswordValid() ? Color(0xFF2D5AF0) : Color.fromARGB(255, 127, 150, 226),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('settings.updatePassword', currentLang),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordContainerRequirement(){
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: inputFillColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            Translations.get('settings.passwordMustContain', currentLang),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: textColor,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          UIHelpers.costumRequirement(Translations.get('settings.atLeast8Characters', currentLang), _hasMinLength),
+          UIHelpers.costumRequirement(Translations.get('settings.oneLowercaseLetter', currentLang), _hasLowercase),
+          UIHelpers.costumRequirement(Translations.get('settings.oneUppercaseLetter', currentLang), _hasUppercase),
+          UIHelpers.costumRequirement(Translations.get('settings.oneNumber', currentLang), _hasNumber),
+          UIHelpers.costumRequirement(Translations.get('settings.passwordsMatch', currentLang), _passwordsMatch),
+        ],
+      ),
+    );
+  }
+
 }

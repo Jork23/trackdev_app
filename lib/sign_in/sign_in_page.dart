@@ -6,6 +6,9 @@ import '../home/home_page.dart';
 import 'reset_password_page.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class SignInPage extends StatefulWidget {
@@ -63,6 +66,17 @@ void dispose() {
 
         await _storage.write(key: 'auth_token', value: token);
 
+        try {
+          final notificationService = NotificationService();
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await notificationService.uploadTokenToServer(fcmToken);
+          }
+        } 
+        catch (fcmError) {
+          debugPrint("Error: $fcmError");
+        }
+
         if (!mounted) return;
 
         if(mounted){
@@ -107,7 +121,6 @@ void dispose() {
       );
     }
 
-
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SingleChildScrollView(
@@ -115,184 +128,132 @@ void dispose() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.layers_outlined, 
-                  color: Color(0xFF2D5AF0),
-                  size: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'TrackDev',
-                  style: TextStyle(
-                    color: textColor, 
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),
+            _buildSignInTitle(),
             const SizedBox(height: 20),
-            Text(
-              Translations.get('auth.signInTitle', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('auth.emailAddress', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
+            UIHelpers.costumTitle(Translations.get('auth.emailAddress', currentLang), textColor),
+            const SizedBox(height: 5),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: textColor),
-              decoration: InputDecoration(
+              decoration: UIHelpers.customInputDecorationTextField(
+                inputFillColor: inputFillColor,
+                borderColor: borderColor,
+                hintColor: hintColor,
                 hintText: Translations.get('auth.email', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
-                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
+                prefixIcon: Icon(Icons.email_outlined, color: iconColor),
               ),
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('auth.password', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
+            UIHelpers.costumTitle(Translations.get('auth.password', currentLang), textColor),
+            const SizedBox(height: 5),
             TextField(
               controller: _passwordController,
               obscureText: true,
               style: TextStyle(color: textColor),
-              decoration: InputDecoration(
+              decoration: UIHelpers.customInputDecorationTextField(
+                inputFillColor: inputFillColor,
+                borderColor: borderColor,
+                hintColor: hintColor,
                 hintText: Translations.get('auth.password', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
                 prefixIcon: Icon(Icons.lock_outline, color: iconColor),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
               ),
             ),
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
-                  );
-                }, 
-                child: Text(
-                  Translations.get('auth.forgotPassword', currentLang), 
-                  style: const TextStyle(color: Color(0xFF2D5AF0))
-                ),
-              ),
-            ),
+            _buildSignInForgotPasswordButtom(),
             const SizedBox(height: 12),
-            if (_errorMessage.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.red.shade200,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  _login();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  Translations.get('auth.login', currentLang),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-              ),
-            ),
+            if (_errorMessage.isNotEmpty)...{
+              UIHelpers.costumErrorMessage(_errorMessage),
+              const SizedBox(height: 20),
+            },
+            _buildSignInLoginButtom()
           ],
         ),
       ),
     );
   }
+
+  Widget _buildSignInTitle(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'TrackDev',
+              style: TextStyle(
+                color: textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text(
+          Translations.get('auth.signInTitle', currentLang),
+          style: TextStyle(
+            color: textColor, 
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        )
+      ]
+    );
+  }
+
+  Widget _buildSignInForgotPasswordButtom(){
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
+          );
+        }, 
+        child: Text(
+          Translations.get('auth.forgotPassword', currentLang), 
+          style: const TextStyle(color: Color(0xFF2D5AF0))
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignInLoginButtom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            isLoading = true;
+          });
+          _login();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2D5AF0),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('auth.login', currentLang),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+    );
+  }
+
 }

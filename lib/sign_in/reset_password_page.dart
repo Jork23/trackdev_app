@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class ResetPasswordPage extends StatefulWidget {
@@ -93,177 +94,150 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> with ThemePage {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.layers_outlined, 
-                  color: Color(0xFF2D5AF0),
-                  size: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'TrackDev',
-                  style: TextStyle(
-                    color: textColor, 
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              Translations.get('auth.forgotPasswordTitle', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                Translations.get('auth.forgotPasswordDescription', currentLang),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: textColor, 
-                  fontSize: 15,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('auth.emailAddress', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
+            _buildResetTitle(),
+            const SizedBox(height: 30),
+            UIHelpers.costumTitle(Translations.get('auth.emailAddress', currentLang), textColor),
+            const SizedBox(height: 5),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: textColor),
-              decoration: InputDecoration(
+              decoration: UIHelpers.customInputDecorationTextField(
+                inputFillColor: inputFillColor,
+                borderColor: borderColor,
+                hintColor: hintColor,
                 hintText: Translations.get('auth.email', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
-                prefixIcon: Icon(Icons.email_outlined, color: iconColor), 
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
+                prefixIcon: Icon(Icons.email_outlined, color: iconColor),
               ),
             ),
             const SizedBox(height: 20),
-            if (_errorMessage.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.red.shade200,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: (){
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  _sendEmail();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  Translations.get('auth.sendResetLink', currentLang),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
+            if (_errorMessage.isNotEmpty)...{
+              UIHelpers.costumErrorMessage(_errorMessage),
+              const SizedBox(height: 12),
+            },
+            _buildResetLinkButtom(),
+            const SizedBox(height: 12),
+            if(_isSuccess)...{
+              _buildResetSuccessText(),
+            },
+            _buildResetBackButtom()
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetTitle(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.layers_outlined, 
+              color: Color(0xFF2D5AF0),
+              size: 28,
             ),
-            const SizedBox(height: 15),
-            if(_isSuccess)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Text(
-                    Translations.get('auth.resetLinkSent', currentLang),
-                    style: const TextStyle(
-                      color: Color(0xFF2D5AF0), 
-                      fontWeight: FontWeight.w500
-                    ),
-                  ),
-                ),
-              ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isSuccess = false;
-                    _errorMessage = '';
-                    _emailController.clear();
-                  });
-                  Navigator.pop(context);
-                }, 
-                child: Text(
-                  Translations.get('auth.backToLogin', currentLang), 
-                  style: const TextStyle(color: Color(0xFF2D5AF0))
-                ),
+            const SizedBox(width: 8),
+            Text(
+              'TrackDev',
+              style: TextStyle(
+                color: textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 20),
+        Text(
+          Translations.get('auth.forgotPasswordTitle', currentLang),
+          style: TextStyle(
+            color: textColor, 
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Align(
+          alignment: Alignment.center,
+          child: Text(
+            Translations.get('auth.forgotPasswordDescription', currentLang),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor, 
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ]
+    );      
+  }
+
+  Widget _buildResetLinkButtom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: (){
+          setState(() {
+            _isLoading = true;
+          });
+          _sendEmail();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2D5AF0),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('auth.sendResetLink', currentLang),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetSuccessText(){
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.blue.shade200),
+        ),
+        child: Text(
+          Translations.get('auth.resetLinkSent', currentLang),
+          style: const TextStyle(
+            color: Color(0xFF2D5AF0), 
+            fontWeight: FontWeight.w500
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetBackButtom(){
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () {
+          setState(() {
+            _isSuccess = false;
+            _errorMessage = '';
+            _emailController.clear();
+          });
+          Navigator.pop(context);
+        }, 
+        child: Text(
+          Translations.get('auth.backToLogin', currentLang), 
+          style: const TextStyle(color: Color(0xFF2D5AF0))
         ),
       ),
     );

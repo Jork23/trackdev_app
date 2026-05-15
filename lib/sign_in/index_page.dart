@@ -12,50 +12,6 @@ class IndexPage extends StatefulWidget {
 
 class _IndexPageState extends State<IndexPage> with ThemePage {
 
-  Widget _buildFeatureCard(IconData icon, String title, String description, Color bgColor) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: bgColor, 
-              borderRadius: BorderRadius.circular(8)
-            ),
-            child: Icon(icon, color: const Color(0xFF2D5AF0), size: 30),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title, 
-            style: TextStyle(
-              fontSize: 18, 
-              fontWeight: FontWeight.bold, 
-              color: textColor
-            )
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description, 
-            style: TextStyle(
-              fontSize: 14, 
-              color: subtitleColor, 
-              height: 1.4
-            )
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     
@@ -166,19 +122,19 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
               ),
             ),
             const SizedBox(height: 50),           
-            _buildFeatureCard(
+            _buildIndexPageFeatureCard(
               Icons.layers_outlined,
               Translations.get('Sprint Management', currentLang),
               Translations.get('Plan and track sprints with your team. Visualize progress with burn-down charts and sprint boards.', currentLang),
               const Color(0xFFE8F0FE),
             ),
-            _buildFeatureCard(
+            _buildIndexPageFeatureCard(
               Icons.check_circle_outline,
               Translations.get('Task Tracking', currentLang),
               Translations.get('Create user stories and tasks. Track status, assign members, and estimate points for each item.', currentLang),
               const Color(0xFFE8F0FE),
             ),
-            _buildFeatureCard(
+            _buildIndexPageFeatureCard(
               Icons.groups_outlined,
               Translations.get('Team Collaboration', currentLang),
               Translations.get('Work together with your team members. Comment on tasks, track history, and review contributions.', currentLang),
@@ -190,4 +146,53 @@ class _IndexPageState extends State<IndexPage> with ThemePage {
       ),
     );
   }
+  
+  Widget _buildIndexPageFeatureCard(IconData icon, String title, String description, Color bgColor) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: bgColor, 
+              borderRadius: BorderRadius.circular(8)
+            ),
+            child: Icon(
+              icon, 
+              color: const Color(0xFF2D5AF0), 
+              size: 30
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title, 
+            style: TextStyle(
+              fontSize: 18, 
+              fontWeight: FontWeight.bold, 
+              color: textColor
+            )
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description, 
+            style: TextStyle(
+              fontSize: 14, 
+              color: subtitleColor, 
+              height: 1.4
+            )
+          ),
+        ],
+      ),
+    );
+  }
+
 }

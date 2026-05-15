@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class AddSubtaskPage extends StatefulWidget {
@@ -155,324 +156,214 @@ class _AddSubtaskPageState extends State<AddSubtaskPage> with ThemePage {
         backgroundColor: backgroundColor,
         elevation: 0,
         toolbarHeight: 50,
-         title: Row(
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-                  Text(
-                    Translations.get('common.back', currentLang),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ]
-              ),
-            ),
-            const SizedBox(width: 15),
-            const Icon(
-              Icons.layers_outlined, 
-              color: Color(0xFF2D5AF0),
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TrackDev',
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
+        title: UIHelpers.costumBackPopAppBar(context: context,text: Translations.get('common.back', currentLang), textColor: textColor)
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10),
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('tasks.addSubtask', currentLang),
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            Divider(color: dividerColor, thickness: 1),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('tasks.name', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _nameController,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                hintText: Translations.get('tasks.taskNamePlaceholder', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
+            UIHelpers.costumAppBar(
+              dividerColor: dividerColor,
+              textColor: textColor,
+              subtitleColor: subtitleColor,
+              title: Translations.get('tasks.addSubtask', currentLang),
+              subtitile: null,
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('tasks.description', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _descriptionController,
-              style: TextStyle(color: textColor),
-              decoration: InputDecoration(
-                hintText: Translations.get('tasks.taskDescriptionPlaceholder', currentLang),
-                hintStyle: TextStyle(color: hintColor),
-                filled: true,
-                fillColor: inputFillColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('tasks.type', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownMenu<String?>(
-              initialSelection: _selectedType,
-              width: MediaQuery.of(context).size.width,
-              textStyle: TextStyle(color: textColor, fontSize: 14),
-              inputDecorationTheme: InputDecorationTheme(
-                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(cardColor),
-                surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                side: WidgetStateProperty.all(
-                  BorderSide(color: borderColor, width: 1),
-                ),
-              ),
-              onSelected: (String? value) async {
-                setState(() {
-                  _selectedType = value;
-                });               
-              },
-              dropdownMenuEntries: listTypes.map((type) {
-                return DropdownMenuEntry<String?>(
-                  value: type['type'], 
-                  label: type['name'],
-                  style: MenuItemButton.styleFrom(
-                    foregroundColor: textColor,
-                    backgroundColor: backgroundColor
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                Translations.get('tasks.assignee', currentLang),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w500
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownMenu<String?>(
-              initialSelection: _selectedAssignenId,
-              width: MediaQuery.of(context).size.width,
-              textStyle: TextStyle(color: textColor, fontSize: 14),
-              inputDecorationTheme: InputDecorationTheme(
-                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(cardColor),
-                surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                side: WidgetStateProperty.all(
-                  BorderSide(color: borderColor, width: 1),
-                ),
-              ),
-              onSelected: (String? value) async {
-                setState(() {
-                  _selectedAssignenId = value;
-                }); 
-              },
-              dropdownMenuEntries: listAssignees.map((memb) {
-                return DropdownMenuEntry<String?>(
-                  value: memb['id'], 
-                  label: memb['fullName'],
-                  style: MenuItemButton.styleFrom(
-                    foregroundColor: textColor,
-                    backgroundColor: backgroundColor
-                  )
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 12),
+            _buildAddSubtaskName(),
+            const SizedBox(height: 20),
+            _buildAddSubtaskDescription(),  
+            const SizedBox(height: 20),
+            _buildAddSubtaskType(listTypes),
+            const SizedBox(height: 20),
+            _buildAddSubtaskAssignee(listAssignees),
+            const SizedBox(height: 20),
             if (_message.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: _isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _isSuccess ? Colors.green.shade200 : Colors.red.shade200,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _isSuccess ? Icons.check_circle_outline : Icons.error_outline, 
-                        color: _isSuccess ? Colors.green : Colors.red, 
-                        size: 20
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _message,
-                          style: TextStyle(
-                            color: _isSuccess ? Colors.green : Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if(!_isSuccess)...{
-              Row(
-                children: [
-                  Expanded(
-                   child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        side: BorderSide(color: borderColor),
-                      ),
-                      child: Text(
-                        Translations.get('common.cancel', currentLang),
-                        style: TextStyle(color: textColor)
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SizedBox(
-                    height: 50,
-                    child: Expanded(
-                      child: ElevatedButton(
-                        onPressed: (){
-                          setState((){
-                            _isLoading = false;
-                          });
-                          _addSubtask();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2D5AF0),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          Translations.get('tasks.addSubtask', currentLang),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              )
-            }
+              UIHelpers.costumMessage(_isSuccess, _message),
+            if(!_isSuccess)
+              _buildAddSubtaskIsSuccess()
             else
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    side: BorderSide(color: borderColor),
-                  ),
-                  child: Text(
-                    Translations.get('common.back', currentLang),
-                    style: TextStyle(color: textColor)
-                  ),
-                ),
-              )
+              UIHelpers.costumAddIsNotSuccess(context: context, textColor: textColor, borderColor:borderColor, currentLang: currentLang)
           ],
         ),
       ),
     );
   }
+
+  Widget  _buildAddSubtaskName(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('tasks.name', currentLang), textColor),
+        const SizedBox(height: 5),
+        TextField(
+          controller: _nameController,
+          style: TextStyle(color: textColor),
+          decoration: UIHelpers.customInputDecorationTextField(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+            hintText: Translations.get('tasks.taskNamePlaceholder', currentLang),
+          ),
+        )
+      ]
+    );
+  }
+
+  Widget _buildAddSubtaskDescription(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('tasks.description', currentLang), textColor),
+        const SizedBox(height: 5),
+        TextField(
+          controller: _descriptionController,
+          style: TextStyle(color: textColor),
+          decoration: UIHelpers.customInputDecorationTextField(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+            hintText: Translations.get('tasks.taskDescriptionPlaceholder', currentLang),
+          ),
+        )
+      ]
+    );
+  }
+
+  Widget _buildAddSubtaskType(List<dynamic> listTypes){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        UIHelpers.costumTitle(Translations.get('tasks.type', currentLang), textColor),
+        const SizedBox(height: 5),
+        DropdownMenu<String?>(
+          initialSelection: _selectedType,
+          width: MediaQuery.of(context).size.width,
+          textStyle: TextStyle(color: textColor, fontSize: 14),
+          inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+          ),
+          menuStyle: UIHelpers.customMenuStyle(
+            cardColor: cardColor,
+            borderColor: borderColor,
+          ),
+          onSelected: (String? value) async {
+            setState(() {
+              _selectedType = value;
+            });               
+          },
+          dropdownMenuEntries: listTypes.map((type) {
+            return DropdownMenuEntry<String?>(
+              value: type['type'], 
+              label: type['name'],
+              style: MenuItemButton.styleFrom(
+                foregroundColor: textColor,
+                backgroundColor: backgroundColor
+              ),
+            );
+          }).toList(),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildAddSubtaskAssignee(List<dynamic> listAssignees){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            Translations.get('tasks.assignee', currentLang),
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.w500
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        DropdownMenu<String?>(
+          initialSelection: _selectedAssignenId,
+          width: MediaQuery.of(context).size.width,
+          textStyle: TextStyle(color: textColor, fontSize: 14),
+          inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+            inputFillColor: inputFillColor,
+            borderColor: borderColor,
+            hintColor: hintColor,
+          ),
+          menuStyle: UIHelpers.customMenuStyle(
+            cardColor: cardColor,
+            borderColor: borderColor,
+          ),
+          onSelected: (String? value) async {
+            setState(() {
+              _selectedAssignenId = value;
+            }); 
+          },
+          dropdownMenuEntries: listAssignees.map((memb) {
+            return DropdownMenuEntry<String?>(
+              value: memb['id'], 
+              label: memb['fullName'],
+              style: MenuItemButton.styleFrom(
+                foregroundColor: textColor,
+                backgroundColor: backgroundColor
+              )
+            );
+          }).toList(),
+        ),
+      ]
+    );
+  }
+
+  Widget _buildAddSubtaskIsSuccess(){
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => Navigator.pop(context),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              side: BorderSide(color: borderColor),
+            ),
+            child: Text(
+              Translations.get('common.cancel', currentLang),
+              style: TextStyle(color: textColor)
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          height: 50,
+          child: Expanded(
+            child: ElevatedButton(
+              onPressed: (){
+                setState((){
+                  _isLoading = false;
+                });
+                _addSubtask();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2D5AF0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Text(
+                Translations.get('tasks.createTask', currentLang),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
 }

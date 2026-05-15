@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class ActivityPage extends StatefulWidget {
@@ -41,11 +42,6 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
     _selectedProject = null;
     _selectedSprint = null;
     _selectedMember = "";
-  }
-
-  String _formatDate(String isoDate) {
-    final dt = DateTime.parse(isoDate);
-    return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 
   bool _isLoading(){
@@ -102,11 +98,14 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
     };
 
     final url = Uri.https('trackdev.org', '/api/activities', params);
+    
     try {
       final response = await http.get(
         url,
-        headers: {'Authorization': 'Bearer $token',
-                  'Content-Type': 'application/json',},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (!mounted) return;
@@ -244,20 +243,14 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
-        toolbarHeight: 100,
+        toolbarHeight: 90,
         centerTitle: true,
-        title: Column(
-          children:[
-            Divider(color: dividerColor, thickness: 1),
-            Text (Translations.get('activity.title', currentLang),
-              style: TextStyle(
-                  color: textColor, 
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
-              ),
-            Divider(color: dividerColor, thickness: 1),
-          ],
+        title: UIHelpers.costumAppBar(
+          dividerColor: dividerColor,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          title: Translations.get('activity.title', currentLang),
+          subtitile: null,
         ),
       ),
       body: SingleChildScrollView(
@@ -265,327 +258,344 @@ class _ActivityPageState extends State<ActivityPage> with ThemePage{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor)
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      )
-                    ),         
-                    child: Text(
-                      Translations.get('navigation.projects', currentLang),
-                      style: TextStyle(
-                        color: textColor, 
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        DropdownMenu<int?>(
-                          initialSelection: _selectedProject,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (int? value) async {
-                            setState(() {
-                              if(_selectedProject!=value){
-                                _selectedProject = value;
-                                _selectedSprint = null;
-                                _selectedMember = "";
-                              }
-                              _activityData.clear();
-                              _page=0;
-                              _isLoadingActivities = true;
-                            });
-                            _loadActivities(value, null, "");
-                          },
-                          dropdownMenuEntries: (_projectsData['projects'] as List? ?? []).map((proj) {
-                            return DropdownMenuEntry<int?>(
-                              value: proj['id'], 
-                              label: proj['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        if(_selectedProject!=null)...[   
-                          SizedBox(height: 10),
-                          DropdownMenu<int?>(
-                            initialSelection: _selectedSprint,
-                            width: MediaQuery.of(context).size.width - 72,
-                            textStyle: TextStyle(color: textColor, fontSize: 14),
-                            inputDecorationTheme: InputDecorationTheme(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            menuStyle: MenuStyle(
-                              backgroundColor: WidgetStateProperty.all(cardColor),
-                              surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                              side: WidgetStateProperty.all(
-                                BorderSide(color: borderColor, width: 1),
-                              ),
-                            ),
-                            onSelected: (int? value) async {
-                              setState(() {
-                                _selectedSprint = value;
-                                _activityData.clear();
-                                _page=0;
-                                _isLoadingActivities = true;
-                              });
-                              _loadActivities(_selectedProject, value, _selectedMember);
-                            },
-                            dropdownMenuEntries: (sprints).map((spri) {
-                              return DropdownMenuEntry<int?>(
-                                value: spri['id'], 
-                                label: spri['name'],
-                                style: MenuItemButton.styleFrom(
-                                  foregroundColor: textColor,
-                                  backgroundColor: backgroundColor
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          SizedBox(height: 10),
-                          DropdownMenu<String?>(
-                            initialSelection: _selectedMember,
-                            width: MediaQuery.of(context).size.width - 72,
-                            textStyle: TextStyle(color: textColor, fontSize: 14),
-                            inputDecorationTheme: InputDecorationTheme(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            menuStyle: MenuStyle(
-                              backgroundColor: WidgetStateProperty.all(cardColor),
-                              surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                              side: WidgetStateProperty.all(
-                                BorderSide(color: borderColor, width: 1),
-                              ),
-                            ),
-                            onSelected: (String? value) async {
-                              setState(() {
-                                _selectedMember = value;
-                                _activityData.clear();
-                                _page=0;
-                                _isLoadingActivities = true;
-                              });
-                              _loadActivities(_selectedProject, _selectedSprint, value);
-                            },
-                            dropdownMenuEntries: (members).map((memb) {
-                              return DropdownMenuEntry<String?>(
-                                value: memb['id'], 
-                                label: memb['fullName'],
-                                style: MenuItemButton.styleFrom(
-                                  foregroundColor: textColor,
-                                  backgroundColor: backgroundColor
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ]
-                      ],        
-                    )
-                  )
-                ]
-              )
-            ),
+            _buildActivityContainerSearch(sprints, members),
             if(!_isLoading() && activities.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(48.0),
-                margin: const EdgeInsets.symmetric(vertical: 24.0),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: borderColor, width: 2),
-                      ),
-                      child: Icon(
-                        Icons.bar_chart,
-                        size: 60,
-                        color: subtitleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      Translations.get('activity.noActivity', currentLang),
-                      style: TextStyle(
-                        color: textColor, 
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),                           
-                  ],
-                ),
-              ),
+              _buildActivityEmpty(),
             if(!_isLoading() && activities.isNotEmpty)...{
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: activities.length,
-                itemBuilder: (context, index){
-                  final activity = activities[index];
-                  return Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: borderColor)
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          child:Icon(                         
-                            _getIcon(activity['type']),
-                            color:_getIconColor(activity['type'])
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    child: Text(
-                                      _getText(activity),
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 15
-                                      ),
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2,),
-                              Row(
-                                children: [
-                                  if(activity?['taskKey'] != null)...{
-                                    SizedBox(width: 5),
-                                    Text(
-                                      activity?['taskKey'] ?? '',
-                                      style: TextStyle(
-                                        color: const Color(0xFF2D5AF0), 
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    )
-                                  },
-                                  if(activity?['projectName'] != null)...{
-                                    SizedBox(width: 5),
-                                    Flexible(
-                                      child: Text(
-                                        activity?['projectName'] ?? '',
-                                        style: TextStyle(
-                                          color: textColor, 
-                                          fontSize: 13,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    )
-                                  },
-                                  if(activity?['createdAt'] != null)...{
-                                    SizedBox(width: 5),
-                                    Flexible(
-                                      child: Text(
-                                        _formatDate(activity?['createdAt']),
-                                        style: TextStyle(
-                                          color: subtitleColor, 
-                                          fontSize: 13,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    )
-                                  }
-                                ],                              
-                              )
-                            ],
-                          )
-                        )
-                      ]
-                    )
-                  );
-                }
-              ),
+              _buildActivities(activities),
             },
             if(_hasNext)
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed:(){
-                    _loadActivities(_selectedProject, _selectedSprint, _selectedMember);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D5AF0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    Translations.get('activity.loadMore', currentLang),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-              ),
+              _buildActivityMoreLoadBottom()
           ]
         )
       )
     );
   }
+
+  Widget _buildActivityContainerSearch(List sprints, List members){
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2D5AF0),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              )
+            ),         
+            child: Text(
+              Translations.get('navigation.projects', currentLang),
+              style: TextStyle(
+                color: textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildActivityDropMenuProject(),
+                if(_selectedProject!=null)...[   
+                  SizedBox(height: 10),
+                  _buildActivityDropMenuSprint(sprints),
+                  SizedBox(height: 10),
+                  _buildActivityDropMenuMmember(members)
+                ]
+              ],        
+            )
+          )
+        ]
+      )
+    );
+  }
+
+  Widget _buildActivityDropMenuProject(){
+    return DropdownMenu<int?>(
+      initialSelection: _selectedProject,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (int? value) async {
+        setState(() {
+          if(_selectedProject!=value){
+            _selectedProject = value;
+            _selectedSprint = null;
+            _selectedMember = "";
+          }
+          _activityData.clear();
+          _page=0;
+          _isLoadingActivities = true;
+        });
+        _loadActivities(value, null, "");
+      },
+      dropdownMenuEntries: (_projectsData['projects'] as List? ?? []).map((proj) {
+        return DropdownMenuEntry<int?>(
+          value: proj['id'], 
+          label: proj['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildActivityDropMenuSprint(List sprints){
+    return DropdownMenu<int?>(
+      initialSelection: _selectedSprint,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (int? value) async {
+        setState(() {
+          _selectedSprint = value;
+          _activityData.clear();
+          _page=0;
+          _isLoadingActivities = true;
+        });
+        _loadActivities(_selectedProject, value, _selectedMember);
+      },
+      dropdownMenuEntries: (sprints).map((spri) {
+        return DropdownMenuEntry<int?>(
+          value: spri['id'], 
+          label: spri['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildActivityDropMenuMmember(List members){
+    return DropdownMenu<String?>(
+      initialSelection: _selectedMember,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (String? value) async {
+        setState(() {
+          _selectedMember = value;
+          _activityData.clear();
+          _page=0;
+          _isLoadingActivities = true;
+        });
+        _loadActivities(_selectedProject, _selectedSprint, value);
+      },
+      dropdownMenuEntries: (members).map((memb) {
+        return DropdownMenuEntry<String?>(
+          value: memb['id'], 
+          label: memb['fullName'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildActivityEmpty(){
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(48.0),
+      margin: const EdgeInsets.symmetric(vertical: 24.0),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: borderColor, width: 2),
+            ),
+            child: Icon(
+              Icons.bar_chart,
+              size: 60,
+              color: subtitleColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            Translations.get('activity.noActivity', currentLang),
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+            textAlign: TextAlign.center,
+          ),                           
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivities(List activities){
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: activities.length,
+      itemBuilder: (context, index){
+        final activity = activities[index];
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor)
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child:Icon(                         
+                  _getIcon(activity['type']),
+                  color:_getIconColor(activity['type'])
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            _getText(activity),
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 15
+                            ),
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2,),
+                    Row(
+                      children: [
+                        if(activity?['taskKey'] != null)...{
+                          SizedBox(width: 5),
+                          Text(
+                            activity?['taskKey'] ?? '',
+                            style: TextStyle(
+                              color: const Color(0xFF2D5AF0), 
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        },
+                        if(activity?['projectName'] != null)...{
+                          SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              activity?['projectName'] ?? '',
+                              style: TextStyle(
+                                color: textColor, 
+                                fontSize: 13,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        },
+                        if(activity?['createdAt'] != null)...{
+                          SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              UIHelpers.formatDate(activity?['createdAt']),
+                              style: TextStyle(
+                                color: subtitleColor, 
+                                fontSize: 13,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )
+                        }
+                      ],                              
+                    )
+                  ],
+                )
+              )
+            ]
+          )
+        );
+      }
+    );
+  }
+
+  Widget _buildActivityMoreLoadBottom(){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed:(){
+          _loadActivities(_selectedProject, _selectedSprint, _selectedMember);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2D5AF0),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        child: Text(
+          Translations.get('activity.loadMore', currentLang),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+    );
+  }
+
 }

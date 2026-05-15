@@ -6,12 +6,14 @@ import 'dart:convert';
 import '../sign_in/index_page.dart';
 import '../configuration/profile_page.dart';
 import '../configuration/security_page.dart';
+import '../configuration/notifications_page.dart';
 import 'courses_page.dart';
 import 'projects_page.dart';
 import 'activity_page.dart';
 import 'overview_page.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
+import '../../utils/ui_helpers.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,9 +23,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with ThemePage {
+
   int _selectedIndex = 0;
+
   static const  _storage = FlutterSecureStorage();
+
   Map<String, dynamic>? _userData;
+  
   bool _isLoading = true;
 
   @override
@@ -36,14 +42,6 @@ class _HomePageState extends State<HomePage> with ThemePage {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  Color _hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return const Color(0xFF2D5AF0);
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
   }
 
   Future<void> _loadUserData() async{
@@ -123,13 +121,13 @@ class _HomePageState extends State<HomePage> with ThemePage {
       OverviewPage(),
       CoursesPage(),
       ProjectsPage(),
-      Text('Index 3: Analitiques'),
+      Text('Work In Progress'),
       ActivityPage(),
 
       ProfilePage(userData: _userData, onProfileUpdated: _loadUserData,),
       PreferencesPage(userData: _userData, onPreferencesUpdated: loadThemeSettings,),
       SecurityPage(),
-      Text('Index 8: Integracions')
+      NotificationsPage()
     ];
 
 
@@ -148,201 +146,10 @@ class _HomePageState extends State<HomePage> with ThemePage {
             );
           },
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.layers_outlined, 
-              color: Color(0xFF2D5AF0),
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TrackDev',
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
+        title: _buildHomeTitle()
       ),
       body: Center(child: pages[_selectedIndex]),
-      drawer: Drawer(
-        backgroundColor: backgroundColor,
-        child: Column(
-          children: [
-            DrawerHeader(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.layers_outlined, 
-                        color: Color(0xFF2D5AF0),
-                        size: 28,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'TrackDev',
-                        style: TextStyle(
-                          color: textColor, 
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children:[
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 22,
-                            backgroundColor: _hexToColor(_userData!['color']),
-                            child: Text(
-                              _userData?['capitalLetters'] ?? '',
-                              style: TextStyle(color: Colors.white)
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _userData?['fullName'] ?? '',
-                                  style: TextStyle(color: textColor),
-                                  overflow: TextOverflow.ellipsis
-                                ),
-                                Text(
-                                  _userData?['email'] ?? '',
-                                  style: TextStyle(color: textColor),
-                                  overflow: TextOverflow.ellipsis
-                                ),
-                              ]
-                            ),
-                          )
-                        ]
-                      ),
-                      const SizedBox(height: 10),
-                      if(_userData?['roles'].isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE8EFFF),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
-                              const SizedBox(width: 4),
-                              Text(
-                                _userData?['roles'][0],
-                                style: const TextStyle(
-                                  color: Color(0xFF2D5AF0),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                    ]
-                  )
-                ],
-              )
-            ),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.person_outline, color: textColor),
-                  const SizedBox(width: 15),
-                  Text(
-                    Translations.get('settings.profile', currentLang),
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              onTap: () {
-                _onItemTapped(5);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.language, color: textColor),
-                  const SizedBox(width: 15),
-                  Text(
-                    Translations.get('settings.preferences', currentLang),
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              onTap: () {
-                _onItemTapped(6);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.key_outlined, color: textColor),
-                  const SizedBox(width: 15),
-                  Text(
-                    Translations.get('settings.security', currentLang),
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              onTap: () {
-                _onItemTapped(7);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.link, color: textColor),
-                  const SizedBox(width: 15),
-                  Text(
-                    Translations.get('settings.integrations', currentLang),
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              onTap: () {
-                _onItemTapped(8);
-                Navigator.pop(context);
-              },
-            ),
-            const Spacer(),
-            Divider(color: dividerColor, thickness: 1),
-            ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.logout, color: textColor),
-                  const SizedBox(width: 15),
-                  Text(
-                    Translations.get('auth.logout', currentLang),
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              onTap: _logout,
-            ),
-            Divider(color: dividerColor, thickness: 1),
-            const SizedBox(height: 40,)
-          ]
-        ),
-      ),
+      drawer:  _buildHomeDrawer(),
       bottomNavigationBar: NavigationBarTheme(
       data: NavigationBarThemeData(
         labelTextStyle: WidgetStateProperty.all(
@@ -392,6 +199,180 @@ class _HomePageState extends State<HomePage> with ThemePage {
         ],
       ),
     ),
+    );
+  }
+
+  Widget _buildHomeTitle(){
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.layers_outlined, 
+          color: Color(0xFF2D5AF0),
+          size: 28,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'TrackDev',
+          style: TextStyle(
+            color: textColor, 
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHomeDrawer(){
+    return Drawer(
+      backgroundColor: backgroundColor,
+      child: Column(
+        children: [
+          DrawerHeader(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.layers_outlined, 
+                      color: Color(0xFF2D5AF0),
+                      size: 28,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'TrackDev',
+                      style: TextStyle(
+                        color: textColor, 
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildHomeUserData()
+              ],
+            )
+          ),
+          _buildHomeListTile(Icon(Icons.person_outline, color: textColor), Translations.get('settings.profile', currentLang), 5),
+          _buildHomeListTile(Icon(Icons.language, color: textColor), Translations.get('settings.preferences', currentLang), 6),
+          _buildHomeListTile(Icon(Icons.key_outlined, color: textColor), Translations.get('settings.security', currentLang), 7),
+          _buildHomeListTile(
+            Icon(Icons.notifications_outlined, color: textColor),
+            currentLang == 'ca' ? 'Notificacions' : currentLang == 'es' ? 'Notificaciones' : 'Notifications',
+            8,
+          ),
+          const Spacer(),
+          _buildLogOut(),
+          const SizedBox(height: 40,)
+        ]
+      ),
+    );
+  }
+
+  Widget _buildHomeUserData(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:[
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: UIHelpers.hexToColor(_userData!['color']),
+              child: Text(
+                _userData?['capitalLetters'] ?? '',
+                style: TextStyle(color: Colors.white)
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _userData?['fullName'] ?? '',
+                    style: TextStyle(color: textColor),
+                    overflow: TextOverflow.ellipsis
+                  ),
+                  Text(
+                    _userData?['email'] ?? '',
+                    style: TextStyle(color: textColor),
+                    overflow: TextOverflow.ellipsis
+                  ),
+                ]
+              ),
+            )
+          ]
+        ),
+        const SizedBox(height: 10),
+        if(_userData?['roles'].isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8EFFF),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.shield_outlined, size: 12, color: Color(0xFF2D5AF0)),
+                const SizedBox(width: 4),
+                Text(
+                  _userData?['roles'][0],
+                  style: const TextStyle(
+                    color: Color(0xFF2D5AF0),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          )
+      ]
+    );
+  }
+
+  Widget _buildHomeListTile(Icon icon, String text, int page){
+    return ListTile(
+      title: Row(
+        children: [
+          icon,
+          const SizedBox(width: 15),
+          Text(
+            text,
+            style: TextStyle(color: textColor),
+          ),
+        ],
+      ),
+      onTap: () {
+        _onItemTapped(page);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Widget _buildLogOut(){
+    return Column(
+      children: [
+        Divider(color: dividerColor, thickness: 1),
+        ListTile(
+          title: Row(
+            children: [
+              Icon(Icons.logout, color: textColor),
+              const SizedBox(width: 15),
+              Text(
+                Translations.get('auth.logout', currentLang),
+                style: TextStyle(color: textColor),
+              ),
+            ],
+          ),
+          onTap: _logout,
+        ),
+        Divider(color: dividerColor, thickness: 1)
+      ]
     );
   }
 }

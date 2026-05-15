@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../utils/theme.dart';
 import '../../utils/translations.dart';
 import '../project/task_details_page.dart';
+import '../../utils/ui_helpers.dart';
 
 
 class TasksSearchPage extends StatefulWidget {
@@ -101,70 +102,6 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
       _isLoadingTask = true;
     });
     _loadTask( null, "", "", "", "desc", "");
-  }
-
-  Color _getTaskColor(String type) {
-    switch (type) {
-      case "BUG":
-        return const Color(0xFFFCA5A5);
-      case "TASK":
-        return const Color(0xFF93C5FD);
-      case "USER_STORY":
-        return const Color(0xFFD8B4FE);
-      default:
-        return const Color(0xFF5F6368);
-    }
-  }
-
-  Color _getTaskBackgroundColor(String type) {
-    switch (type) {
-      case "BUG":
-        return const Color(0xFF7F1D1D);
-      case "TASK":
-        return const Color(0xFF1E3A8A);
-      case "USER_STORY":
-        return const Color(0xFF581C87);
-      default:
-        return const Color(0xFFF1F3F4);
-    }
-  }
-
-  String _translateType(String type) {
-    switch (type) {
-      case "BUG":
-        return Translations.get('tasks.typeBug', currentLang);
-      case "TASK":
-        return Translations.get('tasks.typeTask', currentLang);
-      case "USER_STORY":
-        return Translations.get('tasks.typeUserStory', currentLang);
-      default:
-        return type;
-    }
-  }
-
-  String _translateStatus(String status) {
-    switch (status) {
-      case "BACKLOG":
-        return Translations.get('tasks.statusBacklog', currentLang);
-      case "TODO":
-        return Translations.get('tasks.statusTodo', currentLang);
-      case "INPROGRESS":
-        return Translations.get('tasks.statusInProgress', currentLang);
-      case "VERIFY":
-        return Translations.get('tasks.statusVerify', currentLang);
-      case "DONE":
-        return Translations.get('tasks.statusDone', currentLang);
-      default:
-        return status;
-    }
-  }
-
-  Color hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
   }
 
   Future<void> _loadTask(int? projectId, String? assigneeId, String? status, String? type, String? sortOrder, String? search) async{
@@ -272,56 +209,14 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
         toolbarHeight: 125,
         title: Column(
           children: [
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D5AF0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-                      Text(
-                        Translations.get('common.back', currentLang),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ]
-                  ),
-                ),
-                const SizedBox(width: 15),
-                const Icon(
-                  Icons.layers_outlined, 
-                  color: Color(0xFF2D5AF0),
-                  size: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'TrackDev',
-                  style: TextStyle(
-                    color: textColor, 
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),          
-            Divider(color: dividerColor, thickness: 1),
-            Text(
-              Translations.get('tasks.myTasks', currentLang),
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
-              ),
+            UIHelpers.costumBackPopAppBar(context: context,text: Translations.get('common.back', currentLang), textColor: textColor),   
+            UIHelpers.costumAppBar(
+              dividerColor: dividerColor,
+              textColor: textColor,
+              subtitleColor: subtitleColor,
+              title: Translations.get('tasks.myTasks', currentLang),
+              subtitile: null,
             ),
-            Divider(color: dividerColor, thickness: 1),
           ]
         ),
       ),
@@ -331,663 +226,533 @@ class _TasksSearchPageState extends State<TasksSearchPage> with ThemePage{
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor)
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2D5AF0),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      )
-                    ),         
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.filter_list,
-                          color: subtitleColor,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          Translations.get('tasks.filters', currentLang),
-                          style: TextStyle(
-                            color: subtitleColor, 
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton.icon(
-                          onPressed: _resetFilters,
-                          icon: Icon(
-                            Icons.close,
-                            color: subtitleColor,
-                            size: 18,
-                          ),
-                          label: Text(
-                            Translations.get('tasks.clearFilters', currentLang),
-                            style: TextStyle(
-                              color: subtitleColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        DropdownMenu<int?>(
-                          initialSelection: _selectedProjectId,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (int? value) async {
-                            setState(() {
-                              _selectedProjectId = value;                    
-                              for (var project in _projectsData) {
-                                if (project['id'] == value) {
-                                  _selectedProject = project;
-                                  break;
-                                }
-                                else{
-                                  _selectedProject = null;
-                                }
-                              }
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listProjects.map((spri) {
-                            return DropdownMenuEntry<int?>(
-                              value: spri['id'], 
-                              label: spri['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        DropdownMenu<String?>(
-                          initialSelection: _selectedType,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (String? value) async {
-                            setState(() {
-                              _selectedType = value;
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listTypes.map((type) {
-                            return DropdownMenuEntry<String?>(
-                              value: type['type'], 
-                              label: type['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        DropdownMenu<String?>(
-                          initialSelection: _selectedStatus,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (String? value) async {
-                            setState(() {
-                              _selectedStatus = value;
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listStatus.map((stat) {
-                            return DropdownMenuEntry<String?>(
-                              value: stat['status'], 
-                              label: stat['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        DropdownMenu<String?>(
-                          initialSelection: _selectedAssignenId,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (String? value) async {
-                            setState(() {
-                              _selectedAssignenId = value;
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                              _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listAssignees.map((memb) {
-                            return DropdownMenuEntry<String?>(
-                              value: memb['id'], 
-                              label: memb['fullName'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              )
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        DropdownMenu<String?>(
-                          initialSelection: _selectedSortOrder,
-                          width: MediaQuery.of(context).size.width - 72,
-                          textStyle: TextStyle(color: textColor, fontSize: 14),
-                          inputDecorationTheme: InputDecorationTheme(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor: WidgetStateProperty.all(cardColor),
-                            surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-                            side: WidgetStateProperty.all(
-                              BorderSide(color: borderColor, width: 1),
-                            ),
-                          ),
-                          onSelected: (String? value) async {
-                            setState(() {
-                              _selectedSortOrder = value;
-                              _page = 0;
-                              _isLoadingTask = true;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                          dropdownMenuEntries: listSortOrder.map((sort) {
-                            return DropdownMenuEntry<String?>(
-                              value: sort['value'], 
-                              label: sort['name'],
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: textColor,
-                                backgroundColor: backgroundColor
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          controller: _searchController,
-                          style: TextStyle(color: textColor),
-                          decoration: InputDecoration(
-                            hintText: Translations.get('tasks.searchPlaceholder', currentLang),
-                            hintStyle: TextStyle(color: hintColor),
-                            filled: true,
-                            fillColor: inputFillColor,
-                            prefixIcon: Icon(Icons.search, color: iconColor), 
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: Color(0xFF2D5AF0), width: 2),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedSearch = value;
-                              _page = 0;
-                            });
-                            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                          },
-                        ),
-                      ],        
-                    )
-                  )
-                ]
-              )
-            ),
+            _buildTaskShearchSelect(listProjects, listTypes, listStatus, listAssignees, listSortOrder),
             if(!_isLoading() && tasks.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(48.0),
-                margin: const EdgeInsets.symmetric(vertical: 24.0),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: borderColor, width: 2),
-                      ),
-                      child: Icon(
-                        Icons.assignment_outlined,
-                        size: 60,
-                        color: subtitleColor,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      Translations.get('tasks.noMatchingTasks', currentLang),
-                      style: TextStyle(
-                        color: textColor, 
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      Translations.get('tasks.tryAdjustingFilters', currentLang),
-                      style: TextStyle(
-                        color: subtitleColor, 
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+              _buildTaskShearchEmpty(),
             if(!_isLoading() && tasks.isNotEmpty)...{
               Divider(color: dividerColor, thickness: 1),
-              ListView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return InkWell(
-                    onTap: () async{
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TaskDetailsPage(task: task),
-                        ),
-                      );
-                      setState((){
-                        _isLoadingTask = true; 
-                      });
-                      _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFF3B82F6)),
-                            ),
-                            child: Icon(
-                              Icons.assignment_outlined,
-                              color: const Color(0xFF3B82F6), 
-                              size: 25
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      task?['taskKey'] ?? '',
-                                      style: TextStyle(
-                                        color: subtitleColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Expanded(
-                                      child: Text(
-                                        task?['name'] ?? '',
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    if(task?['type'] != null)...{
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _getTaskBackgroundColor(task?['type']),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: _getTaskColor(task?['type']), width: 1),
-                                        ),
-                                        child: Text(
-                                          _translateType(task?['type']),
-                                          style: TextStyle(
-                                            color: _getTaskColor(task?['type']),
-                                            fontSize: 7,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        ' • ',
-                                        style: TextStyle(
-                                          color: subtitleColor,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    },
-                                    if(task?['status'] != null)
-                                      Text(
-                                        _translateStatus(task?['status']),
-                                        style: TextStyle(
-                                          color: subtitleColor,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    if(task?['estimationPoints']!=null && task?['estimationPoints']!=0)...{
-                                        Text(
-                                        ' • ',
-                                        style: TextStyle(
-                                          color: subtitleColor,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF064E3B),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: const Color(0xFF34D399)),
-                                        ),
-                                        child: Text(
-                                          '${task?['estimationPoints']} ${Translations.get('tasks.points', currentLang)}',
-                                          style: TextStyle(
-                                            color: const Color(0xFF34D399),
-                                            fontSize: 7,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    },
-                                    if(task?['assignee']!=null)...{
-                                      Text(
-                                        ' • ',
-                                        style: TextStyle(
-                                          color: subtitleColor,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      CircleAvatar(
-                                        radius: 10,
-                                        backgroundColor: hexToColor(task?['assignee']?['color']),
-                                        child: Text(
-                                          "${task?['assignee']?['capitalLetters']}",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            )
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Expanded(
-                                        child: Text(
-                                          task?['assignee']?['fullName'] ?? '',
-                                          style: TextStyle(
-                                            color: textColor,
-                                            fontSize: 10),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    }
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),                                                                                                
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _buildTaskShearchTasks(tasks),
               Divider(color: dividerColor, thickness: 1),
               const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor)
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      '${Translations.get('tasks.of', currentLang)} ${_page * _size + 1} - ${(_page * _size + tasks.length)} ${Translations.get('tasks.of', currentLang)} $_totalElements ${Translations.get('common.itemsPerPage', currentLang)}',
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _page > 0
-                          ? () {
-                              setState(() {
-                                _page--;
-                                _isLoadingTask = true;
-                              });
-                              _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                            }
-                          : null,
-                          icon: Icon(Icons.chevron_left, size: 20),
-                          label: Text(
-                            Translations.get('common.previous', currentLang),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _page > 0 ? const Color(0xFF2D5AF0) : backgroundColor,
-                            foregroundColor: _page > 0 ? Colors.white : subtitleColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            disabledBackgroundColor: backgroundColor,
-                            disabledForegroundColor: subtitleColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: backgroundColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: borderColor),
-                          ),
-                          child: Text(
-                            '${_page + 1} / $_totalPages',
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _page < (_totalPages - 1) 
-                          ? () {
-                              setState(() {
-                                _page++;
-                                _isLoadingTask = true;
-                              });
-                              _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                            }
-                          : null,
-                          icon: Icon(Icons.chevron_right, size: 20),
-                          label: Text(
-                            Translations.get('common.next', currentLang),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _page < _totalPages - 1 ? const Color(0xFF2D5AF0) : backgroundColor,
-                            foregroundColor: _page < _totalPages - 1 ? Colors.white : subtitleColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            disabledBackgroundColor: backgroundColor,
-                            disabledForegroundColor: subtitleColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${Translations.get('tasks.itemsPerPage', currentLang)}: ',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: backgroundColor,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: borderColor),
-                          ),
-                          child: DropdownButton<int>(
-                            value: _size,
-                            dropdownColor: cardColor,
-                            style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
-                            underline: Container(),
-                            items: pageSizeOptions.map((int value) {
-                              return DropdownMenuItem<int>(
-                                value: value,
-                                child: Text('$value'),
-                              );
-                            }).toList(),
-                            onChanged: (int? newSize) {
-                              if (newSize != null) {
-                                setState(() {
-                                  _size = newSize;
-                                  _page = 0;
-                                  _isLoadingTask = true;
-                                });
-                                _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),              
+              _buildTaskShearchBottomNavagation(tasks, pageSizeOptions) 
             },
             const SizedBox(height: 60),
           ]
         )
       )
+    );
+  }
+
+  Widget _buildTaskShearchSelect(List listProjects, List listTypes, List listStatus, List listAssignees, List listSortOrder){
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTaskShearchSelectTitle(),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildTaskShearchDropMenuProjects(listProjects),
+                SizedBox(height: 8),
+                _buildTaskShearchDropMenuTypes(listTypes),
+                SizedBox(height: 8),
+                _buildTaskShearchDropMenuStatus(listStatus),
+                SizedBox(height: 8),
+                _buildTaskShearchDropMenuAssignees(listAssignees),
+                SizedBox(height: 8),
+                _buildTaskShearchDropMenuSortOrder(listSortOrder),
+                SizedBox(height: 8),
+                _buildTaskShearchTextFieldShearch(),
+              ],        
+            )
+          )
+        ]
+      )
+    );
+  }
+
+  Widget _buildTaskShearchSelectTitle(){
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D5AF0),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        )
+      ),         
+      child: Row(
+        children: [
+          Icon(
+            Icons.filter_list,
+            color: subtitleColor,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            Translations.get('tasks.filters', currentLang),
+            style: TextStyle(
+              color: subtitleColor, 
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          const Spacer(),
+          TextButton.icon(
+            onPressed: _resetFilters,
+            icon: Icon(
+              Icons.close,
+              color: subtitleColor,
+              size: 18,
+            ),
+            label: Text(
+              Translations.get('tasks.clearFilters', currentLang),
+              style: TextStyle(
+                color: subtitleColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskShearchDropMenuProjects(List listProjects){
+    return DropdownMenu<int?>(
+      initialSelection: _selectedProjectId,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (int? value) async {
+        setState(() {
+          _selectedProjectId = value;                    
+          for (var project in _projectsData) {
+            if (project['id'] == value) {
+              _selectedProject = project;
+              break;
+            }
+            else{
+              _selectedProject = null;
+            }
+          }
+          _page = 0;
+          _isLoadingTask = true;
+        });
+        _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+      dropdownMenuEntries: listProjects.map((spri) {
+        return DropdownMenuEntry<int?>(
+          value: spri['id'], 
+          label: spri['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTaskShearchDropMenuTypes(List listTypes){
+    return DropdownMenu<String?>(
+      initialSelection: _selectedType,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (String? value) async {
+        setState(() {
+          _selectedType = value;
+          _page = 0;
+          _isLoadingTask = true;
+        });
+        _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+      dropdownMenuEntries: listTypes.map((type) {
+        return DropdownMenuEntry<String?>(
+          value: type['type'], 
+          label: type['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTaskShearchDropMenuStatus(List listStatus){
+    return DropdownMenu<String?>(
+      initialSelection: _selectedStatus,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (String? value) async {
+        setState(() {
+          _selectedStatus = value;
+          _page = 0;
+          _isLoadingTask = true;
+        });
+        _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+      dropdownMenuEntries: listStatus.map((stat) {
+        return DropdownMenuEntry<String?>(
+          value: stat['status'], 
+          label: stat['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTaskShearchDropMenuAssignees(List listAssignees){
+    return DropdownMenu<String?>(
+      initialSelection: _selectedAssignenId,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (String? value) async {
+        setState(() {
+          _selectedAssignenId = value;
+          _page = 0;
+          _isLoadingTask = true;
+        });
+          _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+      dropdownMenuEntries: listAssignees.map((memb) {
+        return DropdownMenuEntry<String?>(
+          value: memb['id'], 
+          label: memb['fullName'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          )
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTaskShearchDropMenuSortOrder(List listSortOrder){
+    return DropdownMenu<String?>(
+      initialSelection: _selectedSortOrder,
+      width: MediaQuery.of(context).size.width - 72,
+      textStyle: TextStyle(color: textColor, fontSize: 14),
+      inputDecorationTheme: UIHelpers.customInputDecorationDropdownMenu(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+      ),
+      menuStyle: UIHelpers.customMenuStyle(
+        cardColor: cardColor,
+        borderColor: borderColor,
+      ),
+      onSelected: (String? value) async {
+        setState(() {
+          _selectedSortOrder = value;
+          _page = 0;
+          _isLoadingTask = true;
+        });
+        _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+      dropdownMenuEntries: listSortOrder.map((sort) {
+        return DropdownMenuEntry<String?>(
+          value: sort['value'], 
+          label: sort['name'],
+          style: MenuItemButton.styleFrom(
+            foregroundColor: textColor,
+            backgroundColor: backgroundColor
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTaskShearchTextFieldShearch(){
+    return TextField(
+      controller: _searchController,
+      style: TextStyle(color: textColor),
+      decoration: UIHelpers.customInputDecorationTextField(
+        inputFillColor: inputFillColor,
+        borderColor: borderColor,
+        hintColor: hintColor,
+        hintText: Translations.get('tasks.searchPlaceholder', currentLang),
+        prefixIcon: Icon(Icons.search, color: iconColor),
+      ),
+      onChanged: (value) {
+        setState(() {
+          _selectedSearch = value;
+          _page = 0;
+        });
+        _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+      },
+    );
+  }
+
+  Widget _buildTaskShearchEmpty(){
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(48.0),
+      margin: const EdgeInsets.symmetric(vertical: 24.0),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: borderColor, width: 2),
+            ),
+            child: Icon(
+              Icons.assignment_outlined,
+              size: 60,
+              color: subtitleColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            Translations.get('tasks.noMatchingTasks', currentLang),
+            style: TextStyle(
+              color: textColor, 
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Translations.get('tasks.tryAdjustingFilters', currentLang),
+            style: TextStyle(
+              color: subtitleColor, 
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskShearchTasks(List tasks){
+    return ListView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        return InkWell(
+          onTap: () async{
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TaskDetailsPage(task: task),
+              ),
+            );
+            setState((){
+              _isLoadingTask = true; 
+            });
+            _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+          },
+          child: UIHelpers.costumTask(
+            textColor: textColor,
+            subtitleColor: subtitleColor,
+            task: task,
+            currentLang: currentLang
+          )
+        );
+      },
+    );
+  }
+
+  Widget _buildTaskShearchBottomNavagation(List tasks, List<int> pageSizeOptions){
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor)
+      ),
+      child: Column(
+        children: [
+          Text(
+            '${Translations.get('tasks.of', currentLang)} ${_page * _size + 1} - ${(_page * _size + tasks.length)} ${Translations.get('tasks.of', currentLang)} $_totalElements ${Translations.get('common.itemsPerPage', currentLang)}',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: _page > 0
+                ? () {
+                    setState(() {
+                      _page--;
+                      _isLoadingTask = true;
+                    });
+                    _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                  }
+                : null,
+                icon: Icon(Icons.chevron_left, size: 20),
+                label: Text(
+                  Translations.get('common.previous', currentLang),
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _page > 0 ? const Color(0xFF2D5AF0) : backgroundColor,
+                  foregroundColor: _page > 0 ? Colors.white : subtitleColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  disabledBackgroundColor: backgroundColor,
+                  disabledForegroundColor: subtitleColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Text(
+                  '${_page + 1} / $_totalPages',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _page < (_totalPages - 1) 
+                ? () {
+                    setState(() {
+                      _page++;
+                      _isLoadingTask = true;
+                    });
+                    _loadTask( _selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                  }
+                : null,
+                icon: Icon(Icons.chevron_right, size: 20),
+                label: Text(
+                  Translations.get('common.next', currentLang),
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _page < _totalPages - 1 ? const Color(0xFF2D5AF0) : backgroundColor,
+                  foregroundColor: _page < _totalPages - 1 ? Colors.white : subtitleColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  disabledBackgroundColor: backgroundColor,
+                  disabledForegroundColor: subtitleColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${Translations.get('tasks.itemsPerPage', currentLang)}: ',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: borderColor),
+                ),
+                child: DropdownButton<int>(
+                  value: _size,
+                  dropdownColor: cardColor,
+                  style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
+                  underline: Container(),
+                  items: pageSizeOptions.map((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text('$value'),
+                    );
+                  }).toList(),
+                  onChanged: (int? newSize) {
+                    if (newSize != null) {
+                      setState(() {
+                        _size = newSize;
+                        _page = 0;
+                        _isLoadingTask = true;
+                      });
+                      _loadTask(_selectedProjectId, _selectedAssignenId, _selectedStatus, _selectedType, _selectedSortOrder, _selectedSearch);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "838116745875",
+    "project_id": "trackdev-80ed8",
+    "storage_bucket": "trackdev-80ed8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838116745875:android:836e278ab3e3e0ae986366",
+        "android_client_info": {
+          "package_name": "org.trackdev.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaelXYVFawSpG6wgI5pX9FgyAp9VaEkZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

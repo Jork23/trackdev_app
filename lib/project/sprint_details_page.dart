@@ -7,6 +7,7 @@ import '../../utils/translations.dart';
 import 'add_task_page.dart';
 import 'add_subtask_page.dart';
 import 'task_details_page.dart';
+import '../../utils/ui_helpers.dart';
 
 class SprintDetailsPage extends StatefulWidget {
   final Map<String, dynamic> sprint;
@@ -220,63 +221,6 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
         return const Color(0xFFFEF7E0);
       default:
         return const Color(0xFFF1F3F4);
-    }
-  }
-
-  
-    Color _getTaskColor(String type) {
-    switch (type) {
-      case "BUG":
-        return const Color(0xFFFCA5A5);
-      case "TASK":
-        return const Color(0xFF93C5FD);
-      case "USER_STORY":
-        return const Color(0xFFD8B4FE);
-      default:
-        return const Color(0xFF5F6368);
-    }
-  }
-
-  Color _getTaskBackgroundColor(String type) {
-    switch (type) {
-      case "BUG":
-        return const Color(0xFF7F1D1D);
-      case "TASK":
-        return const Color(0xFF1E3A8A);
-      case "USER_STORY":
-        return const Color(0xFF581C87);
-      default:
-        return const Color(0xFFF1F3F4);
-    }
-  }
-
-  String _translateType(String type) {
-    switch (type) {
-      case "BUG":
-        return Translations.get('tasks.typeBug', currentLang);
-      case "TASK":
-        return Translations.get('tasks.typeTask', currentLang);
-      case "USER_STORY":
-        return Translations.get('tasks.typeUserStory', currentLang);
-      default:
-        return type;
-    }
-  }
-
-  String _translateStatus(String status) {
-    switch (status) {
-      case "BACKLOG":
-        return Translations.get('tasks.statusBacklog', currentLang);
-      case "TODO":
-        return Translations.get('tasks.statusTodo', currentLang);
-      case "INPROGRESS":
-        return Translations.get('tasks.statusInProgress', currentLang);
-      case "VERIFY":
-        return Translations.get('tasks.statusVerify', currentLang);
-      case "DONE":
-        return Translations.get('tasks.statusDone', currentLang);
-      default:
-        return status;
     }
   }
 
@@ -496,7 +440,8 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
           },
           body: jsonEncode({'activeSprints': []}),
         );
-      } else {
+      } 
+      else {
         await http.patch(
           url,
           headers: {
@@ -509,7 +454,8 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
           }),
         );
       }
-    } catch (e) {
+    } 
+    catch (e) {
       debugPrint("Error: $e");
     }
   }
@@ -530,7 +476,8 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
         }),
       );
 
-    } catch (e) {
+    } 
+    catch (e) {
       debugPrint("Error: $e");
     }
   }
@@ -559,21 +506,9 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     );
   }
 
-  String _formatDate(String isoDate) {
-    final dt = DateTime.parse(isoDate);
-    return "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
-  }
-
-  Color _hexToColor(String? hexString) {
-    if (hexString == null || hexString.isEmpty) return Colors.pinkAccent.shade100;
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-
   @override
   Widget build(BuildContext context) {
+
     if(_isLoading()){
       return Scaffold(
         backgroundColor: backgroundColor,
@@ -611,292 +546,121 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
         automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
         elevation: 0,
-        toolbarHeight: 60,
-        title: Row(
-          children: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D5AF0),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-                  Text(
-                    Translations.get('common.back', currentLang),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ]
-              ),
-            ),
-            const SizedBox(width: 15),
-            const Icon(
-              Icons.layers_outlined, 
-              color: Color(0xFF2D5AF0),
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'TrackDev',
-              style: TextStyle(
-                color: textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            const Spacer(),
-            SizedBox(
-              height: 40,
-              child: ElevatedButton(
-                onPressed: ()async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddTaskPage(project: _projectData),
-                    ),
-                  );
-                  setState((){
-                    _isLoadingTasks = true; 
-                  });
-                  _loadTasksData();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D5AF0),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                  padding: EdgeInsets.only(right: 10,left: 10),
-                ),
-                child: Text(
-                  Translations.get('tasks.addTask', currentLang),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-              ),
-            ),
-          ]
-        )
+        toolbarHeight: 50,
+        title: _buildSprintAppBar(), 
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Divider(color: dividerColor, thickness: 1),
-                Row(
-                  children: [
-                    if(_sprintData?['name']!=null)...{
-                      Text(
-                        _sprintData?['name'],
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                    },
-                    if(_sprintData?['status']!=null)                 
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getSprintStatusBgColor(_sprintData?['status']),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _getSprintStatusColor(_sprintData?['status']), width: 1),
-                        ),
-                        child: Text(
-                          _sprintData?['status'],
-                          style: TextStyle(
-                            color: _getSprintStatusColor(_sprintData?['status']),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    if(_sprintData?['project']?['name'] != null)...{
-                      Icon(
-                        Icons.folder_shared,
-                        color: iconColor,
-                        size: 13,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        _sprintData?['project']?['name'],
-                        style: TextStyle(
-                          color: subtitleColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    },
-                    if(_sprintData?['startDate'] != null && _sprintData?['endDate'] != null)...{
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        color: iconColor,
-                        size: 13,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        "${_formatDate(_sprintData?['startDate'])} - ${_formatDate(_sprintData?['endDate'])}",
-                        style: TextStyle(
-                          color: subtitleColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    }
-                  ],
-                ),
-                Divider(color: dividerColor, thickness: 1),
-              ]
-            )
-          ),
-
+          _buildSprintInfo(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _statusButton('BACKLOG'),
-                  _statusButton('TODO'),
-                  _statusButton('INPROGRESS'),
-                  _statusButton('VERIFY'),
-                  _statusButton('DONE'),
+                  _buildSprintStatusButton('BACKLOG'),
+                  _buildSprintStatusButton('TODO'),
+                  _buildSprintStatusButton('INPROGRESS'),
+                  _buildSprintStatusButton('VERIFY'),
+                  _buildSprintStatusButton('DONE'),
                 ],
               ),
             ),
           ),
-
           if(_selectedColumn == 'BACKLOG')
-            Expanded(
-              child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: backlogTasks.length,
-                    itemBuilder: (context, index) {
-                      final task = backlogTasks[index];
-                      return InkWell(
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TaskDetailsPage(task: task),
-                            ),
-                          );
-                          setState(() {
-                            _isLoadingTasks = true;
-                          });
-                          _loadTasksData();
-                        },
-                        child: LongPressDraggable<Map<String, dynamic>>(
-                          delay: const Duration(milliseconds: 300),
-                          data: task,
-                          feedback: Material(
-                            color: Colors.transparent,
-                            child: SizedBox(
-                              width: 300,
-                              child: _taskCard(task, true),
-                            ),
-                          ),
-                          child: _taskCard(task, false),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ],
-                )
-              )
-            )
+            _buildSprintColumnBacklog(backlogTasks)
           else
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: userStories.length,
-                      itemBuilder: (context, index) {
-                        final task = userStories[index];
-                        return InkWell(
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TaskDetailsPage(task: task),
-                              ),
-                            );
-                            setState(() {
-                              _isLoadingTasks = true;
-                            });
-                            _loadTasksData();
-                          },
-                          child: LongPressDraggable<Map<String, dynamic>>(
-                            delay: const Duration(milliseconds: 300),
-                            data: task,
-                            feedback: Material(
-                              color: Colors.transparent,
-                              child: SizedBox(
-                                width: 300,
-                                child: _taskCardUserStory(task, true),
-                              ),
-                            ),
-                            child: _taskCardUserStory(task, false),
-                          ),
-                        );
-                      },
-                    ),
-                    if (usersTasks.isNotEmpty)
-                      _unassignedTasksRow(usersTasks),
-                    const SizedBox(height: 150),
-                  ],
-                ),
-              )
-            )
+            _buildSprintColumnNoBacklog(userStories, usersTasks)
         ]
       )
     );
   }
-    
 
-    
+  Widget _buildSprintInfo(){
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Divider(color: dividerColor, thickness: 1),
+          Row(
+            children: [
+              if(_sprintData?['name']!=null)...{
+                Text(
+                  _sprintData?['name'],
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                const SizedBox(width: 5),
+              },
+              if(_sprintData?['status']!=null)                 
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getSprintStatusBgColor(_sprintData?['status']),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _getSprintStatusColor(_sprintData?['status']), width: 1),
+                  ),
+                  child: Text(
+                    _sprintData?['status'],
+                    style: TextStyle(
+                      color: _getSprintStatusColor(_sprintData?['status']),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          Row(
+            children: [
+              if(_sprintData?['project']?['name'] != null)...{
+                Icon(
+                  Icons.folder_shared,
+                  color: iconColor,
+                  size: 13,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  _sprintData?['project']?['name'],
+                  style: TextStyle(
+                    color: subtitleColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              },
+              if(_sprintData?['startDate'] != null && _sprintData?['endDate'] != null)...{
+                Icon(
+                  Icons.calendar_today_outlined,
+                  color: iconColor,
+                  size: 13,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  "${UIHelpers.formatDate(_sprintData?['startDate'])} - ${UIHelpers.formatDate(_sprintData?['endDate'])}",
+                  style: TextStyle(
+                    color: subtitleColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              }
+            ],
+          ),
+          Divider(color: dividerColor, thickness: 1),
+        ]
+      )
+    );
+  }
 
+  Widget _buildSprintStatusButton(String col) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  Widget _statusButton(String col) {
     final isSelected = _selectedColumn == col;
+    
     return DragTarget<Map<String, dynamic>>(
       onWillAcceptWithDetails: (details) {
         final activeSprints = details.data['activeSprints'] as List? ?? [];
@@ -977,7 +741,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             child: Text(
-              _translateStatus(col),
+            UIHelpers.translateStatus(col, currentLang),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
@@ -986,24 +750,102 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     );
   }
 
+  Widget _buildSprintColumnBacklog(List<dynamic> backlogTasks){
+    return Expanded(
+      child: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: backlogTasks.length,
+            itemBuilder: (context, index) {
+              final task = backlogTasks[index];
+              return InkWell(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TaskDetailsPage(task: task),
+                    ),
+                  );
+                  setState(() {
+                    _isLoadingTasks = true;
+                  });
+                  _loadTasksData();
+                },
+                child: LongPressDraggable<Map<String, dynamic>>(
+                  delay: const Duration(milliseconds: 300),
+                  data: task,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: SizedBox(
+                      width: 300,
+                      child: _buildSprintTaskCard(task, true),
+                    ),
+                  ),
+                  child: _buildSprintTaskCard(task, false),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          ],
+        )
+      )
+    );
+  }
 
+  Widget _buildSprintColumnNoBacklog(List<dynamic> userStories, List<Map<String,dynamic>> usersTasks){
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: userStories.length,
+              itemBuilder: (context, index) {
+                final task = userStories[index];
+                return InkWell(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetailsPage(task: task),
+                      ),
+                    );
+                    setState(() {
+                      _isLoadingTasks = true;
+                    });
+                    _loadTasksData();
+                  },
+                  child: LongPressDraggable<Map<String, dynamic>>(
+                    delay: const Duration(milliseconds: 300),
+                    data: task,
+                    feedback: Material(
+                      color: Colors.transparent,
+                      child: SizedBox(
+                        width: 300,
+                        child: _buildSprintTaskCardUserStory(task, true),
+                      ),
+                    ),
+                    child: _buildSprintTaskCardUserStory(task, false),
+                  ),
+                );
+              },
+            ),
+            if (usersTasks.isNotEmpty)
+              _buildSprintUnassignedTasksRow(usersTasks),
+            const SizedBox(height: 150),
+          ],
+        ),
+      )
+    );
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  Widget _unassignedTasksRow(List<Map<String, dynamic>> usersTasks) {
+  Widget _buildSprintUnassignedTasksRow(List<Map<String, dynamic>> usersTasks) {
 
     final List<Map<String, dynamic>> selectedTasks = [];
 
@@ -1071,10 +913,10 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                       color: Colors.transparent,
                       child: SizedBox(
                         width: 300,
-                        child: _taskCard(task, true),
+                        child: _buildSprintTaskCard(task, true),
                       ),
                     ),
-                    child: _taskCard(task, false),
+                    child: _buildSprintTaskCard(task, false),
                   ), 
                 );
               },
@@ -1103,7 +945,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     );
   }
 
-  Widget _taskCardUserStory(Map<String, dynamic> task, bool feedback) {
+  Widget _buildSprintTaskCardUserStory(Map<String, dynamic> task, bool feedback) {
 
     final List children = task['childTasks'] ?? [];
 
@@ -1150,14 +992,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getTaskBackgroundColor(task['type']),
+                            color: UIHelpers.getTaskBackgroundColor(task['type']),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _getTaskColor(task['type']), width: 1),
+                            border: Border.all(color: UIHelpers.getTaskColor(task['type']), width: 1),
                           ),
                           child: Text(
-                            _translateType(task['type']),
+                            UIHelpers.translateType(task['type'], currentLang),
                             style: TextStyle(
-                              color: _getTaskColor(task['type']),
+                              color: UIHelpers.getTaskColor(task['type']),
                               fontSize: 7,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1291,10 +1133,10 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                                 color: Colors.transparent,
                                 child: SizedBox(
                                   width: 300,
-                                  child: _taskCard(task, true),
+                                  child: _buildSprintTaskCard(task, true),
                                 ),
                               ),
-                              child: _taskCard(task, false),
+                              child: _buildSprintTaskCard(task, false),
                             ),
                           ]
                         )
@@ -1311,7 +1153,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
     );
   }
 
-  Widget _taskCard(Map<String, dynamic> task, bool isDragging) {
+  Widget _buildSprintTaskCard(Map<String, dynamic> task, bool isDragging) {
 
     final List children = task['childTasks'] ?? [];
 
@@ -1340,14 +1182,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getTaskBackgroundColor(task['type']),
+                            color: UIHelpers.getTaskBackgroundColor(task['type']),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _getTaskColor(task['type']), width: 1),
+                            border: Border.all(color: UIHelpers.getTaskColor(task['type']), width: 1),
                           ),
                           child: Text(
-                            _translateType(task['type']),
+                            UIHelpers.translateType(task['type'], currentLang),
                             style: TextStyle(
-                              color: _getTaskColor(task['type']),
+                              color: UIHelpers.getTaskColor(task['type']),
                               fontSize: 7,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1383,7 +1225,7 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
               if (task['assignee'] != null) ...{
                 CircleAvatar(
                   radius: 15,
-                  backgroundColor: _hexToColor(task['assignee']['color']),
+                  backgroundColor: UIHelpers.hexToColor(task['assignee']['color']),
                   child: Text(
                     task['assignee']['capitalLetters'],
                     style: const TextStyle(color: Colors.white),
@@ -1436,14 +1278,14 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getTaskBackgroundColor(child['type']),
+                            color: UIHelpers.getTaskBackgroundColor(child['type']),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _getTaskColor(child['type']), width: 1),
+                            border: Border.all(color: UIHelpers.getTaskColor(child['type']), width: 1),
                           ),
                           child: Text(
-                            _translateType(child['type']),
+                            UIHelpers.translateType(child['type'], currentLang),
                             style: TextStyle(
-                              color: _getTaskColor(child['type']),
+                              color: UIHelpers.getTaskColor(child['type']),
                               fontSize: 7,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1468,6 +1310,85 @@ class _SprintDetailsPageState extends State<SprintDetailsPage> with ThemePage{
           }
         ]   
       )
+    );
+  }
+
+  Widget _buildSprintAppBar(){
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2D5AF0),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 16
+              ),
+              Text(
+                Translations.get('common.back', currentLang),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
+            ]
+          ),
+        ),
+        const SizedBox(width: 15),
+        const Icon(
+          Icons.layers_outlined, 
+          color: Color(0xFF2D5AF0),
+          size: 28,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'TrackDev',
+          style: TextStyle(
+            color: textColor, 
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        const Spacer(),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            onPressed: ()async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddTaskPage(project: _projectData),
+                ),
+              );
+              setState((){
+                _isLoadingTasks = true; 
+              });
+              _loadTasksData();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D5AF0),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+              padding: EdgeInsets.only(right: 10,left: 10),
+            ),
+            child: Text(
+              Translations.get('tasks.addTask', currentLang),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold
+              ),
+            ),
+          ),
+        ),
+      ]
     );
   }
 }
