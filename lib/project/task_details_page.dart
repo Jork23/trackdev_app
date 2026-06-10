@@ -1644,8 +1644,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
                 _buildTaskDetailsProject(), 
                 SizedBox(height: 5),
                 Divider(color: dividerColor, thickness: 1),
-                SizedBox(height: 5),
                 if(_taskData?['parentTaskId'] != null)...{
+                  SizedBox(height: 5),
                   _buildTaskDetailsPrarent(),
                   SizedBox(height: 5),
                   Divider(color: dividerColor, thickness: 1),
@@ -2270,8 +2270,6 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> with ThemePage{
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if(_taskData?['parentTaskId'] != null)...{
-          Divider(color: dividerColor, thickness: 1),
-          SizedBox(height: 5),
           Text(
             Translations.get('tasks.parentTask', currentLang),
             style: TextStyle(

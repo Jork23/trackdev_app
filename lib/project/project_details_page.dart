@@ -306,7 +306,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> with ThemePage{
       child: Row(
         children: [
           Text(
-            "${Translations.get('projects.githubRepos', currentLang)} (${repositoris.length})",
+            Translations.get('projects.githubRepos', currentLang),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
